@@ -1,0 +1,28 @@
+<h2>Batches</h2>
+
+<form method="get">
+  <label for="department">Filter by Department:</label>
+  <select name="department" id="department" onchange="this.form.submit()">
+    <option value="">-- All Departments --</option>
+    {% for dept in departments %}
+      <option value="{{ dept.id }}" {% if dept.id|stringformat:"s" == selected_dept %}selected{% endif %}>
+        {{ dept.name }}
+      </option>
+    {% endfor %}
+  </select>
+</form>
+
+<br>
+<a href="{% url 'batch-add' %}">Add Batch</a>
+
+<ul>
+  {% for batch in batches %}
+    <li>
+      {{ batch.department.name }} - {{ batch.start_year }} to {{ batch.end_year }}
+      <a href="{% url 'batch-edit' batch.id %}">Edit</a>
+      <a href="{% url 'batch-delete' batch.id %}">Delete</a>
+    </li>
+  {% empty %}
+    <li>No batches found.</li>
+  {% endfor %}
+</ul>

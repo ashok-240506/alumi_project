@@ -11,7 +11,8 @@ class Department(models.Model):
     created_by = models.IntegerField(blank=True, null=True)
     modified_at = models.DateTimeField(auto_now=True)
     modified_by = models.IntegerField(blank=True, null=True)
-
+    def __str__(self):
+        return self.name
     class Meta:
         db_table = 'department'
         ordering = ['created_at']
@@ -26,7 +27,8 @@ class Batch(models.Model):
     created_by = models.IntegerField(blank=True, null=True)
     modified_at = models.DateTimeField(auto_now=True)
     modified_by = models.IntegerField(blank=True, null=True)
-
+    def __str__(self):
+        return f"{self.department.name} ({self.start_year}-{self.end_year})"
     class Meta:
         unique_together = ('name', 'department', 'start_year')
         db_table = 'batch_details'

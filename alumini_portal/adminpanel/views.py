@@ -4,7 +4,10 @@ from django.views import View
 from .forms import UploadExcelForm
 from users.models import CustomUser, UserPersonalProfile
 from .models import Department, Batch
-
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import Department, Batch
+from .forms import DepartmentForm, BatchForm
 class UploadStudentView(View):
     def get(self, request):
         return render(request, 'adminpanel/upload.html', {'form': UploadExcelForm()})
@@ -61,3 +64,65 @@ class UploadStudentView(View):
             return redirect('upload-students')
 
         return render(request, 'adminpanel/upload.html', {'form': form})
+
+# DEPARTMENT CRUD
+
+class DepartmentListView(ListView):
+    model = Department
+    template_name = 'adminpanel/department_list.html'
+    context_object_name = 'departments'
+
+class DepartmentCreateView(CreateView):
+    model = Department
+    form_class = DepartmentForm
+    template_name = 'adminpanel/department_form.html'
+    success_url = reverse_lazy('department-list')
+
+class DepartmentUpdateView(UpdateView):
+    model = Department
+    form_class = DepartmentForm
+    template_name = 'adminpanel/department_form.html'
+    success_url = reverse_lazy('department-list')
+
+class DepartmentDeleteView(DeleteView):
+    model = Department
+    template_name = 'adminpanel/department_confirm_delete.html'
+    success_url = reverse_lazy('department-list')
+
+
+# BATCH CRUD
+
+class BatchListView(ListView):
+    model = Batch
+    template_name = 'adminpanel/batch_list.html'
+    context_object_name = 'batches'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        department_id = self.request.GET.get('department')
+        if department_id:
+            queryset = queryset.filter(department_id=department_id)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['departments'] = Department.objects.all()
+        context['selected_dept'] = self.request.GET.get('department')
+        return context
+
+class BatchCreateView(CreateView):
+    model = Batch
+    form_class = BatchForm
+    template_name = 'adminpanel/batch_form.html'
+    success_url = reverse_lazy('batch-list')
+
+class BatchUpdateView(UpdateView):
+    model = Batch
+    form_class = BatchForm
+    template_name = 'adminpanel/batch_form.html'
+    success_url = reverse_lazy('batch-list')
+
+class BatchDeleteView(DeleteView):
+    model = Batch
+    template_name = 'adminpanel/batch_confirm_delete.html'
+    success_url = reverse_lazy('batch-list')

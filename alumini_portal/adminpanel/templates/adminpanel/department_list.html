@@ -1,0 +1,11 @@
+<h2>Departments</h2>
+<a href="{% url 'department-add' %}">Add Department</a>
+<ul>
+  {% for dept in departments %}
+    <li>
+      {{ dept.name }}
+      <a href="{% url 'department-edit' dept.id %}">Edit</a>
+      <a href="{% url 'department-delete' dept.id %}">Delete</a>
+    </li>
+  {% endfor %}
+</ul>
