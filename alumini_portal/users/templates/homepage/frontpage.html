@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Alumni Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .admin-btn-container {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .admin-btn {
+      background-color: #ffffff;
+      color: #4a148c;
+      border: 2px solid #4a148c;
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .admin-btn:hover {
+      background-color: #4a148c;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .container h1 {
+      margin-bottom: 15px;
+      color: #4a148c;
+    }
+
+    .container p {
+      margin-bottom: 30px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      background-color: #4a148c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #6a1b9a;
+    }
+  </style>
+</head>
+<body>
+
+  {% url 'signin' as signin_url %}
+  {% url 'send-otp' as send_otp_url %}
+  {% url 'admin-login' as admin_login_url %}
+
+  <div class="admin-btn-container">
+    <button class="admin-btn" onclick="window.location.href='{{ admin_login_url }}'">Admin Login</button>
+  </div>
+
+  <div class="container">
+    <h1>Welcome to Alumni Connect</h1>
+    <p>Reconnect with classmates, join discussions, and build your network!</p>
+    <div class="button-group">
+      <button class="btn" onclick="window.location.href='{{ signin_url }}'">Login</button>
+      <button class="btn" onclick="window.location.href='{{ send_otp_url }}'">Register</button>
+    </div>
+  </div>
+
+</body>
+</html>

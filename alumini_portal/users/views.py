@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import CustomUser,OTP
+from django.views.generic import TemplateView
 from .forms import (
     MobileForm,
     OTPForm,
@@ -13,10 +14,28 @@ from .forms import (
     SignupForm,
     LoginForm,
 )
-# users/views.py
-class HomeView(LoginRequiredMixin, View):
+from users.utils import has_role
+from django.contrib import messages
+
+class FrontPageView(TemplateView):
+    template_name = 'homepage/frontpage.html'
+
+
+
+class AdminLoginView(View):
     def get(self, request):
-        return render(request, 'users/home.html')
+        return render(request, 'users/adminlogin.html', {'form': LoginForm()})
+
+    def post(self, request):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            if has_role(user, 'admin'):  # using your role_type field
+                login(request, user)
+                return redirect('adminpanel:admin-home')
+            else:
+                messages.error(request, "You are not authorized as admin.")
+        return render(request, 'users/adminlogin.html', {'form': form})
 
 otp_store = {}
 

@@ -60,3 +60,22 @@ class OTP(models.Model):
     def mark_used(self):
         self.is_used = True
         self.save()
+
+
+class RoleMaster(models.Model):
+    role_name = models.CharField(max_length=40, unique=True)
+    role_desc = models.CharField(max_length=100)
+    status = models.CharField(max_length=15)
+    role_type = models.CharField(max_length=15, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    modified_by = models.CharField(max_length=20)
+
+    def __str__(self):
+        return str(self.role_name)
+
+
+class RoleMapping(models.Model):
+    role = models.ForeignKey(RoleMaster, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.DO_NOTHING, related_name='user_role')

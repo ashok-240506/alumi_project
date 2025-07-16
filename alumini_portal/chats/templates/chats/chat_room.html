@@ -1,0 +1,31 @@
+<h2>Room: {{ room_name }}</h2>
+
+<div id="chat-log">
+  {% for message in messages %}
+    <p><strong>{{ message.sender }}:</strong> {{ message.content }}</p>
+  {% endfor %}
+</div>
+
+<input type="text" id="chat-message-input" autocomplete="off" placeholder="Type a message..." />
+<button id="chat-message-submit">Send</button>
+
+<script>
+  
+  const roomName = "{{ room }}";
+  const chatSocket = new WebSocket(
+    'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+  );
+
+  chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const log = document.getElementById('chat-log');
+    log.innerHTML += `<p><strong>${data.username}:</strong> ${data.message}</p>`;
+  };
+
+  document.getElementById('chat-message-submit').onclick = function() {
+    const input = document.getElementById('chat-message-input');
+    const message = input.value;
+    chatSocket.send(JSON.stringify({ message }));
+    input.value = '';
+  };
+</script>
