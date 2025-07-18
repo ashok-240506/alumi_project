@@ -2,6 +2,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    path('home/', admin_home, name='admin-home'),
     path('upload/', UploadStudentView.as_view(), name='upload-students'),
     # Department URLs
     path('departments/', DepartmentListView.as_view(), name='department-list'),

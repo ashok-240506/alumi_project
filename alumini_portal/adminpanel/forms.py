@@ -23,8 +23,26 @@ class BatchForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        start = int(cleaned_data.get('start_year'))
-        end = int(cleaned_data.get('end_year'))
+        start_year = int(cleaned_data.get('start_year'))
+        end_year = int(cleaned_data.get('end_year'))
+        department = cleaned_data.get('department')
 
-        if start > end:
+        if start_year > end_year:
             raise forms.ValidationError("Start year cannot be after end year.")
+
+        name = f"{start_year}-{end_year}"
+
+        
+        if Batch.objects.filter(
+            name=name, department=department, start_year=start_year
+        ).exists():
+            raise forms.ValidationError(f"Batch {name} for department '{department}' already exists.")
+
+        return cleaned_data
+        
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.name = f"{instance.start_year}-{instance.end_year}"
+        if commit:
+            instance.save()
+        return instance

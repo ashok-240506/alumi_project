@@ -8,6 +8,14 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Department, Batch
 from .forms import DepartmentForm, BatchForm
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+@login_required
+def admin_home(request):
+    return render(request, 'adminpanel/adminhome.html')
+
 class UploadStudentView(View):
     def get(self, request):
         return render(request, 'adminpanel/upload.html', {'form': UploadExcelForm()})

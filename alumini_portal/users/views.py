@@ -5,9 +5,15 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import CustomUser,OTP
+
+from adminpanel.models import Batch
+from .models import CustomUser,OTP, RoleMapping, RoleMaster, UserPersonalProfile 
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
 from django.views.generic import TemplateView
 from .forms import (
+    AdminSignupForm,
     MobileForm,
     OTPForm,
     SetPasswordForm,
@@ -16,26 +22,73 @@ from .forms import (
 )
 from users.utils import has_role
 from django.contrib import messages
+from django.contrib.auth.hashers import check_password
 
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
 
 
-
-class AdminLoginView(View):
-    def get(self, request):
-        return render(request, 'users/adminlogin.html', {'form': LoginForm()})
-
-    def post(self, request):
+def admin_login_view(request):
+    if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            user = form.cleaned_data['user']
-            if has_role(user, 'admin'):  # using your role_type field
-                login(request, user)
-                return redirect('adminpanel:admin-home')
-            else:
-                messages.error(request, "You are not authorized as admin.")
-        return render(request, 'users/adminlogin.html', {'form': form})
+            mobile = form.cleaned_data['mobilenumber']
+            password = form.cleaned_data['password']
+
+            try:
+                user = CustomUser.objects.get(mobilenumber=mobile)
+                print("User found:", user)
+                if check_password(password, user.password):
+                    print("Password matched")
+                    if has_role(user, 'admin'):
+                        login(request, user)
+                        return redirect('/adminpanel/home/')
+                    else:
+                        messages.error(request, "You are not authorized as admin.")
+                else:
+                    messages.error(request, "Incorrect password.")
+            except CustomUser.DoesNotExist:
+                messages.error(request, "User with this mobile number does not exist.")
+    else:
+        form = LoginForm()
+    
+    return render(request, 'users/adminlogin.html', {'form': form})
+def admin_signup(request):
+    if request.method == 'POST':
+        form = AdminSignupForm(request.POST)
+        if form.is_valid():
+            mobile = form.cleaned_data['mobilenumber']
+            password = form.cleaned_data['password']
+            email = form.cleaned_data['email']
+            address = form.cleaned_data['address']
+            date_of_birth = form.cleaned_data['date_of_birth']
+            role_obj = form.cleaned_data['role']
+            # Create or get user
+            user, created = CustomUser.objects.get_or_create(
+                mobilenumber=mobile,
+                defaults={
+                    'email': email,
+                    'address': address,
+                    'date_of_birth': date_of_birth,
+                    'is_verified': True
+                }
+            )
+            user.set_password(password)
+            user.save()
+
+            # Assign Role
+            try:
+                RoleMapping.objects.create(user=user, role=role_obj)
+            except RoleMaster.DoesNotExist:
+                print("Role not found. Skipping mapping.")
+
+            # Log in and redirect
+            login(request, user)
+            return redirect('/adminpanel/home/')
+            # return redirect('adminpanel/adminhome.html')
+    else:
+        form = AdminSignupForm()
+    return render(request, 'users/admin_signup.html', {'form': form})
 
 otp_store = {}
 
@@ -149,14 +202,52 @@ class SignupView(View):
         if form.is_valid():
             mobile = form.cleaned_data['mobilenumber']
             password = form.cleaned_data['password']
+            roll_no = form.cleaned_data['roll_no']
+            reg_no = form.cleaned_data['reg_no']
+            email = form.cleaned_data['email']
+            address = form.cleaned_data['address']
+            date_of_birth = form.cleaned_data['date_of_birth']
+            batch_id = form.cleaned_data['batch_id']  
+            role_type = form.cleaned_data['role_type'] 
 
+            # Create or get user
             user, created = CustomUser.objects.get_or_create(
-                mobilenumber=mobile 
+                mobilenumber=mobile,
+                defaults={
+                    'roll_no': roll_no,
+                    'reg_no': reg_no,
+                    'email': email,
+                    'address': address,
+                    'date_of_birth': date_of_birth,
+                    'is_verified': True
+                }
+            )
+            user.set_password(password)
+            user.save()
+
+            # Create personal profile
+            UserPersonalProfile.objects.create(
+                user=user,
+                firstname=form.cleaned_data['firstname'],
+                lastname=form.cleaned_data['lastname'],
+                gender=form.cleaned_data['gender'],
+                age=form.cleaned_data['age'],
+                language=form.cleaned_data['language'],
+                major=form.cleaned_data['major'],
+                college_name=form.cleaned_data['college_name'],
+                university_name=form.cleaned_data['university_name'],
+                batch=Batch.objects.get(id=batch_id)
             )
 
-            user.set_password(password)
-            user.is_verified = True
-            user.save()
+            # Assign Role
+            try:
+                role_obj = RoleMaster.objects.get(role_type=role_type)
+                RoleMapping.objects.create(user=user, role=role_obj)
+            except RoleMaster.DoesNotExist:
+                # Optional: Add fallback role or error
+                print("Role not found. Skipping mapping.")
+
+            # Log in and redirect
             login(request, user)
             return redirect('/')
 
@@ -179,3 +270,39 @@ class SignoutView(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
         return redirect('signin')
+class RoleMasterAPI(APIView):
+    def get(self, request):
+
+        roles = RoleMaster.objects.all()
+        data = [
+            {
+                'id': role.id,
+                'name': role.name,
+                'description': role.description,} for role in roles]
+        message = 'Role details fetched successfully.'
+        return Response({'status': 'success', 'message': message, 'data': data}, status=status.HTTP_200_OK)
+    def post(self, request):
+        role='admin'
+        if role != 'admin':
+            return Response({'status': 'error', 'message': 'You are not authenticated to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+        messages.success(request, "Your profile was updated successfully!")
+        data = request.data
+        role_name = data.get('name')
+        role_desc = data.get('description')
+        role_status  = data.get('status')
+        role_type = data.get('role_type')
+        modified_by=data.get('modified_by')
+
+        # if RoleMaster.objects.filter(role_name__iexact=role_name).exists():
+        #     return Response({'status': 'error', 'message': ' name already exists', 'is_valid': True}, status=status.HTTP_200_OK)
+
+        role = RoleMaster(
+            role_name=role_name,
+            role_desc=role_desc,
+            status=role_status ,
+            role_type=role_type,
+            modified_by=modified_by        
+        )
+        role.save()
+        return Response({'status': 'success', 'message': 'Role created successfully'}, status=status.HTTP_200_OK)
+    

@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #4a148c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            padding: 40px;
+            text-align: center;
+        }
+        .btn {
+            background-color: #4a148c;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #6a1b9a;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome Admin</h1>
+    </div>
+    <div class="container">
+        <h2>Admin Dashboard</h2>
+        <p>Manage departments, batches, users, and more.</p>
+        <a href="{% url 'department-list' %}"><button class="btn">Manage Departments</button></a>
+        <a href="{% url 'batch-list' %}"><button class="btn">Manage Batches</button></a>
+        <a href="{% url 'signout' %}"><button class="btn">Logout</button></a>
+    </div>
+</body>
+</html>

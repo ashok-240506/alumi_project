@@ -9,6 +9,7 @@ constantly==23.10.4
 cryptography==45.0.5
 daphne==2.5.0
 Django==3.0.6
+djangorestframework==3.11.0
 et-xmlfile==2.0.0
 hyperlink==21.0.0
 idna==3.10
