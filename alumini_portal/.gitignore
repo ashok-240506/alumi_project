@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# VSCode and IDEs
+.vscode/
+.idea/
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+
+# Django migrations (optional to ignore)
+*.log
+
+# Local environment variables
+.env
+*.env
+
+# SQLite database (optional if using local dev DB)
+*.sqlite3
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+
+# Static and media files (optional, if generated on deploy)
+staticfiles/
+media/
+
+# Pipenv
+Pipfile.lock
+
+# MyPy and Pylint
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Celery beat schedule
+celerybeat-schedule
+
+# __pycache__ inside migrations folders
+**/migrations/__pycache__/

@@ -5,26 +5,19 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-
 from adminpanel.models import Batch
 from .models import CustomUser,OTP, RoleMapping, RoleMaster, UserPersonalProfile 
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.views.generic import TemplateView
-from .forms import (
-    AdminSignupForm,
-    MobileForm,
-    OTPForm,
-    SetPasswordForm,
-    SignupForm,
-    LoginForm,
-)
-from users.utils import has_role
+from .forms import  *
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.db.models import Q
+from .utils import *
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
 
@@ -105,17 +98,34 @@ class SendOTPView(View):
     def post(self, request):
         form = MobileForm(request.POST)
         if form.is_valid():
-            mobile = form.cleaned_data['mobile_number']
-            otp_code = str(random.randint(100000, 999999))
+            identifier = form.cleaned_data['mobile_number']
 
+            # Try to get user by mobile or email
+            user = CustomUser.objects.filter(
+                Q(mobilenumber=identifier) | Q(email=identifier)
+            ).first()
+
+            if not user:
+                return render(request, 'users/send_otp.html', {
+                    'form': form,
+                    'error': 'Account not found. Please contact admin.'
+                })
+
+            # Send OTP
+            otp_code = str(random.randint(100000, 999999))
             OTP.objects.create(
-                mobile_number=mobile,
+                mobile_number=user.mobilenumber,
                 code=otp_code,
                 created_at=timezone.now()
             )
-
-            request.session['mobile_number'] = mobile
-            print(f"OTP for {mobile}: {otp_code}")  # Simulate SMS
+            try:
+                mobile='+91' + user.mobilenumber 
+                # send_otp_sms(mobile, otp_code)  
+                print(f"OTP sent to {mobile}: {otp_code}")
+            except Exception as e:
+                print(f"Failed to send OTP: {e}")
+            request.session['mobile_number'] = user.mobilenumber
+            print(f"OTP for {user.mobilenumber}: {otp_code}")
             return redirect('verify-otp')
 
         return render(request, 'users/send_otp.html', {'form': form})
@@ -124,7 +134,7 @@ class SendOTPView(View):
 class VerifyOTPView(View):
     def get(self, request):
         return render(request, 'users/verify_otp.html', {'form': OTPForm()})
-
+    
     def post(self, request):
         form = OTPForm(request.POST)
         if form.is_valid():
@@ -146,19 +156,17 @@ class VerifyOTPView(View):
             if otp.is_valid():
                 otp.mark_used()
 
-                user, created = CustomUser.objects.get_or_create(
-                    mobilenumber=mobile,
-                )
-                user.set_unusable_password() 
-                user.is_verified = True
-                user.save()
+                mobile = request.session.get('mobile_number')
+                user = CustomUser.objects.filter(mobilenumber=mobile).first()
 
-                if not user.has_usable_password():
-                    request.session['user_id'] = user.id
-                    return redirect('set-password')
-
+                if not user:
+                    return render(request, 'users/verify_otp.html', {
+                        'form': form,
+                        'error': 'Account not found. Please contact admin.'
+                })
                 login(request, user)
-                return redirect('/')
+                return redirect('student_home')
+
             else:
                 return render(request, 'users/verify_otp.html', {
                     'form': form,
@@ -188,6 +196,85 @@ class SetPasswordView(View):
 
         return render(request, 'users/set_password.html', {'form': form})
 
+class SendForgotPasswordOTPView(View):
+    def get(self, request):
+        return render(request, 'users/forgot_password_send_otp.html', {'form': MobileForm()})
+
+    def post(self, request):
+        form = MobileForm(request.POST)
+        if form.is_valid():
+            identifier = form.cleaned_data['mobile_number']
+            user = CustomUser.objects.filter(
+                Q(mobilenumber=identifier) | Q(email=identifier)
+            ).first()
+
+            if not user:
+                return render(request, 'users/forgot_password_send_otp.html', {
+                    'form': form,
+                    'error': 'Account not found.'
+                })
+
+            otp_code = str(random.randint(100000, 999999))
+            OTP.objects.create(
+                mobile_number=user.mobilenumber,
+                code=otp_code,
+                created_at=timezone.now()
+            )
+            print('otp',otp_code)
+            request.session['reset_mobile'] = user.mobilenumber
+            return redirect('forgot-verify-otp')
+
+        return render(request, 'users/forgot_password_send_otp.html', {'form': form})
+class ForgotPasswordVerifyOTPView(View):
+    def get(self, request):
+        return render(request, 'users/forgot_password_verify_otp.html', {'form': OTPForm()})
+
+    def post(self, request):
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data['otp']
+            mobile = request.session.get('reset_mobile')
+
+            otp = OTP.objects.filter(
+                mobile_number=mobile, code=otp_code, is_used=False
+            ).order_by('-created_at').first()
+
+            if otp and otp.is_valid():
+                otp.mark_used()
+                request.session['otp_verified'] = True
+                return redirect('reset-password')
+            else:
+                return render(request, 'users/forgot_password_verify_otp.html', {
+                    'form': form,
+                    'error': 'Invalid or expired OTP.'
+                })
+
+        return render(request, 'users/forgot_password_verify_otp.html', {'form': form})
+class ResetPasswordView(View):
+    def get(self, request):
+        if not request.session.get('otp_verified'):
+            return redirect('forgot-password')
+        return render(request, 'users/reset_password.html', {'form': SetPasswordForm()})
+
+    def post(self, request):
+        form = SetPasswordForm(request.POST)
+        if form.is_valid() and request.session.get('otp_verified'):
+            mobile = request.session.get('reset_mobile')
+            user = CustomUser.objects.filter(mobilenumber=mobile).first()
+
+            if user:
+                user.set_password(form.cleaned_data['password'])
+                user.save()
+                login(request, user)
+
+                # Clean session
+                request.session.pop('reset_mobile', None)
+                request.session.pop('otp_verified', None)
+
+                return redirect('student_home')
+
+        return render(request, 'users/reset_password.html', {'form': form})
+
 
 # --------------------------
 # Signup + Signin
@@ -207,7 +294,7 @@ class SignupView(View):
             email = form.cleaned_data['email']
             address = form.cleaned_data['address']
             date_of_birth = form.cleaned_data['date_of_birth']
-            batch_id = form.cleaned_data['batch_id']  
+            batch = form.cleaned_data['batch']   
             role_type = form.cleaned_data['role_type'] 
 
             user, created = CustomUser.objects.get_or_create(
@@ -234,7 +321,7 @@ class SignupView(View):
                 major=form.cleaned_data['major'],
                 college_name=form.cleaned_data['college_name'],
                 university_name=form.cleaned_data['university_name'],
-                batch=Batch.objects.get(id=batch_id)
+                batch=batch
             )
 
             try:

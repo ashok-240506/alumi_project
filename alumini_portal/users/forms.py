@@ -4,13 +4,22 @@ from django.contrib.auth import authenticate
 from adminpanel.models import Batch
 from .models import RoleMaster
 class MobileForm(forms.Form):
-    mobile_number = forms.CharField(max_length=15)
-
+    mobile_number = forms.CharField(label='Mobile number or Email')
 class OTPForm(forms.Form):
     otp = forms.CharField(max_length=6)
 
 class SetPasswordForm(forms.Form):
-    password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(widget=forms.PasswordInput())
+    confirm_password = forms.CharField(widget=forms.PasswordInput())
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pw1 = cleaned_data.get("password")
+        pw2 = cleaned_data.get("confirm_password")
+        if pw1 and pw2 and pw1 != pw2:
+            raise forms.ValidationError("Passwords do not match")
+        return cleaned_data
+
 
 
 
@@ -40,7 +49,7 @@ class SignupForm(forms.Form):
 
     # Role dropdown instead of raw string
     role_type = forms.ModelChoiceField(
-        queryset=RoleMaster.objects.exclude(role_type='admin'),
+        queryset=RoleMaster.objects.exclude(role_name='Admin'),
         to_field_name='role_type',
         empty_label="Select Role"
     )

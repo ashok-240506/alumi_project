@@ -1,93 +1,169 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Student Signup</title>
-  <link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+  <title>Signup Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+      background: #f0f2f5;
+      padding: 30px;
     }
 
-    .signup-container {
+    .signup-form {
       background: white;
       padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      width: 100%;
-      max-width: 400px;
+      border-radius: 12px;
+      max-width: 1000px;
+      margin: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .signup-container h2 {
-      text-align: center;
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
       margin-bottom: 20px;
-      color: #333;
+      gap: 20px;
     }
 
-    form label {
-      display: block;
-      margin-bottom: 5px;
+    .form-group {
+      flex: 1 1 45%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      margin-bottom: 6px;
       font-weight: bold;
     }
 
-    form input, form select {
-      width: 100%;
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
       padding: 10px;
-      margin-bottom: 15px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
     }
 
     .btn-submit {
-      width: 100%;
-      padding: 10px;
-      background-color: #6a4fc4;
+      background-color: #7b5fc4;
       color: white;
+      padding: 12px 24px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
+      font-size: 16px;
     }
 
     .btn-submit:hover {
-      background-color: #543ab7;
+      background-color: #5e45ab;
     }
 
-    .form-footer {
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    .form-footer a {
-      color: #6a4fc4;
-      text-decoration: none;
-    }
-
-    .form-footer a:hover {
-      text-decoration: underline;
+    .errorlist {
+      color: red;
+      margin-top: 4px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="signup-container">
-    <h2>Student Signup</h2>
-    <form method="post" action="{% url 'signup' %}">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn-submit">Signup</button>
-    </form>
-    <div class="form-footer">
-      Already registered? <a href="{% url 'student_login' %}">Login here</a>
+
+  <form method="post" action="{% url 'signup' %}" class="signup-form">
+    <h2 style="text-align:center; margin-bottom: 30px;">Student Signup</h2>
+    {% csrf_token %}
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.firstname.label_tag }} {{ form.firstname }} {{ form.firstname.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.lastname.label_tag }} {{ form.lastname }} {{ form.lastname.errors }}
+      </div>
     </div>
-  </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.gender.label_tag }} {{ form.gender }} {{ form.gender.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.age.label_tag }} {{ form.age }} {{ form.age.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.language.label_tag }} {{ form.language }} {{ form.language.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.major.label_tag }} {{ form.major }} {{ form.major.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.college_name.label_tag }} {{ form.college_name }} {{ form.college_name.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.university_name.label_tag }} {{ form.university_name }} {{ form.university_name.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.mobilenumber.label_tag }} {{ form.mobilenumber }} {{ form.mobilenumber.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.password.label_tag }} {{ form.password }} {{ form.password.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.confirm_password.label_tag }} {{ form.confirm_password }} {{ form.confirm_password.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.roll_no.label_tag }} {{ form.roll_no }} {{ form.roll_no.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.reg_no.label_tag }} {{ form.reg_no }} {{ form.reg_no.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.date_of_birth.label_tag }} {{ form.date_of_birth }} {{ form.date_of_birth.errors }}
+      </div>
+      <div class="form-group">
+        {{ form.batch.label_tag }} {{ form.batch }} {{ form.batch.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group" style="flex: 1 1 100%;">
+        {{ form.address.label_tag }} {{ form.address }} {{ form.address.errors }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group" style="flex: 1 1 100%;">
+        {{ form.role_type.label_tag }} {{ form.role_type }} {{ form.role_type.errors }}
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top: 20px;">
+      <button type="submit" class="btn-submit">Signup</button>
+    </div>
+
+  </form>
+
 </body>
 </html>

@@ -12,5 +12,9 @@ urlpatterns = [
     path('signout/', SignoutView.as_view(), name='signout'),
     path('student/home/', StudentHomeView.as_view(), name='student_home'),
     path('data/', alumni_data_view, name='alumni_data'),
+    path('forgot-password/', SendForgotPasswordOTPView.as_view(), name='forgot-password'),
+    path('forgot-verify-otp/', ForgotPasswordVerifyOTPView.as_view(), name='forgot-verify-otp'),
+    path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+
 
 ]

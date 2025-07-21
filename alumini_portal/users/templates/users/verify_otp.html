@@ -1,6 +1,34 @@
-<h2>Verify OTP</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Verify</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+</head>
+<body>
+    <h2>Enter OTP</h2>
+
+    {% if error %}
+      <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Verify</button>
+    </form>
+
+    <p id="timer">Resend OTP in <span id="countdown">30</span> seconds</p>
+
+    <script>
+      let seconds = 30;
+      const countdownEl = document.getElementById("countdown");
+      const interval = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(interval);
+          document.getElementById("timer").innerHTML = '<a href="{% url "send-otp" %}">Resend OTP</a>';
+        }
+      }, 1000);
+    </script>
+</body>
+</html>

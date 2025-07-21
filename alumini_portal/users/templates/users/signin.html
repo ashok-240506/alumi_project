@@ -57,6 +57,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      margin-bottom: 10px;
     }
     .login-button:hover {
       background-color: #0056b3;
@@ -111,6 +112,7 @@
 </head>
 <body>
 
+  <!-- Link to Admin Login -->
   <a href="{% url 'admin_login' %}" class="admin-login-btn">Admin Login</a>
 
   <div class="login-container">
@@ -135,14 +137,19 @@
       </div>
 
       <div class="forgot-password">
-        <a href="#">Forgot Password?</a>
+        <a href="{% url 'forgot-password' %}">Forgot Password?</a>
       </div>
+
+      <div class="register-link">
+        <p><a href="{% url 'send-otp' %}">Login with OTP</a></p>
+      </div>
+
 
       <button class="login-button" type="submit">Login</button>
     </form>
 
     <div class="register-link">
-      <p>Don't have an account? <a href="#">Register here</a></p>
+      <p>Don't have an account? <a href="{% url 'signup' %}">Register here</a></p>
     </div>
   </div>
 
