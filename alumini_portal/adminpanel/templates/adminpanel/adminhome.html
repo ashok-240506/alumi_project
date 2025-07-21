@@ -1,50 +1,128 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f3f4f6;
-            margin: 0;
-            padding: 0;
-        }
-        .header {
-            background-color: #4a148c;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .container {
-            padding: 40px;
-            text-align: center;
-        }
-        .btn {
-            background-color: #4a148c;
-            color: white;
-            padding: 10px 24px;
-            border: none;
-            border-radius: 6px;
-            margin: 10px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #6a1b9a;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      color: #fff;
+      min-height: 100vh;
+    }
+    header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 28px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .dashboard {
+      padding: 60px 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 35px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      cursor: pointer;
+      color: #333;
+    }
+    .card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      width: 160%;
+      height: 160%;
+      top: -40%;
+      left: -30%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent 70%);
+      z-index: 0;
+      transform: rotate(25deg);
+    }
+    .card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #5e35b1;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .card p {
+      color: #555;
+      font-size: 15px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    .file-upload-card input[type="file"] {
+      margin-top: 16px;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .file-upload-card input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .dashboard { padding: 30px 20px; gap: 20px; }
+      .card { padding: 25px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Welcome Admin</h1>
+
+  <header>
+    <h1>Admin Dashboard</h1>
+    <div>Welcome, <strong>Admin</strong></div>
+  </header>
+
+  <main class="dashboard">
+    <div class="card" onclick="window.location.href='/adminpanel/user-analytics/'">
+      <h2>User Analytics</h2>
+      <p>Get insights on user activity and growth statistics.</p>
     </div>
-    <div class="container">
-        <h2>Admin Dashboard</h2>
-        <p>Manage departments, batches, users, and more.</p>
-        <a href="{% url 'department-list' %}"><button class="btn">Manage Departments</button></a>
-        <a href="{% url 'batch-list' %}"><button class="btn">Manage Batches</button></a>
-        <a href="{% url 'signout' %}"><button class="btn">Logout</button></a>
+
+    <div class="card file-upload-card" onclick="window.location.href='/adminpanel/upload-users/'">
+      <h2>Upload Users (Excel)</h2>
+      <p>Import multiple users from an Excel sheet.</p>
+      <input type="file" accept=".xlsx,.xls">
     </div>
+
+    <div class="card" onclick="window.location.href='/jobs/'">
+      <h2>Job Section</h2>
+      <p>Post and manage job openings.</p>
+    </div>
+
+    <div class="card" onclick="window.location.href='/adminpanel/settings/'">
+      <h2>Settings</h2>
+      <p>Manage roles, permissions, and preferences.</p>
+    </div>
+  </main>
+
 </body>
 </html>

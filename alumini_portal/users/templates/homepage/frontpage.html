@@ -82,9 +82,9 @@
 </head>
 <body>
 
-  {% url 'signin' as signin_url %}
-  {% url 'send-otp' as send_otp_url %}
-  {% url 'admin-login' as admin_login_url %}
+  {% url 'student_login' as signin_url %}
+  {% url 'signup' as signup_url %}
+  {% url 'admin_login' as admin_login_url %}
 
   <div class="admin-btn-container">
     <button class="admin-btn" onclick="window.location.href='{{ admin_login_url }}'">Admin Login</button>
@@ -95,7 +95,7 @@
     <p>Reconnect with classmates, join discussions, and build your network!</p>
     <div class="button-group">
       <button class="btn" onclick="window.location.href='{{ signin_url }}'">Login</button>
-      <button class="btn" onclick="window.location.href='{{ send_otp_url }}'">Register</button>
+      <button class="btn" onclick="window.location.href='{{ signup_url }}'">Register</button>
     </div>
   </div>
 

@@ -23,10 +23,17 @@ from .forms import (
 from users.utils import has_role
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
-
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
 
+@method_decorator(login_required, name='dispatch')
+class StudentHomeView(TemplateView):
+    template_name = 'users/student_home.html'
+@login_required
+def alumni_data_view(request):
+    return render(request, 'users/alumni_data.html') 
 
 def admin_login_view(request):
     if request.method == 'POST':
@@ -37,9 +44,7 @@ def admin_login_view(request):
 
             try:
                 user = CustomUser.objects.get(mobilenumber=mobile)
-                print("User found:", user)
                 if check_password(password, user.password):
-                    print("Password matched")
                     if has_role(user, 'admin'):
                         login(request, user)
                         return redirect('/adminpanel/home/')
@@ -76,16 +81,13 @@ def admin_signup(request):
             user.set_password(password)
             user.save()
 
-            # Assign Role
             try:
                 RoleMapping.objects.create(user=user, role=role_obj)
             except RoleMaster.DoesNotExist:
                 print("Role not found. Skipping mapping.")
 
-            # Log in and redirect
             login(request, user)
             return redirect('/adminpanel/home/')
-            # return redirect('adminpanel/adminhome.html')
     else:
         form = AdminSignupForm()
     return render(request, 'users/admin_signup.html', {'form': form})
@@ -106,7 +108,6 @@ class SendOTPView(View):
             mobile = form.cleaned_data['mobile_number']
             otp_code = str(random.randint(100000, 999999))
 
-            # Save OTP to database
             OTP.objects.create(
                 mobile_number=mobile,
                 code=otp_code,
@@ -155,7 +156,6 @@ class VerifyOTPView(View):
                 if not user.has_usable_password():
                     request.session['user_id'] = user.id
                     return redirect('set-password')
-                print("Has usable password?", user.has_usable_password())
 
                 login(request, user)
                 return redirect('/')
@@ -210,7 +210,6 @@ class SignupView(View):
             batch_id = form.cleaned_data['batch_id']  
             role_type = form.cleaned_data['role_type'] 
 
-            # Create or get user
             user, created = CustomUser.objects.get_or_create(
                 mobilenumber=mobile,
                 defaults={
@@ -225,7 +224,6 @@ class SignupView(View):
             user.set_password(password)
             user.save()
 
-            # Create personal profile
             UserPersonalProfile.objects.create(
                 user=user,
                 firstname=form.cleaned_data['firstname'],
@@ -239,17 +237,14 @@ class SignupView(View):
                 batch=Batch.objects.get(id=batch_id)
             )
 
-            # Assign Role
             try:
                 role_obj = RoleMaster.objects.get(role_type=role_type)
                 RoleMapping.objects.create(user=user, role=role_obj)
             except RoleMaster.DoesNotExist:
-                # Optional: Add fallback role or error
                 print("Role not found. Skipping mapping.")
 
-            # Log in and redirect
             login(request, user)
-            return redirect('/')
+            return redirect('student_home')
 
         return render(request, 'users/signup.html', {'form': form})
 
@@ -261,9 +256,20 @@ class SigninView(View):
     def post(self, request):
         form = LoginForm(request.POST)
         if form.is_valid():
-            login(request, form.cleaned_data['user'])
-            return redirect('/')
+            mobilenumber = form.cleaned_data['mobilenumber']
+            password = form.cleaned_data['password']
+
+            try:
+                user = CustomUser.objects.get(mobilenumber=mobilenumber)
+                if check_password(password, user.password):
+                    login(request, user)
+                    return redirect('student_home')
+                else:
+                    messages.error(request, "Incorrect password.")
+            except CustomUser.DoesNotExist:
+                messages.error(request, "User not found.")
         return render(request, 'users/signin.html', {'form': form})
+
 
 
 class SignoutView(LoginRequiredMixin, View):
@@ -293,8 +299,8 @@ class RoleMasterAPI(APIView):
         role_type = data.get('role_type')
         modified_by=data.get('modified_by')
 
-        # if RoleMaster.objects.filter(role_name__iexact=role_name).exists():
-        #     return Response({'status': 'error', 'message': ' name already exists', 'is_valid': True}, status=status.HTTP_200_OK)
+        if RoleMaster.objects.filter(role_name__iexact=role_name).exists():
+            return Response({'status': 'error', 'message': ' name already exists'}, status=status.HTTP_200_OK)
 
         role = RoleMaster(
             role_name=role_name,

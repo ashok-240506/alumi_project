@@ -5,6 +5,12 @@ from .models import ChatRoom, Message
 from adminpanel.models import Batch
 from users.models import CustomUser
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def chat_home_view(request):
+    return render(request, 'chats/chat_home.html')  # You can create this later
 
 class ChatRoomView(LoginRequiredMixin, View):
     def get(self, request, room_name):

@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'adminpanel',
-    'chats'
+    'chats',
+    'jobs',
 
 ]
 ASGI_APPLICATION = 'alumini_portal.routing.application'

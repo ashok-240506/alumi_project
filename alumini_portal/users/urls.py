@@ -7,8 +7,10 @@ urlpatterns = [
     path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
     path('set-password/', SetPasswordView.as_view(), name='set-password'),
     path('signup/', SignupView.as_view(), name='signup'),
-    path('admin-signup/',admin_signup, name='signup'),
-    path('signin/', SigninView.as_view(), name='signin'),
+    path('admin-signup/',admin_signup, name='admin-signup'),
+    path('signin/', SigninView.as_view(), name='student_login'),
     path('signout/', SignoutView.as_view(), name='signout'),
+    path('student/home/', StudentHomeView.as_view(), name='student_home'),
+    path('data/', alumni_data_view, name='alumni_data'),
 
 ]

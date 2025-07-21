@@ -21,8 +21,9 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('adminpanel/', include('adminpanel.urls')),
     path('', FrontPageView.as_view(), name='home'), 
-    path('admin-login/',admin_login_view, name='admin-login'),
+    path('admin-login/',admin_login_view, name='admin_login'),
     path('chat/', include('chats.urls')),
+    path('jobs/', include('jobs.urls')),
 
 
 ]

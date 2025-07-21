@@ -54,18 +54,21 @@ class SignupForm(forms.Form):
             raise forms.ValidationError("Passwords do not match.")
         return cleaned
 
+
 class LoginForm(forms.Form):
-    mobilenumber = forms.CharField(max_length=15)
-    password = forms.CharField(widget=forms.PasswordInput)
-
-    def clean(self):
-        cleaned = super().clean()
-        user = authenticate(username=cleaned.get('mobilenumber'), password=cleaned.get('password'))
-        if not user:
-            raise forms.ValidationError("Invalid credentials")
-        cleaned['user'] = user
-        return cleaned
-
+    mobilenumber = forms.CharField(
+        label='Mobile Number',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter mobile number',
+            'class': 'form-control'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Enter password',
+            'class': 'form-control'
+        })
+    )
 
 class AdminSignupForm(forms.Form):
     mobilenumber = forms.CharField()
