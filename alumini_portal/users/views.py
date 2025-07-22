@@ -24,6 +24,13 @@ class FrontPageView(TemplateView):
 @method_decorator(login_required, name='dispatch')
 class StudentHomeView(TemplateView):
     template_name = 'users/student_home.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['is_alumini'] = user.is_alumini
+        return context
+    
+
 @login_required
 def alumni_data_view(request):
     return render(request, 'users/alumni_data.html') 
@@ -267,7 +274,6 @@ class ResetPasswordView(View):
                 user.save()
                 login(request, user)
 
-                # Clean session
                 request.session.pop('reset_mobile', None)
                 request.session.pop('otp_verified', None)
 
@@ -363,39 +369,3 @@ class SignoutView(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
         return redirect('signin')
-class RoleMasterAPI(APIView):
-    def get(self, request):
-
-        roles = RoleMaster.objects.all()
-        data = [
-            {
-                'id': role.id,
-                'name': role.name,
-                'description': role.description,} for role in roles]
-        message = 'Role details fetched successfully.'
-        return Response({'status': 'success', 'message': message, 'data': data}, status=status.HTTP_200_OK)
-    def post(self, request):
-        role='admin'
-        if role != 'admin':
-            return Response({'status': 'error', 'message': 'You are not authenticated to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
-        messages.success(request, "Your profile was updated successfully!")
-        data = request.data
-        role_name = data.get('name')
-        role_desc = data.get('description')
-        role_status  = data.get('status')
-        role_type = data.get('role_type')
-        modified_by=data.get('modified_by')
-
-        if RoleMaster.objects.filter(role_name__iexact=role_name).exists():
-            return Response({'status': 'error', 'message': ' name already exists'}, status=status.HTTP_200_OK)
-
-        role = RoleMaster(
-            role_name=role_name,
-            role_desc=role_desc,
-            status=role_status ,
-            role_type=role_type,
-            modified_by=modified_by        
-        )
-        role.save()
-        return Response({'status': 'success', 'message': 'Role created successfully'}, status=status.HTTP_200_OK)
-    

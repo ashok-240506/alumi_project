@@ -1,28 +1,174 @@
-<h2>Batches</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Batch Management</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+    .add-btn {
+      background-color: #5e60ce;
+      color: #fff;
+      padding: 10px 16px;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+    .filter {
+      margin-bottom: 20px;
+    }
+    select {
+      padding: 8px;
+      border-radius: 6px;
+      margin-left: 8px;
+    }
+    .actions a.edit,
+    .actions a.delete {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-block;
+      margin-left: 8px;
+    }
+    .actions a.edit {
+      background-color: #4caf50;
+      color: white;
+    }
+    .actions a.delete {
+      background-color: #f44336;
+      color: white;
+    }
+    .actions a:hover {
+      opacity: 0.9;
+    }
 
-<form method="get">
-  <label for="department">Filter by Department:</label>
-  <select name="department" id="department" onchange="this.form.submit()">
-    <option value="">-- All Departments --</option>
-    {% for dept in departments %}
-      <option value="{{ dept.id }}" {% if dept.id|stringformat:"s" == selected_dept %}selected{% endif %}>
-        {{ dept.name }}
-      </option>
-    {% endfor %}
-  </select>
-</form>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
 
-<br>
-<a href="{% url 'batch-add' %}">Add Batch</a>
+    .flash-msg {
+      padding: 12px 20px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      animation: fadeIn 0.5s ease-in-out;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      color: white;
+      position: relative;
+      transition: opacity 0.5s ease;
+    }
 
-<ul>
-  {% for batch in batches %}
-    <li>
-      {{ batch.department.name }} - {{ batch.start_year }} to {{ batch.end_year }}
-      <a href="{% url 'batch-edit' batch.id %}">Edit</a>
-      <a href="{% url 'batch-delete' batch.id %}">Delete</a>
-    </li>
-  {% empty %}
-    <li>No batches found.</li>
-  {% endfor %}
-</ul>
+    .flash-msg.success { background-color: #4CAF50; }
+    .flash-msg.error   { background-color: #f44336; }
+    .flash-msg.warning { background-color: #ff9800; }
+    .flash-msg.info    { background-color: #2196F3; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="back-link">
+    <a href="{% url 'admin-settings' %}">← Back to Settings</a>
+  </div>
+  <h2>Batch List</h2>
+
+  {% if messages %}
+    <div id="flash-messages">
+      {% for message in messages %}
+        <div class="flash-msg {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="get" class="filter">
+    <label for="department">Filter by Department:</label>
+    <select name="department" id="department" onchange="this.form.submit()">
+      <option value="">-- All Departments --</option>
+      {% for dept in departments %}
+        <option value="{{ dept.id }}" {% if dept.id|stringformat:"s" == selected_dept %}selected{% endif %}>
+          {{ dept.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <a href="{% url 'batch-add' %}" class="add-btn">+ Add Batch</a>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Department</th>
+        <th>Start Year</th>
+        <th>End Year</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for batch in batches %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ batch.department.name }}</td>
+          <td>{{ batch.start_year }}</td>
+          <td>{{ batch.end_year }}</td>
+          <td class="actions">
+            <a href="{% url 'batch-edit' batch.id %}" class="edit">Edit</a>
+            <a href="{% url 'batch-delete' batch.id %}" class="delete">Delete</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" style="text-align:center;">No batches found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  setTimeout(() => {
+    const flash = document.getElementById('flash-messages');
+    if (flash) {
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 500);
+    }
+  }, 5000);
+</script>
+
+</body>
+</html>

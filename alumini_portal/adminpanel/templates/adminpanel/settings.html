@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right,#8EC5FC, #E0C3FC);
+      margin: 0;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #333;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+    }
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #5e60ce;
+    }
+    .card p {
+      color: #666;
+      font-size: 14px;
+    }
+    a.card-link {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="back-link">
+      <a href="{% url 'admin-home' %}">← Back to Dashboard</a>
+    </div>
+
+    <h1>Admin Settings</h1>
+
+    <div class="card-grid">
+      <a href="{% url 'role-list' %}" class="card-link">
+        <div class="card">
+          <h2>Role Master</h2>
+          <p>Manage user roles and access levels</p>
+        </div>
+      </a>
+
+      <a href="{% url 'department-list' %}" class="card-link">
+        <div class="card">
+          <h2>Departments</h2>
+          <p>Create, update, and delete departments</p>
+        </div>
+      </a>
+
+      <a href="{% url 'batch-list' %}" class="card-link">
+        <div class="card">
+          <h2>Batches</h2>
+          <p>Manage student batches and years</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

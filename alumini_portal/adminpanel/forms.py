@@ -1,14 +1,23 @@
 from django import forms
+
+from users.models import RoleMaster
 from .models import Department, Batch
 from datetime import datetime
+from django import forms
+
 class UploadExcelForm(forms.Form):
-    excel_file = forms.FileField()
+    excel_file = forms.FileField(label="Select Excel file")
+
 
 class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
-        fields = ['name']
+        fields = ['name','description']
 
+class RoleForm(forms.ModelForm):
+    class Meta:
+        model = RoleMaster
+        fields = ['role_name', 'role_desc', 'status', 'role_type']
 
 CURRENT_YEAR = datetime.now().year
 YEAR_CHOICES = [(y, y) for y in range(CURRENT_YEAR, 1979, -1)]

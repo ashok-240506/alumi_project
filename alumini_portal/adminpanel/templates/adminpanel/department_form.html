@@ -1,5 +1,84 @@
-<h2>{% if object %}Edit{% else %}Add{% endif %} Department</h2>
-<form method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Save</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% if form.instance.pk %}Edit Department{% else %}Add Department{% endif %}</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="text"],
+    textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #5e60ce;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #4a49b1;
+    }
+
+    .back-link {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>{% if form.instance.pk %}Edit Department{% else %}Add Department{% endif %}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
+  </form>
+  <div class="back-link">
+    <a href="{% url 'department-list' %}">← Back to Department List</a>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Role Management</title>
+  <style>
+     body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right,#8EC5FC, #E0C3FC);
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    .actions a {
+      margin-right: 10px;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .actions a:hover {
+      opacity: 0.9;
+    }
+
+    .edit {
+      background-color: #4caf50;
+      color: white;
+    }
+    .delete {
+      background-color: #f44336;
+      color: white;
+    }
+    .add-role {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 16px;
+      background: #5e60ce;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    .back-link {
+      margin-top: 20px;
+    }
+    .flash-msg {
+      padding: 12px 20px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      animation: fadeIn 0.5s ease-in-out;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      color: white;
+      position: relative;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Message Types */
+    .flash-msg.success { background-color: #4CAF50; }
+    .flash-msg.error   { background-color: #f44336; }
+    .flash-msg.warning { background-color: #ff9800; }
+    .flash-msg.info    { background-color: #2196F3; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="back-link">
+    <a href="{% url 'admin-settings' %}">← Back to Settings</a>
+  </div>
+  <h2>Role List</h2>
+
+  {% if messages %}
+    <div id="flash-messages">
+      {% for message in messages %}
+        {% if message.tags == 'success' %}
+          <div class="flash-msg {{ message.tags }}">{{ message }}</div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% for message in messages %}
+      {% if message.tags == 'error' %}
+        <p style="color: red; margin-top: 10px; text-align: center;">{{ message }}</p>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+
+  <a href="{% url 'role-add' %}" class="add-role">+ Add New Role</a>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Role Name</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Type</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for role in object_list %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ role.role_name }}</td>
+        <td>{{ role.role_desc }}</td>
+        <td>{{ role.status }}</td>
+        <td>
+          {% if role.status %}
+            <span style="color: green;">Active</span>
+          {% else %}
+            <span style="color: red;">Inactive</span>
+          {% endif %}
+        </td>
+        <td class="actions">
+          <a href="{% url 'role-edit' role.pk %}" class="edit">Edit</a>
+          <a href="{% url 'role-delete' role.pk %}" class="delete">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center;">No roles found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+<script>
+  setTimeout(() => {
+    const flash = document.getElementById('flash-messages');
+    if (flash) {
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 500); 
+    }
+  }, 5000); // Hide after 5 seconds
+</script>
+
+</body>
+</html>

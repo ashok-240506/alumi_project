@@ -1,11 +1,135 @@
-<h2>{% if object %}Edit{% else %}Add{% endif %} Batch</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% if form.instance.pk %}Edit Batch{% else %}Add Batch{% endif %}</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">
-    {% if object %}Update{% else %}Create{% endif %}
-  </button>
-</form>
+    .form-container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
 
-<a href="{% url 'batch-list' %}">Back to List</a>
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    input, select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    button {
+      background: #5e60ce;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4344a4;
+    }
+
+    .back-link {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: #555;
+    }
+
+    ul.errorlist {
+      color: red;
+      list-style: none;
+      padding: 0;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flash-msg.success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+    }
+    .non-field-errors {
+    background: #ffdddd;
+    border: 1px solid #d8000c;
+    color: #d8000c;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>{% if form.instance.pk %}Edit Batch{% else %}Add Batch{% endif %}</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="flash-msg {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+  {% if form.non_field_errors %}
+    <div class="non-field-errors">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field">
+        {{ field.label_tag }}
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button type="submit">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
+  </form>
+
+  <div class="back-link">
+    <a href="{% url 'batch-list' %}">← Back to Batch List</a>
+  </div>
+</div>
+</body>
+</html>

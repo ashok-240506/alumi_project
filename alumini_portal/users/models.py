@@ -4,7 +4,9 @@ from django.utils import timezone
 from datetime import timedelta
 from adminpanel.models import Batch 
 from django.contrib.postgres.fields import JSONField
-
+from datetime import date
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 class CustomUser(AbstractUser):
     username = None  
     roll_no = models.CharField(max_length=20, unique=True)#dept ID
@@ -22,8 +24,17 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "mobilenumber"  
     REQUIRED_FIELDS = ["email"]  
 
+
     class Meta:
         unique_together = ("mobilenumber", "email")
+    
+    @property
+    def is_alumni_dynamic(self):
+        profile = self.userdetails.first() 
+        if profile and profile.batch and profile.batch.end_year:
+            return date.today().year > profile.batch.end_year
+        return False
+    
 
 class UserPersonalProfile(models.Model):  
     """details of user"""
@@ -47,6 +58,13 @@ class UserPersonalProfile(models.Model):
     class Meta:
         db_table = 'user_profile_details'
         ordering = ['created_at']
+
+@receiver(post_save, sender=UserPersonalProfile)
+def update_is_alumni(sender, instance, **kwargs):
+    user = instance.user
+    if instance.batch and instance.batch.end_year:
+        user.is_alumini = date.today().year > instance.batch.end_year
+        user.save(update_fields=['is_alumini'])
 
 class OTP(models.Model):
     mobile_number = models.CharField(max_length=15)

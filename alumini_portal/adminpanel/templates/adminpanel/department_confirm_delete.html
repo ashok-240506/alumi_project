@@ -1,6 +1,82 @@
-<h2>Delete Department</h2>
-<p>Are you sure you want to delete "{{ object.name }}"?</p>
-<form method="post">{% csrf_token %}
-  <button type="submit">Yes, delete</button>
-  <a href="{% url 'department-list' %}">Cancel</a>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delete Department</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .delete-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #c62828;
+      margin-bottom: 20px;
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .confirm {
+      background-color: #e53935;
+      color: white;
+    }
+
+    .cancel {
+      background-color: #ccc;
+      color: black;
+    }
+
+    .cancel:hover {
+      background-color: #bbb;
+    }
+
+    .confirm:hover {
+      background-color: #c62828;
+    }
+  </style>
+</head>
+<body>
+
+<div class="delete-box">
+  <h2>Delete Department</h2>
+  <p>Are you sure you want to delete <strong>{{ object.name }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn confirm">Yes, Delete</button>
+    <a href="{% url 'department-list' %}" class="btn cancel">Cancel</a>
+  </form>
+</div>
+
+</body>
+</html>

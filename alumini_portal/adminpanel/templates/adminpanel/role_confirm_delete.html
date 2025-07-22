@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Delete Batch</title>
+  <meta charset="UTF-8" />
+  <title>Delete Role</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -13,68 +13,60 @@
       min-height: 100vh;
       margin: 0;
     }
-
     .delete-box {
       background: #fff;
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.1);
-      width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
       text-align: center;
+      width: 400px;
     }
-
     h2 {
-      color: #c62828;
+      color: #b30000;
       margin-bottom: 20px;
     }
-
     p {
-      margin-bottom: 20px;
-      color: #333;
+      color: #555;
+      margin-bottom: 30px;
     }
-
     form {
       display: flex;
       justify-content: center;
-      gap: 15px;
+      gap: 20px;
     }
-
-    .btn {
+    button, .cancel-link {
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
+      text-decoration: none;
     }
-
-    .confirm {
-      background-color: #e53935;
+    button {
+      background-color: #dc3545;
       color: white;
     }
-
-    .cancel {
-      background-color: #ccc;
-      color: black;
+    .cancel-link {
+      background-color: #6c757d;
+      color: white;
     }
-
-    .cancel:hover {
-      background-color: #bbb;
+    button:hover {
+      background-color: #c82333;
     }
-
-    .confirm:hover {
-      background-color: #c62828;
+    .cancel-link:hover {
+      background-color: #5a6268;
     }
   </style>
 </head>
 <body>
 
 <div class="delete-box">
-  <h2>Delete Batch</h2>
-  <p>Are you sure you want to delete batch <strong>{{ object.department.name }} - {{ object.start_year }} to {{ object.end_year }}</strong>?</p>
+  <h2>Delete Role</h2>
+  <p>Are you sure you want to delete the role: <strong>{{ object.role_name }}</strong>?</p>
   <form method="post">
     {% csrf_token %}
-    <button type="submit" class="btn confirm">Yes, Delete</button>
-    <a href="{% url 'batch-list' %}" class="btn cancel">Cancel</a>
+    <button type="submit">Yes, Delete</button>
+    <a href="{% url 'role-list' %}" class="cancel-link">Cancel</a>
   </form>
 </div>
 

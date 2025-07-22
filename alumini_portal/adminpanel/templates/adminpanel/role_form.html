@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% if form.instance.pk %}Edit Role{% else %}Add Role{% endif %}</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .form-box {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 80%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .form-field {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 80%;
+      padding: 12px 12px 12px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      background: none;
+    }
+
+    .form-field label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #fff;
+      padding: 0 4px;
+      color: #777;
+      font-size: 14px;
+      transition: 0.3s ease;
+      pointer-events: none;
+    }
+
+    .form-field input:focus + label,
+    .form-field input:not(:placeholder-shown) + label,
+    .form-field select:focus + label,
+    .form-field select:not([value=""]) + label,
+    .form-field textarea:focus + label,
+    .form-field textarea:not(:placeholder-shown) + label {
+      top: -10px;
+      left: 8px;
+      font-size: 12px;
+      color: #5e60ce;
+    }
+
+    .form-error {
+      color: #d8000c;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #5e60ce;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4344a4;
+    }
+
+    .back-link {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .back-link a {
+      color: #555;
+      text-decoration: none;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-box">
+  <h2>{% if form.instance.pk %}Edit Role{% else %}Add Role{% endif %}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="form-field">
+        {{ field }}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% for error in field.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    <button type="submit">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
+  </form>
+
+  <div class="back-link">
+    <a href="{% url 'role-list' %}">← Back to Role List</a>
+  </div>
+</div>
+
+</body>
+</html>

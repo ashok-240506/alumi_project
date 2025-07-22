@@ -3,6 +3,11 @@ from .views import *
 
 urlpatterns = [
     path('home/', admin_home, name='admin-home'),
+    path('settings/', SettingsView.as_view(), name='admin-settings'),
+    path('roles/', RoleListView.as_view(), name='role-list'),
+    path('roles/add/', RoleCreateView.as_view(), name='role-add'),
+    path('roles/edit/<int:pk>/', RoleUpdateView.as_view(), name='role-edit'),
+    path('roles/delete/<int:pk>/', RoleDeleteView.as_view(), name='role-delete'),
     path('upload/', UploadStudentView.as_view(), name='upload-students'),
     # Department URLs
     path('departments/', DepartmentListView.as_view(), name='department-list'),
