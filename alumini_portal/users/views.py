@@ -18,18 +18,29 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from .utils import *
+from django.core.mail import send_mail
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
 
 @method_decorator(login_required, name='dispatch')
 class StudentHomeView(TemplateView):
     template_name = 'users/student_home.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        user_role = RoleMapping.objects.filter(user=request.user).first()
+        if not user_role or user_role.role.role_name.lower() != 'student':
+            storage = messages.get_messages(request)
+            for _ in storage:  # clear previous messages
+                pass
+            messages.error(request, "You are not authorized as student.")
+            return redirect('student_login')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context['is_alumini'] = user.is_alumini
         return context
-    
 
 @login_required
 def alumni_data_view(request):
@@ -126,9 +137,21 @@ class SendOTPView(View):
                 created_at=timezone.now()
             )
             try:
-                mobile='+91' + user.mobilenumber 
-                # send_otp_sms(mobile, otp_code)  
-                print(f"OTP sent to {mobile}: {otp_code}")
+                if '@' in identifier:
+                    # Send via email
+                    send_mail(
+                        subject="Your OTP Code",
+                        message=f"Your OTP is {otp_code}",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user.email],
+                        fail_silently=False,
+                    )
+                    print(f"OTP sent to {user.email}: {otp_code}")
+                else:
+                    # Send via SMS
+                    mobile = '+91' + user.mobilenumber
+                    # send_otp_sms(mobile, otp_code)
+                    print(f"OTP sent to {mobile}: {otp_code}")
             except Exception as e:
                 print(f"Failed to send OTP: {e}")
             request.session['mobile_number'] = user.mobilenumber
@@ -356,6 +379,7 @@ class SigninView(View):
                 user = CustomUser.objects.get(mobilenumber=mobilenumber)
                 if check_password(password, user.password):
                     login(request, user)
+                    messages.success(request, "Login successful.")
                     return redirect('student_home')
                 else:
                     messages.error(request, "Incorrect password.")

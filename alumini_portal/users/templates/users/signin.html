@@ -108,6 +108,33 @@
       transform: translateY(-2px);
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+    .alert {
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      border: 1px solid #ccc;
+    }
+
+    .alert-success {
+      color: green;
+      background-color: #eafaf1;
+      border-color: #b2f2bb;
+    }
+
+    .alert-error {
+      color: #c0392b;
+      background-color: #fdecea;
+      border-color: #f5c6cb;
+    }
+
+    .alert-info {
+      color: #0c5460;
+      background-color: #d1ecf1;
+      border-color: #bee5eb;
+    }
+
   </style>
 </head>
 <body>
@@ -119,9 +146,13 @@
     <h2>Login to Alumni Connect</h2>
 
     {% if messages %}
-      {% for message in messages %}
-        <p style="color: red;">{{ message }}</p>
-      {% endfor %}
+      <div>
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
     {% endif %}
 
     <form method="post">

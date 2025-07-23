@@ -83,6 +83,39 @@
       display: inline-block;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
+    .flash-message {
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 220px;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-align: left;
+    }
+
+    .success {
+      color: green;
+      background-color: #eafaf1;
+      border: 1px solid #b2f2bb;
+    }
+    .error {
+      color: #c0392b;
+      background-color: #fdecea;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      color: #0c5460;
+      background-color: #d1ecf1;
+      border: 1px solid #bee5eb;
+    }
+    .warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+    }
+
   </style>
 </head>
 <body>
@@ -100,6 +133,16 @@
     <p>You are logged in as <strong>Student</strong></p>
   {% endif %}
 </header>
+
+{% if messages %}
+  <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+    {% for message in messages %}
+      <div class="flash-message {{ message.tags }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <div class="card-container">
   <div class="card">
@@ -149,6 +192,14 @@
     alert("You have been logged out.");
     window.location.href = "{% url 'student_login' %}";
   }
+  setTimeout(() => {
+  const flashBox = document.getElementById('flash-messages');
+  if (flashBox) {
+    flashBox.style.transition = 'opacity 0.5s ease';
+    flashBox.style.opacity = '0';
+    setTimeout(() => flashBox.remove(), 500);
+  }
+}, 3000);
 </script>
 
 </body>

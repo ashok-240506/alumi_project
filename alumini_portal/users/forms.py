@@ -4,9 +4,24 @@ from django.contrib.auth import authenticate
 from adminpanel.models import Batch
 from .models import RoleMaster
 class MobileForm(forms.Form):
-    mobile_number = forms.CharField(label='Mobile number or Email')
+    mobile_number = forms.CharField(
+        label='Mobile or Email',
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'placeholder': ' ',
+            'autocomplete': 'off',
+        })
+    )
 class OTPForm(forms.Form):
-    otp = forms.CharField(max_length=6)
+    otp = forms.CharField(
+        label="OTP",
+        max_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter OTP',
+        })
+    )
+
 
 class SetPasswordForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput())
