@@ -146,14 +146,14 @@
     <h2>Login to Alumni Connect</h2>
 
     {% if messages %}
-      <div>
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}">
-            {{ message }}
+          <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+              {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }}" role="alert">
+                      {{ message }}
+                  </div>
+              {% endfor %}
           </div>
-        {% endfor %}
-      </div>
-    {% endif %}
+        {% endif %}
 
     <form method="post">
       {% csrf_token %}
@@ -183,6 +183,15 @@
       <p>Don't have an account? <a href="{% url 'signup' %}">Register here</a></p>
     </div> -->
   </div>
+<script>
+  setTimeout(() => {
+    const flash = document.getElementById('flash-messages');
+    if (flash) {
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 500); 
+    }
+  }, 3000); 
+</script>
 
 </body>
 </html>

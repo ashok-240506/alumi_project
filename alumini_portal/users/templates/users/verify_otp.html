@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Verify OTP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
             background: linear-gradient(to right, #8EC5FC, #E0C3FC);
@@ -43,29 +44,60 @@
         .resend-link {
             display: none;
         }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            border: 1px solid #ccc;
+        }
+
+        .alert-success {
+            color: green;
+            background-color: #eafaf1;
+            border-color: #b2f2bb;
+        }
+
+        .alert-error {
+            color: #c0392b;
+            background-color: #fdecea;
+            border-color: #f5c6cb;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
     </style>
 </head>
 <body>
     <div class="otp-box">
         <h4 class="mb-4 text-center">Verify OTP</h4>
 
-        {% if error %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
+        {% if messages %}
+            <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             </div>
         {% endif %}
 
         <form method="post">
             {% csrf_token %}
             <div class="form-floating mb-3">
-              {{ form.otp }}
-              <label for="{{ form.otp.id_for_label }}">Enter OTP</label>
-              {% if form.otp.errors %}
-                  <div class="text-danger small mt-1">
-                      {{ form.otp.errors.0 }}
-                  </div>
-              {% endif %}
-          </div>
+                {{ form.otp }}
+                <label for="{{ form.otp.id_for_label }}">Enter OTP</label>
+                {% if form.otp.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.otp.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">Verify</button>
@@ -74,40 +106,66 @@
 
         <div class="text-center mt-3">
             <div id="timer" class="timer-text">Resend OTP in 01:00</div>
-            <a id="resendLink" class="resend-link" href="{% url 'send-otp' %}">Resend OTP</a>
+            <a id="resendLink" class="resend-link" href="#" onclick="resetTimerAndRedirect()">Resend OTP</a>
         </div>
     </div>
 
     <script>
-        // Set input style
-        document.addEventListener('DOMContentLoaded', () => {
-            const otpInput = document.querySelector('input[name="otp"]');
-            if (otpInput) {
-                otpInput.classList.add('form-control');
-                otpInput.placeholder = 'Enter OTP';
-            }
-        });
-
-        // Countdown timer
-        let timerSeconds = 60;
+        const OTP_TIMER_KEY = 'otp_timer';
         const timerDisplay = document.getElementById('timer');
         const resendLink = document.getElementById('resendLink');
 
+        // Update the countdown timer
         function updateTimer() {
-            let minutes = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
-            let seconds = String(timerSeconds % 60).padStart(2, '0');
-            timerDisplay.textContent = `Resend OTP in ${minutes}:${seconds}`;
+            const timerStart = parseInt(localStorage.getItem(OTP_TIMER_KEY));
+            const elapsed = Math.floor((Date.now() - timerStart) / 1000);
+            const remaining = 60 - elapsed;
 
-            if (timerSeconds > 0) {
-                timerSeconds--;
+            if (remaining > 0) {
+                const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const seconds = String(remaining % 60).padStart(2, '0');
+                timerDisplay.textContent = `Resend OTP in ${minutes}:${seconds}`;
+                timerDisplay.style.display = 'block';
+                resendLink.style.display = 'none';
                 setTimeout(updateTimer, 1000);
             } else {
                 timerDisplay.style.display = 'none';
                 resendLink.style.display = 'inline';
+                localStorage.removeItem(OTP_TIMER_KEY);
             }
         }
 
-        updateTimer();
+        // Called when clicking "Resend OTP"
+        function resetTimerAndRedirect() {
+            localStorage.removeItem(OTP_TIMER_KEY); // clear previous
+            window.location.href = window.location.pathname + '?new_otp=1';
+        }
+
+        // Check URL for new_otp=1 and handle logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const newOtp = urlParams.get('new_otp');
+
+            if (newOtp === '1') {
+                localStorage.setItem(OTP_TIMER_KEY, Date.now().toString());
+            }
+
+            if (!localStorage.getItem(OTP_TIMER_KEY)) {
+                localStorage.setItem(OTP_TIMER_KEY, Date.now().toString());
+            }
+
+            updateTimer();
+        });
+
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            const flashBox = document.getElementById('flash-messages');
+            if (flashBox) {
+                flashBox.style.transition = 'opacity 0.5s ease';
+                flashBox.style.opacity = '0';
+                setTimeout(() => flashBox.remove(), 500);
+            }
+        }, 3000);
     </script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils import timezone
 import random
 from django.http import HttpResponse
@@ -19,6 +20,8 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q
 from .utils import *
 from django.core.mail import send_mail
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
 
@@ -118,17 +121,13 @@ class SendOTPView(View):
         if form.is_valid():
             identifier = form.cleaned_data['mobile_number']
 
-            # Try to get user by mobile or email
             user = CustomUser.objects.filter(
                 Q(mobilenumber=identifier) | Q(email=identifier)
             ).first()
 
             if not user:
-                return render(request, 'users/send_otp.html', {
-                    'form': form,
-                    'error': 'Account not found. Please contact admin.'
-                })
-
+                messages.error(request, "Account not found. Please contact admin.")
+                return redirect('student_login')
             # Send OTP
             otp_code = str(random.randint(100000, 999999))
             OTP.objects.create(
@@ -153,10 +152,14 @@ class SendOTPView(View):
                     # send_otp_sms(mobile, otp_code)
                     print(f"OTP sent to {mobile}: {otp_code}")
             except Exception as e:
+                messages.error(request, "Failed to send OTP. Try again.")
+
                 print(f"Failed to send OTP: {e}")
             request.session['mobile_number'] = user.mobilenumber
+            messages.success(request, "OTP sent successfully.")
+
             print(f"OTP for {user.mobilenumber}: {otp_code}")
-            return redirect('verify-otp')
+            return redirect(f"{reverse('verify-otp')}?new_otp=1")
 
         return render(request, 'users/send_otp.html', {'form': form})
 
@@ -177,33 +180,29 @@ class VerifyOTPView(View):
                     code=otp_code,
                     is_used=False
                 ).latest('created_at')
+
+                if otp.is_valid():
+                    otp.mark_used()
+
+                    user = CustomUser.objects.filter(mobilenumber=mobile).first()
+                    if not user:
+                        messages.error(request, "Account not found. Please contact admin.")
+                        return redirect('student_login')
+
+                    login(request, user)
+                    messages.success(request, "Login successful.")
+                    return redirect('student_home')
+
+                else:
+                    messages.error(request, "OTP expired or already used.")
+                    return redirect('verify-otp')
+
             except OTP.DoesNotExist:
-                return render(request, 'users/verify_otp.html', {
-                    'form': form,
-                    'error': 'Invalid or expired OTP.'
-                })
+                messages.error(request, "Invalid or expired OTP.")
+                return redirect('verify-otp')
 
-            if otp.is_valid():
-                otp.mark_used()
-
-                mobile = request.session.get('mobile_number')
-                user = CustomUser.objects.filter(mobilenumber=mobile).first()
-
-                if not user:
-                    return render(request, 'users/verify_otp.html', {
-                        'form': form,
-                        'error': 'Account not found. Please contact admin.'
-                })
-                login(request, user)
-                return redirect('student_home')
-
-            else:
-                return render(request, 'users/verify_otp.html', {
-                    'form': form,
-                    'error': 'OTP expired or already used.'
-                })
-
-        return render(request, 'users/verify_otp.html', {'form': form})
+        messages.error(request, "Invalid form input.")
+        return redirect('verify-otp')
 
 class SetPasswordView(View):
     def get(self, request):
@@ -239,10 +238,8 @@ class SendForgotPasswordOTPView(View):
             ).first()
 
             if not user:
-                return render(request, 'users/forgot_password_send_otp.html', {
-                    'form': form,
-                    'error': 'Account not found.'
-                })
+                messages.error(request, "Account not found. Please contact admin.")
+                return redirect('student_login')
 
             otp_code = str(random.randint(100000, 999999))
             OTP.objects.create(
@@ -252,7 +249,8 @@ class SendForgotPasswordOTPView(View):
             )
             print('otp',otp_code)
             request.session['reset_mobile'] = user.mobilenumber
-            return redirect('forgot-verify-otp')
+            messages.success(request, "OTP sent successfully.")
+            return redirect(f"{reverse('forgot-verify-otp')}?new_otp=1")
 
         return render(request, 'users/forgot_password_send_otp.html', {'form': form})
 class ForgotPasswordVerifyOTPView(View):
@@ -272,13 +270,12 @@ class ForgotPasswordVerifyOTPView(View):
             if otp and otp.is_valid():
                 otp.mark_used()
                 request.session['otp_verified'] = True
+                messages.success(request, "Please Update your new password.")
                 return redirect('reset-password')
             else:
-                return render(request, 'users/forgot_password_verify_otp.html', {
-                    'form': form,
-                    'error': 'Invalid or expired OTP.'
-                })
-
+                messages.error(request, "Invalid or expired OTP.")
+                return redirect('forgot-verify-otp')
+            
         return render(request, 'users/forgot_password_verify_otp.html', {'form': form})
 class ResetPasswordView(View):
     def get(self, request):
@@ -295,13 +292,12 @@ class ResetPasswordView(View):
             if user:
                 user.set_password(form.cleaned_data['password'])
                 user.save()
-                login(request, user)
+                messages.success(request, "Password reset successfully. You can now log in.")
 
                 request.session.pop('reset_mobile', None)
                 request.session.pop('otp_verified', None)
 
-                return redirect('student_home')
-
+                return redirect('student_login')
         return render(request, 'users/reset_password.html', {'form': form})
 
 
