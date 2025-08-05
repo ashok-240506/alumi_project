@@ -372,7 +372,7 @@ class SigninView(View):
             password = form.cleaned_data['password']
 
             try:
-                user = CustomUser.objects.get(mobilenumber=mobilenumber)
+                user = CustomUser.objects.filter(Q(mobilenumber=mobilenumber)|Q(email=mobilenumber)).first()
                 if check_password(password, user.password):
                     login(request, user)
                     messages.success(request, "Login successful.")
