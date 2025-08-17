@@ -58,6 +58,15 @@ class UserPersonalProfile(models.Model):
     class Meta:
         db_table = 'user_profile_details'
         ordering = ['created_at']
+    
+    def get_full_name(self):
+        name = ""
+
+        if self.firstname:
+            name = str(name) + str(self.firstname) + " "
+        if self.lastname:
+            name = str(name) + str(self.lastname) + " "
+        return name
 
 @receiver(post_save, sender=UserPersonalProfile)
 def update_is_alumni(sender, instance, **kwargs):

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chat with Alumni</title>
+  <title>Alumni Chat Home</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -13,37 +13,94 @@
       background: white;
       padding: 30px;
       border-radius: 12px;
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      text-align: center;
     }
     h2 {
       color: #7b5fc4;
       margin-bottom: 20px;
+      text-align: center;
     }
-    p {
-      color: #444;
+    .section {
+      margin-bottom: 30px;
+    }
+    .section h3 {
+      color: #5e45ab;
+      margin-bottom: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #f0f0f0;
+      margin-bottom: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+    li:hover {
+      background: #e0e0ff;
     }
     a {
-      display: inline-block;
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .btn-group {
+      text-align: center;
       margin-top: 20px;
-      padding: 10px 20px;
+    }
+    .btn {
       background-color: #7b5fc4;
       color: white;
-      text-decoration: none;
+      padding: 10px 20px;
+      border: none;
       border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
     }
-    a:hover {
+    .btn:hover {
       background-color: #5e45ab;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Chat with Alumni</h2>
-    <p>This is the starting point for your batch or private chat with alumni.</p>
-    <a href="#">Start Chat</a>
+    <h2>Welcome to Alumni Chat</h2>
+
+    <div class="section">
+      <h3>🔷 Join Group Chat</h3>
+      <div class="btn-group">
+        <a href="{% url 'group-chat-redirect' %}" class="btn">Go to Batch Group Chat</a>
+      </div>
+    </div>
+
+    <div class="section">
+    <h3>👥 Start a Private Chat</h3>
+    <ul>
+      {% if users %}
+        {% for user in users %}
+          {% with detail=user.userdetails.first %}
+            <li>
+              <a href="{% url 'start-private-chat' user.id %}">
+                {% if detail %}
+                  {{ detail.get_full_name|default:detail.firstname }}
+                {% else %}
+                  No Name
+                {% endif %}
+              </a>
+            </li>
+          {% endwith %}
+        {% endfor %}
+
+      {% else %}
+        <li>No other users available.</li>
+      {% endif %}
+    </ul>
+
+    </div>
   </div>
 </body>
 </html>

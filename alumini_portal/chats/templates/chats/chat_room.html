@@ -1,31 +1,173 @@
-<h2>Room: {{ room_name }}</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat - {{ room.name }}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ece5dd;
+    }
 
-<div id="chat-log">
-  {% for message in messages %}
-    <p><strong>{{ message.sender }}:</strong> {{ message.content }}</p>
-  {% endfor %}
-</div>
+    .chat-container {
+      max-width: 900px;
+      height: 95vh;
+      margin: 20px auto;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-<input type="text" id="chat-message-input" autocomplete="off" placeholder="Type a message..." />
-<button id="chat-message-submit">Send</button>
+    .chat-header {
+      background-color: #075e54;
+      color: white;
+      padding: 15px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
 
-<script>
-  
-  const roomName = "{{ room }}";
-  const chatSocket = new WebSocket(
-    'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
-  );
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #e5ddd5;
+      display: flex;
+      flex-direction: column;
+    }
 
-  chatSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    const log = document.getElementById('chat-log');
-    log.innerHTML += `<p><strong>${data.username}:</strong> ${data.message}</p>`;
-  };
+    .message {
+      background-color: #e0fbd2;
+      padding: 8px 12px;
+      margin: 5px;
+      border-radius: 10px;
+      max-width: 60%;
+      display: inline-block;
+      word-wrap: break-word;
+  }
+  .sent {
+      align-self: flex-end;
+      text-align: right;
+  }
+  .received {
+      align-self: flex-start;
+      text-align: left;
+  }
 
-  document.getElementById('chat-message-submit').onclick = function() {
-    const input = document.getElementById('chat-message-input');
-    const message = input.value;
-    chatSocket.send(JSON.stringify({ message }));
-    input.value = '';
-  };
-</script>
+    .sender-name {
+      font-weight: bold;
+      font-size: 13px;
+      color: #075e54;
+      margin-bottom: 3px;
+    }
+
+    .chat-form {
+      display: flex;
+      border-top: 1px solid #ccc;
+      background: #f0f0f0;
+      padding: 10px;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    .chat-form input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+      background: #fff;
+      margin-right: 10px;
+    }
+
+    .chat-form button {
+      background-color: #075e54;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .chat-form button:hover {
+      background-color: #064d45;
+    }
+  </style>
+</head>
+<body>
+<h2>Chat with {{ room.get_other_user(request.user).username }}</h2>
+  <div class="chat-history">
+    {% for msg in messages %}
+      <div class="chat-message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+        <p>{{ msg.content }}</p>
+        <small>{{ msg.timestamp }}</small>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="chat-container">
+    <div class="chat-header">
+      {{ room.name }}
+    </div>
+
+    <div class="chat-messages" id="chat-box">
+      {% for message in messages %}
+        <div class="message {% if message.sender.id == user.id %}sent{% else %}received{% endif %}">
+          {% if message.sender.id != user.id %}
+            <div class="sender-name">{{ message.sender.get_full_name }}</div>
+          {% endif %}
+          {{ message.content }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <form id="chat-form" class="chat-form" method="post">
+      {% csrf_token %}
+      <input type="text" id="message-input" name="message" placeholder="Type a message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const chatBox = document.getElementById('chat-box');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      fetch("{% url 'send-message-api' room.name %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ content: message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const msg = document.createElement('div');
+        msg.classList.add('message', 'sent');
+        msg.innerHTML = data.content;
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        messageInput.value = '';
+      });
+    });
+
+    // Auto-scroll to bottom on load
+    window.onload = () => {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+  </script>
+
+</body>
+</html>
