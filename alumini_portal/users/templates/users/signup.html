@@ -1,169 +1,747 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Signup Form</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      padding: 30px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Signup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .signup-form {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 1000px;
-      margin: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(102, 126, 234, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8B5CF6 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-      gap: 20px;
-    }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 98px,
+                    rgba(255, 255, 255, 0.03) 100px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 98px,
+                    rgba(255, 255, 255, 0.03) 100px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    .form-group {
-      flex: 1 1 45%;
-      display: flex;
-      flex-direction: column;
-    }
+        .container {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 
+                0 30px 60px rgba(102, 126, 234, 0.15),
+                0 15px 30px rgba(118, 75, 162, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            padding: 50px;
+            width: 100%;
+            max-width: 950px;
+            animation: slideUp 0.8s ease-out;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
 
-    .form-group label {
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 20% 70%, rgba(102, 126, 234, 0.06) 0%, transparent 50%);
+            animation: floatPattern 20s ease-in-out infinite;
+            pointer-events: none;
+        }
 
-    .form-group textarea {
-      resize: vertical;
-    }
+        @keyframes shimmer {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
+        }
 
-    .btn-submit {
-      background-color: #7b5fc4;
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
+        @keyframes floatPattern {
+            0%, 100% { transform: rotate(0deg) translate(0, 0); }
+            25% { transform: rotate(90deg) translate(10px, -10px); }
+            50% { transform: rotate(180deg) translate(0, 10px); }
+            75% { transform: rotate(270deg) translate(-10px, 0); }
+        }
 
-    .btn-submit:hover {
-      background-color: #5e45ab;
-    }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .errorlist {
-      color: red;
-      margin-top: 4px;
-      font-size: 14px;
-    }
-  </style>
+        .form-title {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2, #8B5CF6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3rem;
+            margin-bottom: 50px;
+            font-weight: 800;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 6px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #8B5CF6);
+            border-radius: 3px;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+            animation: lineGlow 2s ease-in-out infinite alternate;
+        }
+
+        .form-title::before {
+            content: '✨';
+            position: absolute;
+            top: -10px;
+            left: -30px;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0% { filter: brightness(1) saturate(1); }
+            100% { filter: brightness(1.1) saturate(1.2); }
+        }
+
+        @keyframes lineGlow {
+            0% { box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3); }
+            100% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.7; }
+            50% { transform: rotate(180deg) scale(1.2); opacity: 1; }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 15px rgba(102, 126, 234, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 15px 35px rgba(102, 126, 234, 0.2),
+                0 5px 15px rgba(118, 75, 162, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8B5CF6 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 10px 30px rgba(102, 126, 234, 0.3),
+                0 5px 15px rgba(118, 75, 162, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 20px 50px rgba(102, 126, 234, 0.4),
+                0 10px 25px rgba(118, 75, 162, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%);
+        }
+
+        .signup-btn:active {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .signup-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .signup-btn:hover::before {
+            left: 100%;
+        }
+
+        .signup-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .signup-btn:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .form-title {
+                font-size: 2rem;
+            }
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 15%;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            animation-delay: 0s;
+            box-shadow: 0 0 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #8B5CF6, #667eea);
+            border-radius: 20px;
+            animation-delay: 7s;
+            transform: rotate(45deg);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .shape:nth-child(3) {
+            bottom: 15%;
+            left: 5%;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(225deg, #764ba2, #8B5CF6);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation-delay: 14s;
+            box-shadow: 0 0 35px rgba(118, 75, 162, 0.3);
+        }
+
+        .shape:nth-child(4) {
+            top: 30%;
+            right: 30%;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(90deg, #667eea, #8B5CF6);
+            border-radius: 15px;
+            animation-delay: 3s;
+            opacity: 0.08;
+        }
+
+        .shape:nth-child(5) {
+            bottom: 40%;
+            right: 5%;
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, #764ba2, #667eea);
+            border-radius: 50%;
+            animation-delay: 10s;
+            opacity: 0.06;
+        }
+
+        .shape:nth-child(6) {
+            top: 70%;
+            left: 40%;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(180deg, #8B5CF6, #764ba2);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            animation-delay: 17s;
+            opacity: 0.07;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+            100% { transform: translateY(0px) rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-
-  <form method="post" action="{% url 'signup' %}" class="signup-form">
-    <h2 style="text-align:center; margin-bottom: 30px;">Student Signup</h2>
-    {% csrf_token %}
-
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.firstname.label_tag }} {{ form.firstname }} {{ form.firstname.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.lastname.label_tag }} {{ form.lastname }} {{ form.lastname.errors }}
-      </div>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.gender.label_tag }} {{ form.gender }} {{ form.gender.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.age.label_tag }} {{ form.age }} {{ form.age.errors }}
-      </div>
+    <div class="container">
+        <h1 class="form-title">Student Signup</h1>
+        
+        <div class="success-message" id="successMessage">
+            Registration successful! Welcome aboard! 🎉
+        </div>
+
+        <form id="signupForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="firstName">Firstname *</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                    <div class="error" id="firstNameError">Please enter your first name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Lastname *</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                    <div class="error" id="lastNameError">Please enter your last name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender *</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not-to-say">Prefer not to say</option>
+                    </select>
+                    <div class="error" id="genderError">Please select your gender</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age *</label>
+                    <input type="number" id="age" name="age" min="16" max="100" required>
+                    <div class="error" id="ageError">Please enter a valid age (16-100)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="language">Language *</label>
+                    <input type="text" id="language" name="language" placeholder="e.g., English, Spanish, Hindi" required>
+                    <div class="error" id="languageError">Please enter your preferred language</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="major">Major *</label>
+                    <input type="text" id="major" name="major" placeholder="e.g., Computer Science, Business" required>
+                    <div class="error" id="majorError">Please enter your major</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="collegeName">College name *</label>
+                    <input type="text" id="collegeName" name="collegeName" required>
+                    <div class="error" id="collegeNameError">Please enter your college name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="universityName">University name *</label>
+                    <input type="text" id="universityName" name="universityName" required>
+                    <div class="error" id="universityNameError">Please enter your university name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile number *</label>
+                    <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" placeholder="10-digit mobile number" required>
+                    <div class="error" id="mobileNumberError">Please enter a valid 10-digit mobile number</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                    <div class="error" id="emailError">Please enter a valid email address</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" minlength="8" required>
+                    <div class="error" id="passwordError">Password must be at least 8 characters long</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm password *</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <div class="error" id="confirmPasswordError">Passwords do not match</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="rollNo">Roll no *</label>
+                    <input type="text" id="rollNo" name="rollNo" required>
+                    <div class="error" id="rollNoError">Please enter your roll number</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regNo">Reg no *</label>
+                    <input type="text" id="regNo" name="regNo" required>
+                    <div class="error" id="regNoError">Please enter your registration number</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateOfBirth">Date of birth *</label>
+                    <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                    <div class="error" id="dateOfBirthError">Please enter your date of birth</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="batch">Batch *</label>
+                    <select id="batch" name="batch" required>
+                        <option value="">Select Batch</option>
+                        <option value="2021-2025">2021-2025</option>
+                        <option value="2022-2026">2022-2026</option>
+                        <option value="2023-2027">2023-2027</option>
+                        <option value="2024-2028">2024-2028</option>
+                        <option value="2025-2029">2025-2029</option>
+                    </select>
+                    <div class="error" id="batchError">Please select your batch</div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="address">Address *</label>
+                    <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
+                    <div class="error" id="addressError">Please enter your address</div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="roleType">Role type *</label>
+                    <select id="roleType" name="roleType" required>
+                        <option value="">Select Role</option>
+                        <option value="undergraduate">Undergraduate Student</option>
+                        <option value="graduate">Graduate Student</option>
+                        <option value="phd">PhD Student</option>
+                        <option value="research">Research Student</option>
+                        <option value="exchange">Exchange Student</option>
+                    </select>
+                    <div class="error" id="roleTypeError">Please select your role type</div>
+                </div>
+            </div>
+
+            <button type="submit" class="signup-btn">
+                Signup
+            </button>
+        </form>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.language.label_tag }} {{ form.language }} {{ form.language.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.major.label_tag }} {{ form.major }} {{ form.major.errors }}
-      </div>
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signupForm');
+            const successMessage = document.getElementById('successMessage');
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.college_name.label_tag }} {{ form.college_name }} {{ form.college_name.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.university_name.label_tag }} {{ form.university_name }} {{ form.university_name.errors }}
-      </div>
-    </div>
+            // Form validation
+            function validateField(fieldId, errorId, validationFn, errorMessage) {
+                const field = document.getElementById(fieldId);
+                const error = document.getElementById(errorId);
+                
+                if (!validationFn(field.value.trim())) {
+                    error.textContent = errorMessage;
+                    error.style.display = 'block';
+                    field.style.borderColor = '#e74c3c';
+                    return false;
+                } else {
+                    error.style.display = 'none';
+                    field.style.borderColor = '#2ecc71';
+                    return true;
+                }
+            }
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.mobilenumber.label_tag }} {{ form.mobilenumber }} {{ form.mobilenumber.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}
-      </div>
-    </div>
+            function validateForm() {
+                let isValid = true;
+                
+                // Basic field validations
+                const fields = [
+                    {id: 'firstName', errorId: 'firstNameError', validator: val => val.length >= 2, message: 'First name must be at least 2 characters'},
+                    {id: 'lastName', errorId: 'lastNameError', validator: val => val.length >= 2, message: 'Last name must be at least 2 characters'},
+                    {id: 'gender', errorId: 'genderError', validator: val => val !== '', message: 'Please select your gender'},
+                    {id: 'age', errorId: 'ageError', validator: val => val >= 16 && val <= 100, message: 'Please enter a valid age (16-100)'},
+                    {id: 'language', errorId: 'languageError', validator: val => val.length >= 2, message: 'Please enter your preferred language'},
+                    {id: 'major', errorId: 'majorError', validator: val => val.length >= 2, message: 'Please enter your major'},
+                    {id: 'collegeName', errorId: 'collegeNameError', validator: val => val.length >= 2, message: 'Please enter your college name'},
+                    {id: 'universityName', errorId: 'universityNameError', validator: val => val.length >= 2, message: 'Please enter your university name'},
+                    {id: 'mobileNumber', errorId: 'mobileNumberError', validator: val => /^[0-9]{10}$/.test(val), message: 'Please enter a valid 10-digit mobile number'},
+                    {id: 'email', errorId: 'emailError', validator: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), message: 'Please enter a valid email address'},
+                    {id: 'password', errorId: 'passwordError', validator: val => val.length >= 8, message: 'Password must be at least 8 characters long'},
+                    {id: 'rollNo', errorId: 'rollNoError', validator: val => val.length >= 1, message: 'Please enter your roll number'},
+                    {id: 'regNo', errorId: 'regNoError', validator: val => val.length >= 1, message: 'Please enter your registration number'},
+                    {id: 'dateOfBirth', errorId: 'dateOfBirthError', validator: val => val !== '', message: 'Please enter your date of birth'},
+                    {id: 'batch', errorId: 'batchError', validator: val => val !== '', message: 'Please select your batch'},
+                    {id: 'address', errorId: 'addressError', validator: val => val.length >= 10, message: 'Please enter a complete address (minimum 10 characters)'},
+                    {id: 'roleType', errorId: 'roleTypeError', validator: val => val !== '', message: 'Please select your role type'}
+                ];
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.password.label_tag }} {{ form.password }} {{ form.password.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.confirm_password.label_tag }} {{ form.confirm_password }} {{ form.confirm_password.errors }}
-      </div>
-    </div>
+                fields.forEach(field => {
+                    if (!validateField(field.id, field.errorId, field.validator, field.message)) {
+                        isValid = false;
+                    }
+                });
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.roll_no.label_tag }} {{ form.roll_no }} {{ form.roll_no.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.reg_no.label_tag }} {{ form.reg_no }} {{ form.reg_no.errors }}
-      </div>
-    </div>
+                // Password confirmation validation
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const confirmPasswordError = document.getElementById('confirmPasswordError');
+                const confirmPasswordField = document.getElementById('confirmPassword');
 
-    <div class="form-row">
-      <div class="form-group">
-        {{ form.date_of_birth.label_tag }} {{ form.date_of_birth }} {{ form.date_of_birth.errors }}
-      </div>
-      <div class="form-group">
-        {{ form.batch.label_tag }} {{ form.batch }} {{ form.batch.errors }}
-      </div>
-    </div>
+                if (password !== confirmPassword) {
+                    confirmPasswordError.textContent = 'Passwords do not match';
+                    confirmPasswordError.style.display = 'block';
+                    confirmPasswordField.style.borderColor = '#e74c3c';
+                    isValid = false;
+                } else if (confirmPassword !== '') {
+                    confirmPasswordError.style.display = 'none';
+                    confirmPasswordField.style.borderColor = '#2ecc71';
+                }
 
-    <div class="form-row">
-      <div class="form-group" style="flex: 1 1 100%;">
-        {{ form.address.label_tag }} {{ form.address }} {{ form.address.errors }}
-      </div>
-    </div>
+                return isValid;
+            }
 
-    <div class="form-row">
-      <div class="form-group" style="flex: 1 1 100%;">
-        {{ form.role_type.label_tag }} {{ form.role_type }} {{ form.role_type.errors }}
-      </div>
-    </div>
+            // Real-time validation
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateForm);
+                input.addEventListener('input', function() {
+                    // Remove error styling on input
+                    const errorElement = document.getElementById(this.id + 'Error');
+                    if (errorElement && this.value.trim() !== '') {
+                        errorElement.style.display = 'none';
+                        this.style.borderColor = '#e1e5e9';
+                    }
+                });
+            });
 
-    <div style="text-align:center; margin-top: 20px;">
-      <button type="submit" class="btn-submit">Signup</button>
-    </div>
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (validateForm()) {
+                    // Simulate form submission
+                    const submitBtn = form.querySelector('.signup-btn');
+                    const originalText = submitBtn.textContent;
+                    
+                    submitBtn.textContent = 'Creating Account...';
+                    submitBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        successMessage.style.display = 'block';
+                        form.reset();
+                        
+                        // Reset all field styles
+                        inputs.forEach(input => {
+                            input.style.borderColor = '#e1e5e9';
+                        });
+                        
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                        
+                        // Scroll to top to show success message
+                        successMessage.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // Hide success message after 5 seconds
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 5000);
+                    }, 2000);
+                } else {
+                    // Scroll to first error
+                    const firstError = form.querySelector('.error[style*="block"]');
+                    if (firstError) {
+                        firstError.closest('.form-group').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }
+                }
+            });
 
-  </form>
-
+            // Set max date for date of birth (18 years ago)
+            const dateInput = document.getElementById('dateOfBirth');
+            const maxDate = new Date();
+            maxDate.setFullYear(maxDate.getFullYear() - 16);
+            dateInput.max = maxDate.toISOString().split('T')[0];
+        });
+    </script>
 </body>
 </html>
