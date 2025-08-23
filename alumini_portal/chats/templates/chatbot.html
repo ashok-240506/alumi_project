@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Helper Chatbot</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --gray-color: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            height: 80vh;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .new-conversation-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .new-conversation-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            animation: fadeInUpAndPop 0.4s ease-out;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @keyframes fadeInUpAndPop {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            60% {
+                transform: translateY(-5px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .user-message {
+            background-color: var(--light-gray);
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+
+        .bot-message {
+            background-color: var(--accent-color);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            border-bottom-left-radius: 0;
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            float: left;
+            margin: 0 2px;
+            background-color: white;
+            display: block;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+
+        .typing-indicator span:nth-of-type(1) {
+            animation: typing 1s infinite;
+        }
+
+        .typing-indicator span:nth-of-type(2) {
+            animation: typing 1s infinite 0.2s;
+        }
+
+        .typing-indicator span:nth-of-type(3) {
+            animation: typing 1s infinite 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            50% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+
+        .quick-replies-section {
+            padding: 15px;
+            border-top: 1px solid var(--light-gray);
+            background-color: #fafafa;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-reply {
+            background-color: var(--light-color);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-reply:hover {
+            background-color: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .suggestion {
+            background-color: var(--light-color);
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+
+        .suggestion:hover {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .chat-footer {
+            padding: 15px;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .send-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .conversation-history {
+            padding: 10px 15px;
+            background-color: #f0f4ff;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversation-counter {
+            font-weight: 500;
+        }
+
+        .clear-history-btn {
+            background: none;
+            border: none;
+            color: var(--warning-color);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .clear-history-btn:hover {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 90vh;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+
+            .quick-replies {
+                gap: 6px;
+            }
+
+            .quick-reply {
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Alumni Helper Bot</h1>
+            <button class="new-conversation-btn" id="newConversationBtn">New Conversation</button>
+        </div>
+        <div class="conversation-history" id="conversationHistory">
+            <span class="conversation-counter">Messages: <span id="messageCount">1</span></span>
+            <button class="clear-history-btn" id="clearHistoryBtn">Clear History</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message bot-message">
+                Hello! I'm your Alumni Helper. How can I assist you today?
+                <div class="timestamp" id="timestamp">Just now</div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="quick-replies-section">
+            <div class="quick-replies" id="quickReplies">
+                <div class="quick-reply" data-reply="Register Help">Register Help</div>
+                <div class="quick-reply" data-reply="Job Board">Job Board</div>
+                <div class="quick-reply" data-reply="Chat with Alumni">Chat with Alumni</div>
+                <div class="quick-reply" data-reply="Photo Sharing">Photo Sharing</div>
+                <div class="quick-reply" data-reply="Events">Events</div>
+                <div class="quick-reply" data-reply="Mentorship">Mentorship</div>
+                <div class="quick-reply" data-reply="Settings">Settings</div>
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" class="chat-input" id="userInput" placeholder="Type your question here...">
+            <button class="send-btn" id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Conversation storage
+        let conversationHistory = [];
+        let messageCounter = 1;
+
+        // Knowledge base with enhanced topics
+        const knowledgeBase = [
+            {
+                keywords: ['register', 'registration', 'signup', 'sign up', 'account'],
+                response: "To register for the alumni platform:\n1. Click on 'Sign Up' in the top right corner.\n2. Enter your email address and create a password.\n3. Fill in your personal details (name, graduation year, major, etc.).\n4. Verify your email address by clicking the link sent to your inbox.\n5. Complete your profile with your current job, location, and interests.",
+                quickReplies: ['Email Verification', 'Trouble with ID', 'Login Help']
+            },
+            {
+                keywords: ['email', 'verification', 'verify'],
+                response: "If you're having trouble with email verification:\n1. Check your spam/junk folder for the verification email.\n2. Ensure you're using the same email address you registered with.\n3. Request a new verification email from the login page.\n4. If issues persist, contact our support team with your registration details.",
+                quickReplies: ['Register Help', 'Login Help', 'Change Email']
+            },
+            {
+                keywords: ['id', 'identification', 'trouble with id'],
+                response: "If you're having trouble with ID verification:\n1. Make sure your ID is clear and well-lit in the photo.\n2. Ensure all information is visible and not obscured.\n3. Try uploading a different ID document if available.\n4. If issues continue, our team will manually review your submission within 24-48 hours.",
+                quickReplies: ['Register Help', 'Upload Documents', 'Contact Support']
+            },
+            {
+                keywords: ['login', 'log in', 'signin', 'sign in', 'password'],
+                response: "To log in to your alumni account:\n1. Go to the login page.\n2. Enter your email address and password.\n3. If you've forgotten your password, click 'Forgot Password' to reset it.\n4. For first-time users, make sure you've verified your email address.",
+                quickReplies: ['Reset Password', 'Register Help', 'Two-Factor Authentication']
+            },
+            {
+                keywords: ['reset', 'password', 'forgot'],
+                response: "To reset your password:\n1. Click 'Forgot Password' on the login page.\n2. Enter your registered email address.\n3. Check your email for a password reset link.\n4. Click the link and create a new password.\n5. You'll be redirected to login with your new password.",
+                quickReplies: ['Login Help', 'Register Help', 'Security Tips']
+            },
+            {
+                keywords: ['job', 'jobs', 'job board', 'career', 'employment'],
+                response: "To use the job board:\n1. Navigate to the 'Career Hub' section.\n2. Browse job listings by industry, location, or company.\n3. Click on a job to view full details and application instructions.\n4. Save interesting jobs to your bookmarks for later reference.\n5. Set up job alerts to receive notifications about new postings.",
+                quickReplies: ['Post a Job', 'Resume Tips', 'Interview Preparation']
+            },
+            {
+                keywords: ['chat', 'message', 'messages', 'communication', 'alumni'],
+                response: "To chat with fellow alumni:\n1. Go to the 'Community' or 'Messaging' section.\n2. Search for alumni by name, company, or graduation year.\n3. Click on their profile to start a conversation.\n4. Use the chat interface to send messages, images, or files.\n5. You can also join group chats related to your interests or industry.",
+                quickReplies: ['Privacy Settings', 'Group Chats', 'Report User']
+            },
+            {
+                keywords: ['photo', 'photos', 'picture', 'pictures', 'upload photo', 'share memories', 'album', 'gallery'],
+                response: "To share photos and memories:\n1. Go to the 'Memories' or 'Gallery' section.\n2. Click 'Upload' or the photo icon.\n3. Select photos from your device.\n4. Add a caption, tag friends, and choose album visibility (public, alumni-only, private).",
+                quickReplies: ['Create Album', 'Tag Friends', 'Photo Privacy']
+            },
+            {
+                keywords: ['events', 'event', 'reunion', 'meetup', 'networking', 'professional event', 'rsvp', 'conference', 'seminar'],
+                response: "Our platform hosts a variety of events:\n- Finding Events: Navigate to the 'Events' tab and filter by date, location, or type.\n- RSVP: Click 'RSVP' on an event page to confirm your attendance. This helps organizers with planning.\n- Networking: Use the attendee list to connect with people attending the same event beforehand.\n- Virtual Events: Many events are online - you'll receive a link upon RSVP.",
+                quickReplies: ['Upcoming Events', 'Host an Event', 'Event Calendar']
+            },
+            {
+                keywords: ['mentor', 'mentorship', 'mentoring', 'find a mentor', 'become a mentor', 'mentoring program', 'guide', 'advice'],
+                response: "Our mentorship program connects experienced alumni with those seeking guidance:\n- Find a Mentor: Go to the 'Mentorship' section, browse by industry, expertise, or location, and send a connection request.\n- Become a Mentor: Update your profile to indicate you're available for mentoring and specify your areas of expertise.\n- Mentoring Sessions: Schedule virtual or in-person meetings through the platform.",
+                quickReplies: ['Mentor Profiles', 'Mentoring Guidelines', 'Success Stories']
+            },
+            {
+                keywords: ['notifications', 'email alerts', 'push notifications', 'settings', 'account settings', 'privacy', 'notification settings', 'update preferences'],
+                response: "You can manage your notifications and privacy settings:\n- Notifications: Go to 'Settings' → 'Notification Preferences' to choose what you receive alerts for (new messages, event invitations, job postings, etc.).\n- Privacy: In 'Privacy Settings', you can control who can see your profile, contact information, job history, and online status.\n- Two-Factor Authentication: Enhance security by enabling 2FA in account settings.",
+                quickReplies: ['Notification Types', 'Privacy Levels', 'Security Settings']
+            }
+        ];
+
+        // Default responses for unmatched queries
+        const defaultResponses = [
+            "I'm sorry, I don't understand that. Try asking about 'registration,' 'jobs,' or 'chatting.'",
+            "I'm not sure how to help with that. You can ask me about photo sharing, events, or mentorship programs.",
+            "I didn't quite get that. Try phrases like 'how to register,' 'job board,' or 'chat with alumni.'"
+        ];
+
+        // DOM elements
+        const chatBody = document.getElementById('chatBody');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const newConversationBtn = document.getElementById('newConversationBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const quickRepliesContainer = document.getElementById('quickReplies');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const messageCountElement = document.getElementById('messageCount');
+
+        // Initialize chat
+        function initChat() {
+            // Load conversation history from memory
+            loadConversationHistory();
+            
+            // Set up event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+            newConversationBtn.addEventListener('click', newConversation);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            
+            // Set up quick reply listeners
+            setupQuickReplyListeners();
+        }
+
+        // Load conversation history
+        function loadConversationHistory() {
+            // Add initial bot message if no history
+            if (conversationHistory.length === 0) {
+                const welcomeMessage = {
+                    type: 'bot',
+                    text: "Hello! I'm your Alumni Helper. How can I assist you today?",
+                    timestamp: getCurrentTime()
+                };
+                conversationHistory.push(welcomeMessage);
+            }
+
+            // Render all messages
+            chatBody.innerHTML = '';
+            conversationHistory.forEach(message => {
+                if (message.type === 'user') {
+                    addUserMessage(message.text, message.timestamp, false);
+                } else {
+                    addBotMessage(message.text, message.timestamp, false);
+                }
+            });
+
+            // Add typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            typingDiv.style.display = 'none';
+            chatBody.appendChild(typingDiv);
+
+            updateMessageCount();
+        }
+
+        // Update message counter
+        function updateMessageCount() {
+            messageCountElement.textContent = conversationHistory.length;
+        }
+
+        // Set up quick reply event listeners
+        function setupQuickReplyListeners() {
+            const quickReplies = document.querySelectorAll('.quick-reply');
+            quickReplies.forEach(reply => {
+                reply.addEventListener('click', function() {
+                    const replyText = this.getAttribute('data-reply');
+                    userInput.value = replyText;
+                    sendMessage();
+                });
+            });
+        }
+
+        // Send message function
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addUserMessage(message);
+                userInput.value = '';
+                
+                // Show typing indicator
+                const typingIndicator = document.getElementById('typingIndicator');
+                typingIndicator.style.display = 'block';
+                chatBody.scrollTop = chatBody.scrollHeight;
+                
+                // Process message after a delay to simulate thinking
+                setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                    processUserMessage(message);
+                }, 1000);
+            }
+        }
+
+        // Add user message to chat
+        function addUserMessage(text, timestamp = null, saveToHistory = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.textContent = text;
+            
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'timestamp';
+            timestampDiv.textContent = timestamp || getCurrentTime();
+            
+            messageDiv.appendChild(timestampDiv);
+            
+            // Insert before typing indicator
+            const typingIndicator = document.getElementById('typingIndicator');
+            chatBody.insertBefore(messageDiv, typingIndicator);
+            
+            // Save to history
+            if (saveToHistory) {
+                conversationHistory.push({
+                    type: 'user',
+                    text: text,
+                    timestamp: timestampDiv.textContent
+                });
+                updateMessageCount();
+            }
+            
+            // Scroll to bottom
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Add bot message to chat
+        function addBotMessage(text, timestamp = null, saveToHistory = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            messageDiv.textContent = text;
+            
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'timestamp';
+            timestampDiv.textContent = timestamp || getCurrentTime();
+            
+            messageDiv.appendChild(timestampDiv);
+            
+            // Insert before typing indicator
+            const typingIndicator = document.getElementById('typingIndicator');
+            chatBody.insertBefore(messageDiv, typingIndicator);
+            
+            // Save to history
+            if (saveToHistory) {
+                conversationHistory.push({
+                    type: 'bot',
+                    text: text,
+                    timestamp: timestampDiv.textContent
+                });
+                updateMessageCount();
+            }
+            
+            // Scroll to bottom
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Get current time formatted
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Process user message with enhanced matching
+        function processUserMessage(text) {
+            // Tokenize input
+            const tokens = tokenize(text);
+            
+            // Try to find best matching response
+            const bestResponse = findBestResponse(tokens);
+            
+            if (bestResponse) {
+                addBotMessage(bestResponse.response);
+                
+                // Update quick replies based on context
+                if (bestResponse.quickReplies) {
+                    updateQuickReplies(bestResponse.quickReplies);
+                }
+            } else {
+                // Try to find similar keywords for "Did you mean?" suggestions
+                const similarKeywords = findSimilarKeywords(tokens[0]);
+                
+                if (similarKeywords.length > 0) {
+                    // Show "Did you mean?" suggestion
+                    addBotMessage(`Did you mean: "${similarKeywords[0].keyword}"?`);
+                    
+                    // Add quick replies for confirmation
+                    const suggestionReplies = [
+                        `Yes, tell me about ${similarKeywords[0].keyword}`,
+                        "No, try again"
+                    ];
+                    updateQuickReplies(suggestionReplies);
+                } else {
+                    // Show default response
+                    const randomResponse = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+                    addBotMessage(randomResponse);
+                }
+                
+                // Reset to default quick replies after a delay
+                setTimeout(() => {
+                    updateQuickReplies(['Register Help', 'Job Board', 'Chat with Alumni', 'Photo Sharing', 'Events', 'Mentorship', 'Settings']);
+                    setupQuickReplyListeners();
+                }, 3000);
+            }
+        }
+
+        // Tokenize and stem words
+        function tokenize(text) {
+            return text.toLowerCase()
+                .replace(/[^\w\s]/g, '')
+                .split(/\s+/)
+                .filter(token => token.length > 0)
+                .map(token => stemWord(token));
+        }
+
+        // Simple stemming function
+        function stemWord(word) {
+            // Handle common plural forms
+            if (word.endsWith('s') && word.length > 3) {
+                return word.slice(0, -1);
+            }
+            
+            // Handle common verb forms
+            if (word.endsWith('ing') && word.length > 5) {
+                return word.slice(0, -3);
+            }
+            
+            if (word.endsWith('ed') && word.length > 4) {
+                return word.slice(0, -2);
+            }
+            
+            return word;
+        }
+
+        // Find best matching response based on keyword scoring
+        function findBestResponse(tokens) {
+            let bestScore = 0;
+            let bestResponse = null;
+            
+            for (const entry of knowledgeBase) {
+                let score = 0;
+                
+                for (const keyword of entry.keywords) {
+                    const stemmedKeyword = stemWord(keyword);
+                    if (tokens.includes(stemmedKeyword)) {
+                        score += 2;
+                    }
+                    
+                    // Check sub-words for multi-word keywords
+                    keyword.split(' ').forEach(kw => {
+                        if (tokens.includes(stemWord(kw))) {
+                            score += 1;
+                        }
+                    });
+                }
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestResponse = entry;
+                }
+            }
+            
+            return bestScore > 0 ? bestResponse : null;
+        }
+
+        // Find similar keywords for "Did you mean?" suggestions
+        function findSimilarKeywords(inputWord) {
+            const suggestions = [];
+            
+            for (const entry of knowledgeBase) {
+                for (const keyword of entry.keywords) {
+                    const similarity = getSimilarity(inputWord, keyword);
+                    if (similarity > 0.6) {
+                        suggestions.push({
+                            keyword: keyword,
+                            similarity: similarity
+                        });
+                    }
+                }
+            }
+            
+            // Sort by similarity score
+            suggestions.sort((a, b) => b.similarity - a.similarity);
+            
+            return suggestions;
+        }
+
+        // Simple similarity function (Jaro-Winkler inspired)
+        function getSimilarity(s1, s2) {
+            if (s1 === s2) return 1;
+            
+            const len1 = s1.length;
+            const len2 = s2.length;
+            const matchWindow = Math.floor(Math.max(len1, len2) / 2) - 1;
+            
+            let matches1 = new Array(len1).fill(false);
+            let matches2 = new Array(len2).fill(false);
+            let matches = 0;
+            
+            // Find matches
+            for (let i = 0; i < len1; i++) {
+                const start = Math.max(0, i - matchWindow);
+                const end = Math.min(i + matchWindow + 1, len2);
+                
+                for (let j = start; j < end; j++) {
+                    if (matches2[j] || s1[i] !== s2[j]) continue;
+                    matches1[i] = true;
+                    matches2[j] = true;
+                    matches++;
+                    break;
+                }
+            }
+            
+            if (matches === 0) return 0;
+            
+            // Calculate similarity
+            return (2.0 * matches) / (len1 + len2);
+        }
+
+        // Update quick replies with new options
+        function updateQuickReplies(replies) {
+            // Clear existing quick replies
+            quickRepliesContainer.innerHTML = '';
+            
+            // Add new quick replies
+            replies.forEach(reply => {
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'quick-reply';
+                replyDiv.setAttribute('data-reply', reply);
+                replyDiv.textContent = reply;
+                quickRepliesContainer.appendChild(replyDiv);
+            });
+            
+            // Set up listeners for new replies
+            setupQuickReplyListeners();
+        }
+
+        // Start new conversation
+        function newConversation() {
+            // Clear conversation history
+            conversationHistory = [];
+            
+            // Add welcome message
+            const welcomeMessage = {
+                type: 'bot',
+                text: "Hello! I'm your Alumni Helper. How can I assist you today?",
+                timestamp: getCurrentTime()
+            };
+            conversationHistory.push(welcomeMessage);
+            
+            // Reload the chat
+            loadConversationHistory();
+            
+            // Reset quick replies to default
+            updateQuickReplies(['Register Help', 'Job Board', 'Chat with Alumni', 'Photo Sharing', 'Events', 'Mentorship', 'Settings']);
+            
+            // Set up quick reply listeners
+            setupQuickReplyListeners();
+        }
+
+        // Clear conversation history
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear the conversation history?')) {
+                newConversation();
+            }
+        }
+
+        // Initialize chat when page loads
+        window.onload = initChat;
+    </script>
+</body>
+</html>
