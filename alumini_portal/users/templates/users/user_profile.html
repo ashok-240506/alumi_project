@@ -1,0 +1,289 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile Page</title>
+    <style>
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .save-btn,
+        .logout-btn,
+        .edit-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .save-btn:disabled {
+            background: #a5d6a7;
+            cursor: not-allowed;
+        }
+
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .edit-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-image-container {
+            margin-right: 20px;
+            position: relative;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #2196F3;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: none; /* hidden by default */
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input:disabled, select:disabled, textarea:disabled {
+            background: #f2f2f2;
+            cursor: not-allowed;
+        }
+        
+
+    .cancel-btn {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-left: 10px;
+    }
+
+    .cancel-btn:hover {
+        background-color: #c0392b;
+    }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <form method="post" enctype="multipart/form-data" id="profileForm">
+                {% csrf_token %}
+
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-image-container">
+                        <img id="profilePreview" 
+                        src="{% if personal_form.instance.profilephoto %}{{ personal_form.instance.profilephoto.url }}{% else %}https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face{% endif %}" 
+                        alt="Profile Picture" 
+                        class="profile-image">
+
+                    <!-- Hidden file input -->
+                    <input type="file" id="profileInput" name="profilephoto" accept="image/*" style="display:none;">
+
+                    <button class="upload-btn" type="button" id="uploadBtn" onclick="uploadProfileImage()">+</button>
+
+                    </div>
+                    <div class="profile-info">
+                        <h2>{{ personal_form.firstname.value|default:"Your Name" }} {{ personal_form.lastname.value }}</h2>
+                        <p>{{ user_form.email.value }}</p>
+                        <button class="edit-btn" type="button" onclick="toggleEditMode()">Edit</button>
+                    </div>
+                </div>
+
+                <!-- Forms -->
+                <div class="form-grid">
+                    <div>
+                        <div class="form-group">
+                            <label>First Name</label>
+                            {{ personal_form.firstname }}
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            {{ personal_form.lastname }}
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            {{ personal_form.gender }}
+                        </div>
+                        <div class="form-group">
+                            <label>Language</label>
+                            {{ personal_form.language }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <label>Roll No</label>
+                            {{ user_form.roll_no }}
+                        </div>
+                        <div class="form-group">
+                            <label>Registration No</label>
+                            {{ user_form.reg_no }}
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            {{ user_form.email }}
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            {{ user_form.date_of_birth }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        {{ user_form.mobilenumber }}
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        {{ user_form.address }}
+                    </div>
+                    <div class="form-group">
+                        <label>Major</label>
+                        {{ personal_form.major }}
+                    </div>
+                    <div class="form-group">
+                        <label>Batch</label>
+                        {{ personal_form.batch }}
+                    </div>
+                    <div class="form-group">
+                        <label>College</label>
+                        {{ personal_form.college_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>University</label>
+                        {{ personal_form.university_name }}
+                    </div>
+                </div>
+
+            
+            <!-- Save + Cancel buttons (hidden by default) -->
+            <div class="btn-container" id="actionButtons" style="display:none;">
+                <button type="submit" class="save-btn" id="saveBtn">Save Changes</button>
+                <button type="button" class="cancel-btn" id="cancelBtn">Cancel</button>
+            </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("profileForm");
+        const inputs = form.querySelectorAll("input, select, textarea");
+        const saveBtn = document.getElementById("saveBtn");
+        const actionButtons = document.getElementById("actionButtons");
+        const editBtn = document.querySelector(".edit-btn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const uploadBtn = document.getElementById("uploadBtn");
+
+        // disable all inputs on page load
+        inputs.forEach(input => {
+            if (input.name !== "csrfmiddlewaretoken") {
+                input.disabled = true;
+            }
+        });
+
+        // Hide Save + Cancel initially
+        actionButtons.style.display = "none";
+
+        // Edit button click
+        editBtn.addEventListener("click", function () {
+            inputs.forEach(input => {
+                if (input.name !== "csrfmiddlewaretoken") {
+                    input.disabled = false;
+                }
+            });
+            saveBtn.disabled = false;
+            uploadBtn.style.display = "block"; // show upload button
+            actionButtons.style.display = "flex"; // show save + cancel
+            editBtn.style.display = "none"; // hide edit
+        });
+
+        // Cancel button click
+        cancelBtn.addEventListener("click", function () {
+            inputs.forEach(input => {
+                if (input.name !== "csrfmiddlewaretoken") {
+                    input.disabled = true;
+                }
+            });
+            saveBtn.disabled = true;
+            uploadBtn.style.display = "none"; // hide upload button
+            actionButtons.style.display = "none"; // hide save + cancel
+            editBtn.style.display = "inline-block"; // show edit again
+            form.reset(); // reset changes (optional: remove if you want to keep edits)
+        });
+    });
+
+    function uploadProfileImage() {
+        const fileInput = document.getElementById("profileInput");
+        fileInput.click();
+
+        // live preview
+        fileInput.addEventListener("change", function () {
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("profilePreview").src = e.target.result;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

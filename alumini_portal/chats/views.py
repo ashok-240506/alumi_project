@@ -35,29 +35,6 @@ class ChatRoomView(LoginRequiredMixin, View):
             'user': request.user
         })
 
-
-# class StartPrivateChatView(LoginRequiredMixin, View):
-#     def get(self, request, user_id):
-#         target_user = get_object_or_404(CustomUser, id=user_id)
-#         print(target_user)
-#         if request.user.id == target_user.id:
-#             return HttpResponseBadRequest("You cannot chat with yourself.")
-
-#         user_ids = sorted([request.user.id, target_user.id])
-#         room_name = f"private_{user_ids[0]}_{user_ids[1]}"
-
-#         try:
-#             room, created = ChatRoom.objects.get_or_create(name=room_name, is_group=False)
-#             # Optional: track users in the room
-#             room.participants.add(request.user, target_user)
-#         except Exception as e:
-#             print("Error:", e)
-#             return HttpResponseServerError("Could not create or fetch room.")
-
-#         return redirect('chat-room', room_name=room.name)
-
-
-
 class StartPrivateChatView(LoginRequiredMixin, View):
     def get(self, request, user_id):
         target_user = get_object_or_404(CustomUser, id=user_id)
@@ -79,7 +56,8 @@ class StartPrivateChatView(LoginRequiredMixin, View):
         # room.participants.add(request.user)
         # room.participants.add(target_user)
 
-        return redirect('chat-room', room_name=room.name)
+        return redirect("chats:chat-room", room_name=room.name)
+
     
 AVATAR_COLORS = ['#4caf50','#2196f3','#f44336','#ff9800','#9c27b0','#3f51b5','#009688','#e91e63','#607d8b','#795548']
 
@@ -89,28 +67,34 @@ class ChatWithAlumniListView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+
         chat_rooms = ChatRoom.objects.filter(participants=user).prefetch_related("participants")
 
+        visible_rooms = []
         for room in chat_rooms:
-            room.other_participants = room.participants.exclude(id=user.id)
-            
-            first_user = room.other_participants.first()
-            if first_user:
-                username = getattr(first_user.userdetails.first(), "firstname", "A") or "A"
-                room.avatar_initial = username[0].upper()
-                room.avatar_bg = AVATAR_COLORS[sum(ord(c) for c in username) % len(AVATAR_COLORS)]
-            else:
-                room.avatar_initial = "A"
-                room.avatar_bg = "#999"
+            room.other_participants = room.participants.exclude(
+                Q(id=user.id) | Q(is_staff=True) | Q(is_superuser=True)
+            )
 
-        context['chat_rooms'] = chat_rooms
+            if not room.other_participants.exists():
+                continue  
+
+            first_user = room.other_participants.first()
+            username = getattr(first_user.userdetails.first(), "firstname", "A") or "A"
+            room.avatar_initial = username[0].upper()
+            room.avatar_bg = AVATAR_COLORS[sum(ord(c) for c in username) % len(AVATAR_COLORS)]
+
+            visible_rooms.append(room)
+
+        context['chat_rooms'] = visible_rooms
         return context
 
 class GroupChatRedirectView(LoginRequiredMixin, View):
     def get(self, request):
         profile = request.user.userdetails.first()
         print(profile)
-        if hasattr(request.user, 'userdetails') and profile:
+        profile = getattr(request.user, "userdetails", None)
+        if profile and profile.batch:
             batch = profile.batch
             room_name = f"group_batch_{batch.id}"
             room, _ = ChatRoom.objects.get_or_create(
@@ -118,28 +102,31 @@ class GroupChatRedirectView(LoginRequiredMixin, View):
                 is_group=True,
                 batch=batch
             )
-            return redirect('chat-room', room_name=room.name)
-        return redirect('/') 
+            return redirect("chats:chat-room", room_name=room.name)
+
 
 
 @method_decorator(csrf_exempt, name='dispatch') 
-
 class SendMessageAPIView(LoginRequiredMixin, View):
     def post(self, request, room_name):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
         room = get_object_or_404(ChatRoom, name=room_name)
-        data = json.loads(request.body)
-        content = data.get('content')
+        content = data.get("content")
 
-        if content:
-            message = Message.objects.create(
-                room=room,
-                sender=request.user,
-                content=content
-            )
-            return JsonResponse({
-                'sender': request.user.get_full_name(),
-                'content': message.content,
-                'timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            })
+        if not content:
+            return JsonResponse({'error': 'No content provided'}, status=400)
 
-        return JsonResponse({'error': 'No content provided'}, status=400)
+        message = Message.objects.create(
+            room=room,
+            sender=request.user,
+            content=content
+        )
+        return JsonResponse({
+            "sender": request.user.get_full_name() or request.user.username,
+            "content": message.content,
+            "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+        })

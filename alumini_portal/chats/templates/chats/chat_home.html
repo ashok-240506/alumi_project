@@ -73,7 +73,7 @@
     <div class="section">
       <h3>🔷 Join Group Chat</h3>
       <div class="btn-group">
-        <a href="{% url 'group-chat-redirect' %}" class="btn">Go to Batch Group Chat</a>
+        <a href="{% url 'chats:group-chat-redirect' %}" class="btn">Go to Batch Group Chat</a>
       </div>
     </div>
 
@@ -84,7 +84,7 @@
         {% for user in users %}
           {% with detail=user.userdetails.first %}
             <li>
-              <a href="{% url 'start-private-chat' user.id %}">
+              <a href="{% url 'chats:start-private-chat' user.id %}">
                 {% if detail %}
                   {{ detail.get_full_name|default:detail.firstname }}
                 {% else %}

@@ -41,7 +41,7 @@ class UserPersonalProfile(models.Model):
     firstname=models.CharField(max_length=30,null=True,blank=True)
     lastname=models.CharField(max_length=30,null=True,blank=True)
     user=models.ForeignKey(CustomUser,related_name='userdetails',on_delete=models.CASCADE)
-    profilephoto=JSONField(null=True,blank=True,default=dict)
+    profilephoto = models.ImageField(upload_to="profile_pics/", null=True, blank=True)
     gender=models.CharField(max_length=20,null=True,blank=True)
     age=models.IntegerField(blank=True,null=True)
     language=models.TextField(blank=True,null=True)

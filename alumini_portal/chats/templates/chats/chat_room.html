@@ -144,7 +144,7 @@
       const message = messageInput.value.trim();
       if (!message) return;
 
-      fetch("{% url 'send-message-api' room.name %}", {
+      fetch("{% url 'chats:send-message-api' room.name %}", {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}",

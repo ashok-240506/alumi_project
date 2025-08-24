@@ -359,7 +359,7 @@ class SignupView(View):
             return redirect('student_home')
 
         return render(request, 'users/signup.html', {'form': form})
-
+    
 
 class SigninView(View):
     def get(self, request):
@@ -389,3 +389,34 @@ class SignoutView(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
         return redirect('signin')
+    
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import CustomUserForm, UserPersonalProfileForm
+
+@login_required
+def profile_view(request):
+    user = request.user
+    try:
+        profile = user.userdetails.first()  # because you used related_name='userdetails'
+    except UserPersonalProfile.DoesNotExist:
+        profile = None
+
+    if request.method == "POST":
+        user_form = CustomUserForm(request.POST, instance=user)
+        profile_form = UserPersonalProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
+            return redirect("profile")
+    else:
+        user_form = CustomUserForm(instance=user)
+        profile_form = UserPersonalProfileForm(instance=profile)
+
+    return render(request, "users/user_profile.html", {
+        "user_form": user_form,
+        "personal_form": profile_form,
+    })
