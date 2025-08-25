@@ -130,3 +130,6 @@ class SendMessageAPIView(LoginRequiredMixin, View):
             "content": message.content,
             "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
         })
+
+def chatbot_view(request):
+    return render(request, "chats/chatbot.html")

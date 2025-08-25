@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ChatRoomView, StartPrivateChatView, GroupChatRedirectView,chat_home_view,SendMessageAPIView,ChatWithAlumniListView
+from .views import *
 app_name = 'chats'
 
 urlpatterns = [
@@ -9,5 +9,7 @@ urlpatterns = [
     path('group/', GroupChatRedirectView.as_view(), name='group-chat-redirect'),
     path('send-message/<str:room_name>/', SendMessageAPIView.as_view(), name='send-message-api'),
     path('chat/alumni/', ChatWithAlumniListView.as_view(), name='chat_with_alumni'),
+    path("chatbot/", chatbot_view, name="chatbot"),
+
 
 ]
