@@ -1,16 +1,11 @@
 from django.urls import reverse
 from django.utils import timezone
 import random
-from django.http import HttpResponse
 from django.views import View
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from adminpanel.models import Batch
 from .models import CustomUser,OTP, RoleMapping, RoleMaster, UserPersonalProfile 
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
 from django.views.generic import TemplateView
 from .forms import  *
 from django.contrib import messages
@@ -20,7 +15,6 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q
 from .utils import *
 from django.core.mail import send_mail
-from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
@@ -33,7 +27,7 @@ class StudentHomeView(TemplateView):
         user_role = RoleMapping.objects.filter(user=request.user).first()
         if not user_role or user_role.role.role_name.lower() != 'student':
             storage = messages.get_messages(request)
-            for _ in storage:  # clear previous messages
+            for _ in storage:  
                 pass
             messages.error(request, "You are not authorized as student.")
             return redirect('student_login')
@@ -320,7 +314,11 @@ class SignupView(View):
             address = form.cleaned_data['address']
             date_of_birth = form.cleaned_data['date_of_birth']
             batch = form.cleaned_data['batch']   
-            role_type = form.cleaned_data['role_type'] 
+            role_type ='Student'
+            reg_no = form.cleaned_data.get('reg_no')
+            # if CustomUser.objects.filter(reg_no=reg_no).exists():
+            #     form.add_error('reg_no', 'This registration number is already registered.')
+            #     return render(request, 'signup.html', {'form': form})
 
             user, created = CustomUser.objects.get_or_create(
                 mobilenumber=mobile,
@@ -356,7 +354,7 @@ class SignupView(View):
                 print("Role not found. Skipping mapping.")
 
             login(request, user)
-            return redirect('student_home')
+            return redirect('send-otp')
 
         return render(request, 'users/signup.html', {'form': form})
     

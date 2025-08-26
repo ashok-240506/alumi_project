@@ -1,7 +1,7 @@
 # jobs/models.py
 from django.db import models
 from users.models import CustomUser  # Use your custom user model
-
+from django.urls import reverse
 class Job(models.Model):
     JOB_TYPES = [
         ('FT', 'Full-time'),
@@ -25,6 +25,8 @@ class Job(models.Model):
 
     def __str__(self):
         return f"{self.title} at {self.company_name}"
+    def get_absolute_url(self):
+        return reverse("job_detail", kwargs={"pk": self.pk})
 class JobLike(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='likes')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

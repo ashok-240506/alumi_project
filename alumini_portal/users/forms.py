@@ -58,16 +58,16 @@ class SignupForm(forms.Form):
     major = forms.CharField()
     college_name = forms.CharField()
     university_name = forms.CharField()
+    profilephoto = forms.ImageField(
+        required=False,  # make optional if you like
+        widget=forms.ClearableFileInput(attrs={'class': 'form-input'})
+    )
 
     # Batch dropdown instead of batch_id
     batch = forms.ModelChoiceField(queryset=Batch.objects.all(), empty_label="Select Batch")
 
     # Role dropdown instead of raw string
-    role_type = forms.ModelChoiceField(
-        queryset=RoleMaster.objects.exclude(role_name='Admin'),
-        to_field_name='role_type',
-        empty_label="Select Role"
-    )
+    role_type = 'Student'
 
     def clean(self):
         cleaned = super().clean()
@@ -77,6 +77,11 @@ class SignupForm(forms.Form):
         if password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
         return cleaned
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already registered")
+        return email
 
 
 class LoginForm(forms.Form):

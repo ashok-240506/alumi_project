@@ -1,0 +1,180 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8f9;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; margin-bottom: 20px; }
+    .profile-header { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+    .profile-pic-wrapper { position: relative; display: inline-block; }
+    .profile-pic {
+      width: 120px; height: 120px; border-radius: 50%;
+      object-fit: cover; border: 3px solid #4CAF50;
+    }
+    .upload-btn {
+      position: absolute; bottom: 5px; right: 5px;
+      background: #4CAF50; color: #fff; border: none;
+      border-radius: 50%; width: 35px; height: 35px;
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .form-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-weight: bold; margin-bottom: 5px; }
+    input, textarea {
+      padding: 10px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 14px; background: #f9f9f9;
+    }
+    input[disabled], textarea[disabled] { background: #e9ecef; cursor: not-allowed; }
+    .btn-group { text-align: center; margin-top: 20px; }
+    .btn {
+      padding: 10px 20px; margin: 0 10px;
+      border: none; border-radius: 6px;
+      cursor: pointer; font-size: 15px;
+    }
+    .btn-edit { background: #007bff; color: #fff; }
+    .btn-save { background: #28a745; color: #fff; display: none; }
+    .btn-cancel { background: #dc3545; color: #fff; display: none; }
+    .notification {
+      display: none; text-align: center; margin: 15px 0;
+      padding: 10px; border-radius: 6px;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .hidden { display: none; }
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4CAF50;
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      animation: spin 1s linear infinite;
+      margin: auto; display: none;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<body>
+<div class="profile-container">
+    <h2>Edit Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="profile-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>User Info</h3>
+            {{ user_form.non_field_errors }}
+            {% for field in user_form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="error">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-section">
+            <h3>Personal Profile</h3>
+            {{ personal_form.non_field_errors }}
+            {% for field in personal_form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="error">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {% if personal_form.instance.profilephoto %}
+                <div class="form-group">
+                    <label>Current Photo:</label><br>
+                    <img src="{{ personal_form.instance.profilephoto.url }}" 
+                         alt="Profile Photo" 
+                         style="width:120px;height:120px;border-radius:50%;object-fit:cover;">
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-save">Save Changes</button>
+            <a href="{% url 'profile' %}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+  let initialData = {};
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#profileForm input, #profileForm textarea").forEach(el => {
+      initialData[el.name] = el.value;
+    });
+  });
+
+  function triggerFileUpload() { document.getElementById("fileInput").click(); }
+
+  function previewProfileImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById("profileImage");
+    const spinner = document.getElementById("spinner");
+    if (file) {
+      spinner.style.display = "block";
+      setTimeout(() => {
+        const reader = new FileReader();
+        reader.onload = e => preview.src = e.target.result;
+        reader.readAsDataURL(file);
+        spinner.style.display = "none";
+        showNotification("Profile image updated (not saved yet)", "success");
+      }, 1000);
+    }
+  }
+
+  function enableEdit() {
+    document.querySelectorAll("#profileForm input, #profileForm textarea").forEach(el => el.disabled = false);
+    document.getElementById("editBtn").style.display = "none";
+    document.getElementById("saveBtn").style.display = "inline-block";
+    document.getElementById("cancelBtn").style.display = "inline-block";
+  }
+
+  function cancelEdit() {
+    document.querySelectorAll("#profileForm input, #profileForm textarea").forEach(el => {
+      el.value = initialData[el.name];
+      el.disabled = true;
+    });
+    document.getElementById("editBtn").style.display = "inline-block";
+    document.getElementById("saveBtn").style.display = "none";
+    document.getElementById("cancelBtn").style.display = "none";
+    showNotification("Changes cancelled", "error");
+  }
+
+  function showNotification(msg, type) {
+    const n = document.getElementById("notification");
+    n.innerText = msg;
+    n.className = "notification " + type;
+    n.style.display = "block";
+    setTimeout(() => n.style.display = "none", 2500);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+            margin: 0;
+            padding: 20px;
+        }
+        .navbar {
+            background: #fff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+        }
+        .navbar h1 {
+            font-size: 20px;
+            color: #ff6600;
+        }
+        .navbar a button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            cursor: pointer;
+        }
+        .feed {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .user-info {
+            font-size: 14px;
+        }
+        .user-info strong {
+            display: block;
+            font-size: 15px;
+        }
+        .card-content {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .card-footer {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #555;
+        }
+        .like-btn {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #007bff;
+            font-size: 13px;
+        }
+        .likes-comments {
+            margin-left: 10px;
+            font-size: 13px;
+            color: #db0b0b;
+        }
+        .heart {
+                font-size: 17px;
+                transition: transform 0.2s ease;
+                display: inline-block;
+            }
+
+            .heart.liked {
+                color: #e0245e;
+            }
+
+            .heart.animate {
+                transform: scale(1.4);
+            }
+    </style>
+</head>
+<body>
+    <div class="navbar" style="display:flex; justify-content:flex-end; align-items:center;">
+        <a href="{% url 'job_create' %}">
+            <button>+ Create Post</button>
+        </a>
+    </div>
+
+    <div class="feed">
+        {% for job in jobs %}
+        <div class="card" data-job-id="{{ job.id }}">
+            <div class="card-header">
+                <div class="user-info">
+                    <strong>{{ job.user.username }}</strong>
+                    <span>{{ job.created_at|timesince }} ago</span>
+                </div>
+            </div>
+
+            <div class="card-content">
+                <p><b>{{ job.title }}</b></p>
+                <p>{{ job.description|truncatewords:25 }}</p>
+            </div>
+
+            <div class="card-footer" style="display:flex; justify-content:space-between; align-items:center;">
+    
+                <!-- LEFT: Likes -->
+                <div class="likes-section" style="display:flex; align-items:center; gap:5px;">
+                    <button class="like-btn" data-url="{% url 'job_like' job.pk %}" 
+                            style="background:none;border:none;cursor:pointer;">
+                        <span class="heart {% if job.is_liked %}liked{% endif %}">
+                            {% if job.is_liked %}❤️{% else %}🤍{% endif %}
+                        </span>
+                    </button>
+                    <span class="likes-count">{{ job.likes.count }}</span>likes
+                </div>
+
+                <!-- RIGHT: Comments -->
+                <div class="comments-section">
+                    <a href="{% url 'job_detail' job.pk %}" class="comments-count">
+                        💬 <span class="comments-number">{{ job.comments.count }}</span> comments
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+        {% empty %}
+        <p>No jobs posted yet.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- LIKE TOGGLE (already in your code) ---
+        document.querySelectorAll(".like-btn").forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                const jobCard = this.closest(".card");
+                const url = this.dataset.url;
+                const heart = this.querySelector(".heart");
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.liked) {
+                        heart.classList.add("liked");
+                        heart.textContent = "❤️";
+                    } else {
+                        heart.classList.remove("liked");
+                        heart.textContent = "🤍";
+                    }
+
+                    // 🔥 bounce animation
+                    heart.classList.add("animate");
+                    setTimeout(() => heart.classList.remove("animate"), 200);
+
+                    // update like count immediately
+                    jobCard.querySelector(".likes-comments").textContent = data.count + " likes";
+                });
+            });
+        });
+
+    setInterval(() => {
+    document.querySelectorAll(".card").forEach(card => {
+        const jobId = card.dataset.jobId;
+
+        fetch(`/jobs/${jobId}/stats/`)
+            .then(res => res.json())
+            .then(data => {
+                // update likes count only
+                card.querySelector(".likes-count").textContent = data.likes;
+
+                // update comments count only
+                const commentCount = card.querySelector(".comments-number");
+                if (commentCount) {
+                    commentCount.textContent = data.comments;
+                }
+            });
+    });
+}, 2000);
+
+    });
+    </script>
+
+
+</body>
+</html>
