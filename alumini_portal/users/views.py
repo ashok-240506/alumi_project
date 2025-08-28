@@ -11,15 +11,15 @@ from .forms import  *
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.db.models import Q
 from .utils import *
 from django.core.mail import send_mail
 from django.utils.decorators import method_decorator
+from django.views.generic import ListView
+
 class FrontPageView(TemplateView):
     template_name = 'homepage/frontpage.html'
 
-@method_decorator(login_required, name='dispatch')
 class StudentHomeView(TemplateView):
     template_name = 'users/student_home.html'
 
@@ -27,7 +27,7 @@ class StudentHomeView(TemplateView):
         user_role = RoleMapping.objects.filter(user=request.user).first()
         if not user_role or user_role.role.role_name.lower() != 'student':
             storage = messages.get_messages(request)
-            for _ in storage:  
+            for _ in storage:
                 pass
             messages.error(request, "You are not authorized as student.")
             return redirect('student_login')
@@ -35,13 +35,83 @@ class StudentHomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context['is_alumini'] = user.is_alumini
+        context['is_alumini'] = False
+        print(context)
         return context
 
-@login_required
-def alumni_data_view(request):
-    return render(request, 'users/alumni_data.html') 
+
+class AlumniHomeView(TemplateView):
+    template_name = 'users/student_home.html' 
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_alumini:
+            storage = messages.get_messages(request)
+            for _ in storage:
+                pass
+            messages.error(request, "You are not authorized as alumni.")
+            return redirect('student_login')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_alumini'] = True
+        return context
+def student_list(request):
+    student_qs = (
+        CustomUser.objects.filter(is_active=True, is_staff=False)
+        .prefetch_related("userdetails__batch__department")
+    )
+
+    student_data = []
+    for stud in student_qs:
+        details = stud.userdetails.first() if stud.userdetails.exists() else None
+        student_data.append({
+            "username": details.get_full_name(),
+            "roll_no": stud.roll_no,
+            "email": stud.email,
+            "phone_number": stud.mobilenumber,
+            "department": details.batch.department.name if details and details.batch else "",
+            "batch": details.batch.name if details and details.batch else "",
+            "college": details.college_name if details else "",
+            "university": details.university_name if details else "",
+            "profile_photo": details.profilephoto.url if details and details.profilephoto else "",
+        })
+
+    return render(request, "users/student_data.html", {"student": student_data})
+
+def alumni_list(request):
+    alumni_qs = (
+        CustomUser.objects.filter(is_alumini=True, is_active=True, is_staff=False)
+        .prefetch_related("userdetails__batch__department")
+    )
+
+    alumni_data = []
+    for alum in alumni_qs:
+        details = alum.userdetails.first() if alum.userdetails.exists() else None
+        alumni_data.append({
+            "username": details.get_full_name(),
+            "roll_no": alum.roll_no,
+            "email": alum.email,
+            "phone_number": alum.mobilenumber,
+            "department": details.batch.department.name if details and details.batch else "",
+            "batch": details.batch.name if details and details.batch else "",
+            "college": details.college_name if details else "",
+            "university": details.university_name if details else "",
+            "profile_photo": details.profilephoto.url if details and details.profilephoto else "",
+        })
+
+    return render(request, "users/alumni_data.html", {"alumni": alumni_data})
+class StudentListView(ListView):
+    template_name = "users/student_data.html"
+    context_object_name = "students"
+
+    def get_queryset(self):
+        return (
+            CustomUser.objects
+            .filter(is_alumini=False, is_active=True,is_staff=False)
+            .prefetch_related("userdetails")
+        )
+    
 
 def admin_login_view(request):
     if request.method == 'POST':
@@ -374,7 +444,16 @@ class SigninView(View):
                 if check_password(password, user.password):
                     login(request, user)
                     messages.success(request, "Login successful.")
-                    return redirect('student_home')
+                    # check role
+                    user_role = RoleMapping.objects.filter(user=user).first()
+                    print(user_role,user.is_alumini)
+                    if user_role and user_role.role.role_name.lower() == "student" and user.is_alumini == False:
+                        return redirect('student_home')
+                    elif user.is_alumini:
+                        return redirect('alumni_home')
+                    else:
+                        messages.error(request, "You are not authorized.")
+                        return redirect('student_login')
                 else:
                     messages.error(request, "Incorrect password.")
             except CustomUser.DoesNotExist:

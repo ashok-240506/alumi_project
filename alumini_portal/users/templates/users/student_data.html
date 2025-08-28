@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Alumni Profiles</title>
+  <title>Student Profiles</title>
   <style>
     body {
         font-family: 'Roboto', sans-serif;
@@ -81,66 +81,66 @@
   </style>
 </head>
 <body>
-  <h1>Alumni Details</h1>
+  <h1>Student Details</h1>
   <div class="container">
-    {% for alumini in alumni %}
+    {% for stud in student %}
       <div class="alumni-card">
         <div class="avatar">
-          {% if alumini.profile_photo %}
-            <img src="{{ alumini.profile_photo }}" 
-                alt="{{ alumini.username }}" 
+          {% if stud.profile_photo %}
+            <img src="{{ stud.profile_photo }}" 
+                alt="{{ stud.username }}" 
                 style="width:80px; height:80px; border-radius:70%; object-fit:cover;">
           {% else %}
             👤
           {% endif %}
         </div>
-        <div class="alumni-title">{{ alumini.username }}</div>
+        <div class="alumni-title">{{ stud.username }}</div>
         <div class="subtitle">Academic Profile</div>
 
         <div class="info-box">
           <div class="info-icon">🆔</div>
           <div><span class="info-label">Roll No:</span>
-          <span class="info-value">{{ alumini.roll_no }}</span></div>
+          <span class="info-value">{{ stud.roll_no }}</span></div>
         </div>
 
         <div class="info-box">
           <div class="info-icon">📧</div>
           <div><span class="info-label">Email:</span>
-          <span class="info-value">{{ alumini.email }}</span></div>
+          <span class="info-value">{{ stud.email }}</span></div>
         </div>
 
         <div class="info-box">
           <div class="info-icon">📞</div>
           <div><span class="info-label">Phone:</span>
-          <span class="info-value">{{ alumini.phone_number }}</span></div>
+          <span class="info-value">{{ stud.phone_number }}</span></div>
         </div>
 
         <div class="info-box">
           <div class="info-icon">📅</div>
           <div><span class="info-label">Batch:</span>
-          <span class="info-value">{{ alumini.batch }}</span></div>
+          <span class="info-value">{{ stud.batch }}</span></div>
         </div>
 
         <div class="info-box">
           <div class="info-icon">🏛️</div>
           <div><span class="info-label">Department:</span>
-          <span class="info-value">{{ alumini.department }}</span></div>
+          <span class="info-value">{{ stud.department }}</span></div>
         </div>
 
         <div class="info-box">
           <div class="info-icon">🎓</div>
           <div><span class="info-label">College:</span>
-          <span class="info-value">{{ alumini.college }}</span></div>
+          <span class="info-value">{{ stud.college }}</span></div>
         </div>
 
         <div class="info-box">
           <div class="info-icon">🌐</div>
           <div><span class="info-label">University:</span>
-          <span class="info-value">{{ alumini.university }}</span></div>
+          <span class="info-value">{{ stud.university }}</span></div>
         </div>
       </div>
     {% empty %}
-      <p style="color:white;text-align:center;">No alumni found.</p>
+      <p style="color:white;text-align:center;">No student found.</p>
     {% endfor %}
   </div>
 </body>
