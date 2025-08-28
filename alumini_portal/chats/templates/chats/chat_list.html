@@ -135,37 +135,30 @@
 
   {% if chat_rooms %}
     {% for room in chat_rooms %}
-    <a href="{% url 'chats:chat-room' room.id %}" class="chat-item">
-      <div class="avatar" style="background-color: {{ room.avatar_bg }};">
-        {{ room.avatar_initial }}
-      </div>
+      <a href="{% url 'chats:chat-room' room.id %}" class="chat-item">
+        <div class="avatar" style="background-color: {{ room.avatar_bg }};">
+          {{ room.avatar_initial }}
+        </div>
         <div class="chat-info">
-        <div class="chat-name">
-            {{ room.other_participants.all|join:", " }}
-        </div>
-        <div class="last-message">
+          <div class="chat-name">{{ room.display_name }}</div>
+          <div class="last-message">
             {% if room.last_message %}
-            {{ room.last_message.content|truncatechars:40 }}
+              {{ room.last_message.content|truncatechars:40 }}
             {% else %}
-            No messages yet.
+              No messages yet.
             {% endif %}
-        </div>
+          </div>
         </div>
         <div class="chat-meta">
-        {% if room.last_message %}
-            <div class="time">{{ room.last_message.timestamp|date:"H:i" }}</div>
-        {% else %}
-            <div class="time">&nbsp;</div>
-        {% endif %}
-        {% if room.unread_count and room.unread_count > 0 %}
+          {% if room.last_message_time %}
+            <div class="time">{{ room.last_message_time }}</div>
+          {% endif %}
+          {% if room.unread_count > 0 %}
             <div class="unread-count">{{ room.unread_count }}</div>
-        {% else %}
-            <div style="height:22px;"></div>
-        {% endif %}
+          {% endif %}
         </div>
-    </a>
+      </a>
     {% endfor %}
-
   {% else %}
     <p style="padding: 20px; text-align:center; color:#777;">No chats available</p>
   {% endif %}

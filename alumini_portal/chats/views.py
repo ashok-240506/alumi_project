@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.views.generic import TemplateView
 from django.http import HttpResponseForbidden
-
+from django.utils.timezone import localtime
 
 @login_required
 def chat_home_view(request):
@@ -21,18 +21,22 @@ def chat_home_view(request):
     users = CustomUser.objects.exclude(Q(id=request.user.id) | Q(is_staff=True)|Q(is_alumini=True)) 
     return render(request, 'chats/chat_home.html', {'users': users})
 class ChatRoomView(LoginRequiredMixin, View):
-    def get(self, request, room_name):
-        room = get_object_or_404(ChatRoom, name=room_name)
-
-        # if request.user not in room.participants.all():
-        #     return HttpResponseForbidden("You are not allowed to access this room.")
-
+    def get(self, request, room_id):
+        room = get_object_or_404(ChatRoom, id=room_id)
         messages = room.messages.select_related('sender').order_by('timestamp')
+        room.messages.filter(
+            is_read=False
+        ).exclude(sender=request.user).update(is_read=True)
 
+
+        other_user = None
+        if not room.is_group:
+            other_user = room.participants.exclude(id=request.user.id).first()
         return render(request, 'chats/chat_room.html', {
             'room': room,
             'messages': messages,
-            'user': request.user
+            'user': request.user,
+            'other_user': other_user
         })
 
 class StartPrivateChatView(LoginRequiredMixin, View):
@@ -47,16 +51,10 @@ class StartPrivateChatView(LoginRequiredMixin, View):
         room_name = f"private_{user_ids[0]}_{user_ids[1]}"
 
         room, created = ChatRoom.objects.get_or_create(name=room_name, is_group=False)
-        if not room.participants.filter(id=request.user.id).exists():
-            room.participants.add(request.user)
+        room.participants.add(request.user, target_user)
 
-        if not room.participants.filter(id=target_user.id).exists():
-            room.participants.add(target_user)
-        # Ensure both users are participants
-        # room.participants.add(request.user)
-        # room.participants.add(target_user)
+        return redirect("chats:chat-room", room_id=room.id)
 
-        return redirect("chats:chat-room", room_name=room.name)
 
     
 AVATAR_COLORS = ['#4caf50','#2196f3','#f44336','#ff9800','#9c27b0','#3f51b5','#009688','#e91e63','#607d8b','#795548']
@@ -80,9 +78,24 @@ class ChatWithAlumniListView(LoginRequiredMixin, TemplateView):
                 continue  
 
             first_user = room.other_participants.first()
-            username = getattr(first_user.userdetails.first(), "firstname", "A") or "A"
-            room.avatar_initial = username[0].upper()
-            room.avatar_bg = AVATAR_COLORS[sum(ord(c) for c in username) % len(AVATAR_COLORS)]
+
+            profile = first_user.userdetails.first()
+            if profile and profile.full_name:
+                room.display_name = profile.full_name
+            else:
+                room.display_name = first_user.get_full_name() or first_user.username
+
+            initial_char = room.display_name[0].upper()
+            room.avatar_initial = initial_char
+            room.avatar_bg = AVATAR_COLORS[sum(ord(c) for c in initial_char) % len(AVATAR_COLORS)]
+            last_msg = room.messages.order_by("-timestamp").first()
+            room.last_message = last_msg
+            room.last_message_time = localtime(last_msg.timestamp).strftime("%H:%M") if last_msg else ""
+
+            room.unread_count = room.messages.filter(
+                    is_read=False
+                ).exclude(sender=user).count()
+
 
             visible_rooms.append(room)
 
@@ -116,7 +129,6 @@ class SendMessageAPIView(LoginRequiredMixin, View):
 
         room = get_object_or_404(ChatRoom, name=room_name)
         content = data.get("content")
-
         if not content:
             return JsonResponse({'error': 'No content provided'}, status=400)
 
@@ -130,6 +142,7 @@ class SendMessageAPIView(LoginRequiredMixin, View):
             "content": message.content,
             "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
         })
+    
 
 def chatbot_view(request):
     return render(request, "chats/chatbot.html")

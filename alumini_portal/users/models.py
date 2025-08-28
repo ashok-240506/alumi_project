@@ -67,6 +67,11 @@ class UserPersonalProfile(models.Model):
         if self.lastname:
             name = str(name) + str(self.lastname) + " "
         return name
+    @property
+    def full_name(self):
+        if self.firstname or self.lastname:
+            return f"{self.firstname or ''} {self.lastname or ''}".strip()
+        return self.user.username 
 
 @receiver(post_save, sender=UserPersonalProfile)
 def update_is_alumni(sender, instance, **kwargs):

@@ -78,6 +78,23 @@
       font-size: 2.5rem;
       margin-bottom: 40px;
     }
+    .chat-button {
+    display: inline-block;
+    background: #6a11cb;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  .chat-button:hover {
+    background: #2575fc;
+    transform: scale(1.05);
+}
   </style>
 </head>
 <body>
@@ -138,6 +155,16 @@
           <div><span class="info-label">University:</span>
           <span class="info-value">{{ alumini.university }}</span></div>
         </div>
+        
+        {% if alumini.id %}
+        <div class="card-footer">
+          <a href="{% url 'chats:start-private-chat' alumini.id %}" class="chat-button">💬 Chat</a>
+        </div>
+      {% endif %}
+            <button id="chatbot-button">💬</button>
+      {% empty %}
+        <p style="color:white;text-align:center;">No student found.</p>
+      {% endfor %}
       </div>
     {% empty %}
       <p style="color:white;text-align:center;">No alumni found.</p>

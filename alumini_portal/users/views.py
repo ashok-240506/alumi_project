@@ -89,6 +89,7 @@ def alumni_list(request):
     for alum in alumni_qs:
         details = alum.userdetails.first() if alum.userdetails.exists() else None
         alumni_data.append({
+            "id":alum.id,
             "username": details.get_full_name(),
             "roll_no": alum.roll_no,
             "email": alum.email,

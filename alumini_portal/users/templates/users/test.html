@@ -1,180 +1,435 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f8f9;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h2 { text-align: center; margin-bottom: 20px; }
-    .profile-header { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
-    .profile-pic-wrapper { position: relative; display: inline-block; }
-    .profile-pic {
-      width: 120px; height: 120px; border-radius: 50%;
-      object-fit: cover; border: 3px solid #4CAF50;
-    }
-    .upload-btn {
-      position: absolute; bottom: 5px; right: 5px;
-      background: #4CAF50; color: #fff; border: none;
-      border-radius: 50%; width: 35px; height: 35px;
-      font-size: 20px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .form-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-    .form-group { display: flex; flex-direction: column; }
-    label { font-weight: bold; margin-bottom: 5px; }
-    input, textarea {
-      padding: 10px; border: 1px solid #ccc; border-radius: 6px;
-      font-size: 14px; background: #f9f9f9;
-    }
-    input[disabled], textarea[disabled] { background: #e9ecef; cursor: not-allowed; }
-    .btn-group { text-align: center; margin-top: 20px; }
-    .btn {
-      padding: 10px 20px; margin: 0 10px;
-      border: none; border-radius: 6px;
-      cursor: pointer; font-size: 15px;
-    }
-    .btn-edit { background: #007bff; color: #fff; }
-    .btn-save { background: #28a745; color: #fff; display: none; }
-    .btn-cancel { background: #dc3545; color: #fff; display: none; }
-    .notification {
-      display: none; text-align: center; margin: 15px 0;
-      padding: 10px; border-radius: 6px;
-    }
-    .success { background: #d4edda; color: #155724; }
-    .error { background: #f8d7da; color: #721c24; }
-    .hidden { display: none; }
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #4CAF50;
-      border-radius: 50%;
-      width: 20px; height: 20px;
-      animation: spin 1s linear infinite;
-      margin: auto; display: none;
-    }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .students-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .student-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 2.5rem;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .student-card:hover::before {
+            left: 100%;
+        }
+
+        .student-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+        }
+
+        .student-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .student-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .student-title {
+            color: #1f2937;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .details-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detail-row:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.7);
+        }
+
+        .detail-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .name-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .roll-icon {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .batch-icon {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+
+        .department-icon {
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+        }
+
+        .detail-info {
+            flex: 1;
+        }
+
+        .detail-label {
+            color: #6b7280;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .student-name-value {
+            color: #2563eb;
+            font-size: 1.2rem;
+        }
+
+        .roll-number-value {
+            color: #dc2626;
+            font-family: 'Courier New', monospace;
+        }
+
+        .batch-value {
+            color: #059669;
+        }
+
+        .department-value {
+            color: #7c3aed;
+        }
+
+        .message-icon-button {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .message-icon-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .message-icon-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Modal Styles */
+
+        /* Different card themes */
+        .student-card:nth-child(1) {
+            border-left: 4px solid #667eea;
+        }
+
+        .student-card:nth-child(2) {
+            border-left: 4px solid #dc2626;
+        }
+
+        .student-card:nth-child(3) {
+            border-left: 4px solid #059669;
+        }
+
+        .student-card:nth-child(4) {
+            border-left: 4px solid #7c3aed;
+        }
+
+        .student-card:nth-child(5) {
+            border-left: 4px solid #f97316;
+        }
+
+        .student-card:nth-child(6) {
+            border-left: 4px solid #ec4899;
+        }
+
+        @media (max-width: 768px) {
+            .students-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .student-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .detail-row {
+                padding: 0.8rem;
+            }
+            
+            .detail-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .detail-value {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<body>
-<div class="profile-container">
-    <h2>Edit Profile</h2>
-
-    <form method="POST" enctype="multipart/form-data" class="profile-form">
-        {% csrf_token %}
+    <div class="container">
+        <h1 class="page-title">Student Details</h1>
         
-        <div class="form-section">
-            <h3>User Info</h3>
-            {{ user_form.non_field_errors }}
-            {% for field in user_form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <small class="error">{{ field.errors|striptags }}</small>
-                    {% endif %}
-                </div>
-            {% endfor %}
+        <div class="students-container" id="studentsContainer">
+            <!-- Student cards will be populated by JavaScript -->
         </div>
+    </div>
 
-        <div class="form-section">
-            <h3>Personal Profile</h3>
-            {{ personal_form.non_field_errors }}
-            {% for field in personal_form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <small class="error">{{ field.errors|striptags }}</small>
-                    {% endif %}
+    <script>
+        // Sample student data
+        const students = [
+            {
+                name: "Alex Johnson",
+                rollNo: "CS2024001",
+                batch: "2024-2028",
+                department: "Computer Science Engineering"
+            },
+            {
+                name: "Sarah Chen",
+                rollNo: "EC2024015",
+                batch: "2024-2028",
+                department: "Electronics & Communication"
+            },
+            {
+                name: "Mike Rodriguez",
+                rollNo: "ME2024032",
+                batch: "2024-2028",
+                department: "Mechanical Engineering"
+            },
+            {
+                name: "Emma Wilson",
+                rollNo: "CE2024008",
+                batch: "2024-2028",
+                department: "Civil Engineering"
+            },
+            {
+                name: "David Kumar",
+                rollNo: "BT2024005",
+                batch: "2024-2028",
+                department: "Biotechnology"
+            },
+            {
+                name: "Lisa Park",
+                rollNo: "IT2024021",
+                batch: "2024-2028",
+                department: "Information Technology"
+            }
+        ];
+
+        // Function to create student card
+        function createStudentCard(student, index) {
+            const studentCard = document.createElement('div');
+            studentCard.className = 'student-card';
+            
+            studentCard.innerHTML = `
+                <div class="student-header">
+                    <div class="student-avatar">👤</div>
+                    <div class="student-title">Student ${index + 1}</div>
+                    <div class="student-subtitle">Academic Profile</div>
                 </div>
-            {% endfor %}
-
-            {% if personal_form.instance.profilephoto %}
-                <div class="form-group">
-                    <label>Current Photo:</label><br>
-                    <img src="{{ personal_form.instance.profilephoto.url }}" 
-                         alt="Profile Photo" 
-                         style="width:120px;height:120px;border-radius:50%;object-fit:cover;">
+                
+                <div class="details-grid">
+                    <div class="detail-row">
+                        <div class="detail-icon name-icon">👤</div>
+                        <div class="detail-info">
+                            <div class="detail-label">Student Name</div>
+                            <div class="detail-value student-name-value">${student.name}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon roll-icon">🆔</div>
+                        <div class="detail-info">
+                            <div class="detail-label">Roll Number</div>
+                            <div class="detail-value roll-number-value">${student.rollNo}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon batch-icon">📅</div>
+                        <div class="detail-info">
+                            <div class="detail-label">Batch</div>
+                            <div class="detail-value batch-value">${student.batch}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon department-icon">🏛️</div>
+                        <div class="detail-info">
+                            <div class="detail-label">Department</div>
+                            <div class="detail-value department-value">${student.department}</div>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
-        </div>
+                
+                <!-- Message Icon Button -->
+                <button class="message-icon-button" onclick="openChatroom('${student.name}', '${student.rollNo}')">
+                    💬
+                </button>
+            `;
+            
+            return studentCard;
+        }
 
-        <div class="form-actions">
-            <button type="submit" class="btn-save">Save Changes</button>
-            <a href="{% url 'profile' %}" class="btn-cancel">Cancel</a>
-        </div>
-    </form>
-</div>
+        // Function to populate all students
+        function populateStudents() {
+            const container = document.getElementById('studentsContainer');
+            container.innerHTML = '';
+            
+            students.forEach((student, index) => {
+                const studentCard = createStudentCard(student, index);
+                container.appendChild(studentCard);
+            });
+        }
 
-<script>
-  let initialData = {};
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("#profileForm input, #profileForm textarea").forEach(el => {
-      initialData[el.name] = el.value;
-    });
-  });
+        // Load students on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            populateStudents();
+        });
 
-  function triggerFileUpload() { document.getElementById("fileInput").click(); }
-
-  function previewProfileImage(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById("profileImage");
-    const spinner = document.getElementById("spinner");
-    if (file) {
-      spinner.style.display = "block";
-      setTimeout(() => {
-        const reader = new FileReader();
-        reader.onload = e => preview.src = e.target.result;
-        reader.readAsDataURL(file);
-        spinner.style.display = "none";
-        showNotification("Profile image updated (not saved yet)", "success");
-      }, 1000);
-    }
-  }
-
-  function enableEdit() {
-    document.querySelectorAll("#profileForm input, #profileForm textarea").forEach(el => el.disabled = false);
-    document.getElementById("editBtn").style.display = "none";
-    document.getElementById("saveBtn").style.display = "inline-block";
-    document.getElementById("cancelBtn").style.display = "inline-block";
-  }
-
-  function cancelEdit() {
-    document.querySelectorAll("#profileForm input, #profileForm textarea").forEach(el => {
-      el.value = initialData[el.name];
-      el.disabled = true;
-    });
-    document.getElementById("editBtn").style.display = "inline-block";
-    document.getElementById("saveBtn").style.display = "none";
-    document.getElementById("cancelBtn").style.display = "none";
-    showNotification("Changes cancelled", "error");
-  }
-
-  function showNotification(msg, type) {
-    const n = document.getElementById("notification");
-    n.innerText = msg;
-    n.className = "notification " + type;
-    n.style.display = "block";
-    setTimeout(() => n.style.display = "none", 2500);
-  }
-</script>
-
+        // Function to open chatroom page
+        function openChatroom(studentName, rollNo) {
+            // Store student information in localStorage for the chatroom page
+            const studentInfo = {
+                name: studentName,
+                rollNo: rollNo,
+                timestamp: new Date().toISOString()
+            };
+            
+            // In a real application, you would use localStorage
+            // localStorage.setItem('chatroomStudent', JSON.stringify(studentInfo));
+            
+            // For demonstration, we'll show an alert and simulate redirect
+            alert(`Redirecting to chatroom with ${studentName} (${rollNo})`);
+            
+            // In a real application, uncomment the line below:
+            // window.location.href = 'chatroom.html?student=' + encodeURIComponent(studentName) + '&rollno=' + encodeURIComponent(rollNo);
+            
+            // For demo purposes, you can also open in a new tab:
+            // window.open('chatroom.html?student=' + encodeURIComponent(studentName) + '&rollno=' + encodeURIComponent(rollNo), '_blank');
+        }
+    </script>
 </body>
 </html>
