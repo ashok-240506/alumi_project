@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academic Batches</title>
+<style>
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; margin:0; padding:40px; }
+    h1 { margin-bottom:20px; }
+    .batches-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
+    .batch-card { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:0.3s; }
+    .batch-card:hover { transform:translateY(-4px); box-shadow:0 8px 16px rgba(0,0,0,0.15); }
+    .batch-title { font-weight:600; font-size:18px; margin-bottom:5px; }
+    .batch-count { font-size:14px; color:#555; margin-bottom:8px; }
+    .batch-years { font-size:13px; color:#888; margin-bottom:12px; display:inline-block; }
+    .view-btn { padding:6px 12px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:20px; cursor:pointer; font-size:12px; text-decoration:none; display:inline-block; }
+    .filter-bar { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
+    .filter-option { padding:6px 12px; border-radius:20px; border:1px solid #ccc; cursor:pointer; font-size:12px; user-select:none; }
+    .filter-option.active { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border-color:#667eea; }
+    .search-input { padding:6px 10px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:150px; }
+</style>
+</head>
+<body>
+
+<h1>Academic Batches</h1>
+
+<div class="filter-bar">
+    <input type="text" class="search-input" placeholder="Search batches...">
+
+    
+    <div>
+        <span>Sort:</span>
+        <span class="filter-option active" data-filter="sort" data-value="asc">Asc</span>
+        <span class="filter-option" data-filter="sort" data-value="desc">Desc</span>
+    </div>
+    
+    <button class="filter-option" id="clearFilters">Clear All</button>
+</div>
+
+<div class="batches-grid" id="batchesGrid">
+    {% for batch in batches %}
+        <div class="batch-card" data-program="{{ batch.program }}" data-year="{{ batch.start_year }}-{{ batch.end_year }}">
+            <div class="batch-title">{{ batch.name }}</div>
+            <div class="batch-count">{{ batch.students_count }} students</div>
+            <div class="batch-years">{{ batch.start_year }} - {{ batch.end_year }}</div>
+            <a class="view-btn" href="{% url 'batch_detail' batch.id %}">View Details</a>
+        </div>
+    {% empty %}
+        <p>No batches found.</p>
+    {% endfor %}
+</div>
+
+<script>
+let activeFilters = { program: [], year: [], sort: ['asc'] };
+
+// Apply filters and search
+function applyFilters() {
+    const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+    const batchCards = document.querySelectorAll('.batch-card');
+    
+    batchCards.forEach(card => {
+        let show = true;
+        const program = card.getAttribute('data-program');
+        const year = card.getAttribute('data-year');
+        const title = card.querySelector('.batch-title').textContent.toLowerCase();
+        
+        if(activeFilters.program.length && !activeFilters.program.includes(program)) show = false;
+        if(activeFilters.year.length && !activeFilters.year.includes(year)) show = false;
+        if(searchTerm && !title.includes(searchTerm)) show = false;
+        
+        card.style.display = show ? 'block' : 'none';
+    });
+    
+    // Sorting
+    const container = document.getElementById('batchesGrid');
+    const visibleCards = Array.from(batchCards).filter(c=>c.style.display!='none');
+    visibleCards.sort((a,b)=>{
+        const titleA = a.querySelector('.batch-title').textContent.toLowerCase();
+        const titleB = b.querySelector('.batch-title').textContent.toLowerCase();
+        return activeFilters.sort[0]==='asc'? titleA.localeCompare(titleB) : titleB.localeCompare(titleA);
+    });
+    visibleCards.forEach(c=>container.appendChild(c));
+}
+
+// Filter option clicks
+document.querySelectorAll('.filter-option').forEach(option=>{
+    option.addEventListener('click', ()=>{
+        const filter = option.dataset.filter;
+        const value = option.dataset.value;
+        
+        if(filter==='sort'){
+            document.querySelectorAll('.filter-option[data-filter="sort"]').forEach(o=>o.classList.remove('active'));
+            option.classList.add('active');
+            activeFilters.sort = [value];
+        } else {
+            if(option.classList.contains('active')){
+                option.classList.remove('active');
+                activeFilters[filter] = activeFilters[filter].filter(v=>v!==value);
+            } else {
+                option.classList.add('active');
+                activeFilters[filter].push(value);
+            }
+        }
+        applyFilters();
+    });
+});
+
+// Search input
+document.querySelector('.search-input').addEventListener('input', applyFilters);
+
+// Clear all filters
+document.getElementById('clearFilters').addEventListener('click', ()=>{
+    activeFilters = { program: [], year: [], sort: ['asc'] };
+    document.querySelectorAll('.filter-option').forEach(o=>o.classList.remove('active'));
+    document.querySelector('.filter-option[data-filter="sort"][data-value="asc"]').classList.add('active');
+    document.querySelector('.search-input').value = '';
+    applyFilters();
+});
+
+// Initial apply
+applyFilters();
+</script>
+
+</body>
+</html>

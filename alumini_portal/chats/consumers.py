@@ -1,23 +1,30 @@
+# chats/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import ChatRoom, Message
-from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-
-
-User = get_user_model()
+from django.utils.timezone import localtime
+from channels.db import database_sync_to_async
+from .models import Message
+# Async helper
+@database_sync_to_async
+def get_first_user_detail(user):
+    return user.userdetails.first()
+@database_sync_to_async
+def save_message(room_id, sender, content):
+    return Message.objects.create(room_id=room_id, sender=sender, content=content)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'chat_{self.room_name}'
+        self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
+        self.room_group_name = f"chat_{self.room_id}"
+        user = self.scope["user"]
+        if not user.is_authenticated:
+            await self.close(code=4001)
 
-        # Add to channel layer
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
-
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -27,39 +34,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        message = data['message']
-        username = self.scope["user"].mobilenumber
+        try:
+            data = json.loads(text_data)
+            user = self.scope['user']
 
-        # Broadcast to group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'username': username
-            }
-        )
+            msg_obj = await save_message(self.room_name, user, data['message'])
 
-        # Save to DB
-        user = self.scope["user"]
-        room = await self.get_room(self.room_name)
-        if room:
-            await self.save_message(room, user, message)
+            user_detail = await database_sync_to_async(lambda: user.userdetails.first())()
+            username = user_detail.get_full_name() if user_detail else str(user)
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "chat_message",
+                    "message": msg_obj.content,
+                    "username": username,
+                    "timestamp": str(msg_obj.timestamp),
+                    "id": msg_obj.id
+                }
+            )
+        except Exception as e:
+            print("Error in receive:", e)
 
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps({
-            'message': event['message'],
-            'username': event['username']
-        }))
+        await self.send(text_data=json.dumps(event))
 
     @database_sync_to_async
-    def get_room(self, room_name):
-        try:
-            return ChatRoom.objects.get(name=room_name)
-        except ChatRoom.DoesNotExist:
-            return None
-
-    @database_sync_to_async
-    def save_message(self, room, sender, content):
-        return Message.objects.create(room=room, sender=sender, content=content)
+    def save_message(self, user, content):
+        from .models import ChatRoom, Message 
+        room = ChatRoom.objects.get(id=self.room_id)
+        return Message.objects.create(room=room, sender=user, content=content)

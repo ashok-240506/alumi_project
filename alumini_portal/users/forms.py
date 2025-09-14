@@ -66,9 +66,6 @@ class SignupForm(forms.Form):
     # Batch dropdown instead of batch_id
     batch = forms.ModelChoiceField(queryset=Batch.objects.all(), empty_label="Select Batch")
 
-    # Role dropdown instead of raw string
-    role_type = 'Student'
-
     def clean(self):
         cleaned = super().clean()
         password = cleaned.get('password')

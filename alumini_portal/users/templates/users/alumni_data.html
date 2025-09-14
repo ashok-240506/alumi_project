@@ -158,17 +158,14 @@
         
         {% if alumini.id %}
         <div class="card-footer">
-          <a href="{% url 'chats:start-private-chat' alumini.id %}" class="chat-button">💬 Chat</a>
+          <a href="{% url 'chats:chat_with_alumni'%}" class="chat-button">💬 Chat</a>
         </div>
       {% endif %}
-            <button id="chatbot-button">💬</button>
+         
       {% empty %}
         <p style="color:white;text-align:center;">No student found.</p>
       {% endfor %}
       </div>
-    {% empty %}
-      <p style="color:white;text-align:center;">No alumni found.</p>
-    {% endfor %}
   </div>
 </body>
 </html>

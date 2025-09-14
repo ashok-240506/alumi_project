@@ -60,7 +60,7 @@ class StartPrivateChatView(LoginRequiredMixin, View):
 AVATAR_COLORS = ['#4caf50','#2196f3','#f44336','#ff9800','#9c27b0','#3f51b5','#009688','#e91e63','#607d8b','#795548']
 
 class ChatWithAlumniListView(LoginRequiredMixin, TemplateView):
-    template_name = "chats/chat_list.html"
+    template_name = "chats/chat_home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -119,15 +119,14 @@ class GroupChatRedirectView(LoginRequiredMixin, View):
 
 
 
-@method_decorator(csrf_exempt, name='dispatch') 
 class SendMessageAPIView(LoginRequiredMixin, View):
-    def post(self, request, room_name):
+    def post(self, request, room_id):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-        room = get_object_or_404(ChatRoom, name=room_name)
+        room = get_object_or_404(ChatRoom, id=room_id)
         content = data.get("content")
         if not content:
             return JsonResponse({'error': 'No content provided'}, status=400)
@@ -142,7 +141,35 @@ class SendMessageAPIView(LoginRequiredMixin, View):
             "content": message.content,
             "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
         })
-    
+
 
 def chatbot_view(request):
     return render(request, "chats/chatbot.html")
+@login_required
+def chat_messages_api(request, room_id):
+    room = get_object_or_404(ChatRoom, id=room_id)
+    messages = room.messages.select_related('sender').order_by('timestamp')
+    data = [{
+        'sender_name': m.sender.get_full_name() or m.sender.username,
+        'content': m.content,
+        'timestamp': m.timestamp.isoformat(),
+        'is_sender': m.sender == request.user
+    } for m in messages]
+    return JsonResponse({'messages': data})
+
+class ChatHistoryView(LoginRequiredMixin, View):
+    def get(self, request, room_id):
+        room = get_object_or_404(ChatRoom, id=room_id, participants=request.user)
+        messages = room.messages.select_related("sender").order_by("timestamp")[:50]
+        data = []
+        for m in messages:
+            profile = m.sender.userdetails.first()
+            full_name = profile.get_full_name() if profile else f"{m.profile.firstname}"
+            data.append({
+                "sender_id":m.id,
+                'sender_name': full_name,
+                'content': m.content,
+                'timestamp': m.timestamp.isoformat(),
+                'is_sender': m.sender == request.user
+            })
+        return JsonResponse(data, safe=False)

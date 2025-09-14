@@ -1,106 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Alumni Chat Home</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
-      padding: 40px;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 800px;
-      margin: auto;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-      color: #7b5fc4;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .section {
-      margin-bottom: 30px;
-    }
-    .section h3 {
-      color: #5e45ab;
-      margin-bottom: 10px;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      background: #f0f0f0;
-      margin-bottom: 10px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      transition: background 0.3s ease;
-    }
-    li:hover {
-      background: #e0e0ff;
-    }
-    a {
-      color: #333;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .btn-group {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .btn {
-      background-color: #7b5fc4;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn:hover {
-      background-color: #5e45ab;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Chats</title>
+<style>
+  body { margin:0; padding:0; font-family:'Segoe UI', sans-serif; background:#f0f2f5; }
+  .chat-wrapper { display:flex; height:100vh; min-width: 0;}
+
+  /* Sidebar */
+  .chat-list { width:320px; background:#fff; border-right:1px solid #ddd; overflow-y:auto; }
+  .chat-item { display:flex; align-items:center; padding:12px 16px; border-bottom:1px solid #f0f0f0; cursor:pointer; transition:background .2s; }
+  .chat-item:hover { background:#f5f5f5; }
+  .avatar { width:45px; height:45px; border-radius:50%; flex-shrink:0; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:12px; }
+  .chat-info { flex:1; min-width:0; }
+  .chat-name { font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .last-message { font-size:13px; color:#666; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chat-meta { font-size:11px; color:#999; margin-left:6px; }
+  .unread-badge { background:#25D366; color:white; font-size:11px; border-radius:10px; padding:2px 6px; margin-left:6px; }
+
+  /* Chat window */
+  .chat-container { flex:1; display:flex; flex-direction:column; min-width: 0; overflow-x: hidden;}
+  .chat-header { background:#075e54; color:#fff; padding:14px 16px; font-weight:bold; }
+  .chat-messages { flex:1; padding:15px; overflow-y:auto; background:#ece5dd; display:flex; flex-direction:column; justify-content:flex-start; align-items:stretch;justify-content: center;align-items: center; min-width: 0;}
+  
+  /* Messages */
+  .message { padding:8px 12px; margin:5px 0; border-radius:10px; max-width:65%; word-wrap:break-word; display:flex; flex-direction:column; overflow-wrap: break-word;  }
+  .sent { align-self:flex-end; background:#dcf8c6; border-bottom-right-radius:0; }
+  .received { align-self:flex-start; background:#fff; border-bottom-left-radius:0; }
+  .sender-name { font-size:12px; font-weight:bold; color:#075e54; margin-bottom:3px; }
+  .message-content { font-size:14px; }
+  .timestamp { font-size:10px; color:#555; text-align:right; margin-top:3px; }
+
+  .chat-form { display:flex; border-top:1px solid #ccc; background:#f0f0f0; padding:8px; }
+  .chat-form input { flex:1; padding:10px; border:none; border-radius:20px; outline:none; }
+  .chat-form button { background:#075e54; color:white; border:none; padding:10px 18px; border-radius:20px; margin-left:8px; cursor:pointer; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome to Alumni Chat</h2>
 
-    <div class="section">
-      <h3>🔷 Join Group Chat</h3>
-      <div class="btn-group">
-        <a href="{% url 'chats:group-chat-redirect' %}" class="btn">Go to Batch Group Chat</a>
+<div class="chat-wrapper">
+  <!-- Sidebar -->
+  <div class="chat-list">
+    {% for room in chat_rooms %}
+      <div class="chat-item" data-room="{{ room.id }}" data-display="{{ room.display_name }}">
+        <div class="avatar" style="background-color:{{ room.avatar_bg }}">{{ room.avatar_initial }}</div>
+        <div class="chat-info">
+          <div class="chat-name">{{ room.display_name }}</div>
+          <div class="last-message">
+            {% if room.last_message %}
+              {{ room.last_message.content|truncatechars:25 }}
+            {% else %}No messages yet.{% endif %}
+          </div>
+        </div>
+        <div class="chat-meta">
+          {% if room.last_message_time %}
+            {{ room.last_message_time }}
+          {% endif %}
+          {% if room.unread_count %}
+            <span class="unread-badge">{{ room.unread_count }}</span>
+          {% endif %}
+        </div>
       </div>
-    </div>
-
-    <div class="section">
-    <h3>👥 Start a Private Chat</h3>
-    <ul>
-      {% if users %}
-        {% for user in users %}
-          {% with detail=user.userdetails.first %}
-            <li>
-              <a href="{% url 'chats:start-private-chat' user.id %}">
-                {% if detail %}
-                  {{ detail.get_full_name|default:detail.firstname }}
-                {% else %}
-                  No Name
-                {% endif %}
-              </a>
-            </li>
-          {% endwith %}
-        {% endfor %}
-
-      {% else %}
-        <li>No other users available.</li>
-      {% endif %}
-    </ul>
-
-    </div>
+    {% endfor %}
   </div>
+
+  <!-- Chat Window -->
+  <div class="chat-container">
+    <div class="chat-header" id="chat-header">Select a chat</div>
+    <div class="chat-messages" id="chat-box">
+      <div class="chat-placeholder">👋 Choose a chat to start</div>
+    </div>
+
+    <form id="chat-form" class="chat-form" style="display:none;">
+      {% csrf_token %}
+      <input type="text" id="message-input" placeholder="Type a message..." required />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</div>
+<script>
+let currentRoom = null;
+let chatSocket = null;
+
+const chatBox = document.getElementById("chat-box");
+const chatHeader = document.getElementById("chat-header");
+const form = document.getElementById("chat-form");
+const input = document.getElementById("message-input");
+const currentUser = "{{ request.user.userdetails.first.firstname }}";
+
+// Helper: Render a single message
+function renderMessage(message) {
+    const isSender = message.username === currentUser;
+    const div = document.createElement("div");
+    div.classList.add("message", isSender ? "sent" : "received");
+    div.innerHTML = `
+        <div class="sender-name">${isSender ? "You" : message.username}</div>
+        <div class="message-content">${message.message}</div>
+        <div class="timestamp">${new Date(message.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+    `;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Render multiple messages
+function renderMessages(messages) {
+    chatBox.innerHTML = "";
+    if (!messages || messages.length === 0) {
+        chatBox.innerHTML = '<div class="chat-placeholder">No messages yet. Start chatting!</div>';
+        return;
+    }
+    messages.forEach(m => renderMessage(m, m.is_sender));
+}
+
+// Open chat room
+function openChat(roomId, displayName) {
+    currentRoom = roomId;
+    chatHeader.innerText = displayName;
+    form.style.display = "flex";
+    chatBox.innerHTML = '<div class="chat-placeholder">Loading...</div>';
+
+    // Close previous WebSocket if any
+    if (chatSocket && chatSocket.readyState !== WebSocket.CLOSED) chatSocket.close();
+
+    // Connect WebSocket
+    chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomId}/`);
+
+    chatSocket.onopen = () => console.log("WebSocket connected");
+
+    chatSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      renderMessage(data);  // renders 'sent' or 'received' based on username
+     };
+
+        // Update sidebar last message + time
+        const item = document.querySelector(`.chat-item[data-room="${roomId}"]`);
+        if (item) {
+            const lastMessageDiv = item.querySelector(".last-message");
+            const metaDiv = item.querySelector(".chat-meta");
+            lastMessageDiv.innerText = data.message;
+            metaDiv.innerText = new Date(data.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+    };
+
+    chatSocket.onclose = e => console.log("WebSocket closed:", e);
+    chatSocket.onerror = e => console.error("WebSocket error:", e);
+
+    // Load history via HTTP
+    fetch(`/chat/room/${roomId}/json/`)
+        .then(res => res.json())
+        .then(data => renderMessages(data || []))
+        .catch(err => {
+            chatBox.innerHTML = '<div class="chat-placeholder">Failed to load messages.</div>';
+            console.error("Fetch error:", err);
+        });
+
+
+// Send message
+form.addEventListener("submit", e => {
+    e.preventDefault();
+    const messageText = input.value.trim();
+    if (!messageText || !chatSocket || chatSocket.readyState !== WebSocket.OPEN) return;
+
+    // Send to server (WebSocket)
+    chatSocket.send(JSON.stringify({ message: messageText, username: currentUser }));
+
+    // Render immediately in same format as server
+    renderMessage({sender_name: currentUser, content: messageText, timestamp: new Date().toISOString()}, true);
+
+    input.value = "";
+});
+
+// Sidebar click
+document.querySelectorAll(".chat-item").forEach(item => {
+    item.addEventListener("click", () => {
+        openChat(item.dataset.room, item.dataset.display);
+    });
+});
+</script>
+
 </body>
 </html>

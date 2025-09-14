@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Details</title>
+    <title>Academic Batches</title>
     <style>
         * {
             margin: 0;
@@ -12,424 +12,802 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem 0;
         }
 
-        .container {
-            max-width: 1400px;
+        .header {
+            background: rgba(51, 102, 204, 0.95);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            padding: 8px 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input {
+            background: none;
+            border: none;
+            outline: none;
+            color: white;
+            placeholder-color: rgba(255,255,255,0.7);
+            width: 300px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .filter-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            padding: 20px;
+            min-width: 280px;
+            z-index: 1000;
+            display: none;
+            margin-top: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .filter-dropdown.active {
+            display: block;
+            animation: dropdownFadeIn 0.3s ease;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-option {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .filter-option:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-option.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .clear-filters {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .clear-filters:hover {
+            background: #fed7d7;
+            border-color: #fc8181;
+            color: #c53030;
+        }
+
+        .apply-filters {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .apply-filters:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-indicator {
+            background: #fc8181;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            display: none;
+        }
+
+        .filter-indicator.active {
+            display: flex;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
 
         .page-title {
             color: white;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 40px;
             text-align: center;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        .students-container {
+        .batches-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2.5rem;
-            margin-top: 2rem;
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
-        .student-card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 25px;
-            padding: 2.5rem;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.3);
-            transition: all 0.4s ease;
+        .batch-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .student-card::before {
+        .batch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .batch-card::before {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
         }
 
-        .student-card:hover::before {
-            left: 100%;
-        }
-
-        .student-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
-        }
-
-        .student-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .student-avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: white;
-            margin: 0 auto 1rem;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .student-title {
-            color: #1f2937;
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .student-subtitle {
-            color: #6b7280;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .details-grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .detail-row {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            background: rgba(255,255,255,0.5);
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-
-        .detail-row:hover {
-            transform: translateX(5px);
-            background: rgba(255,255,255,0.7);
-        }
-
-        .detail-icon {
-            width: 45px;
-            height: 45px;
+        .batch-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            margin-bottom: 15px;
             color: white;
-            margin-right: 1rem;
-            flex-shrink: 0;
+            font-size: 20px;
+            font-weight: bold;
         }
 
-        .name-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .roll-icon {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-        }
-
-        .batch-icon {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-        }
-
-        .department-icon {
-            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
-        }
-
-        .detail-info {
-            flex: 1;
-        }
-
-        .detail-label {
-            color: #6b7280;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.3rem;
+        .batch-title {
+            font-size: 20px;
             font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
         }
 
-        .detail-value {
-            color: #1f2937;
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1.2;
+        .batch-count {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
 
-        .student-name-value {
-            color: #2563eb;
-            font-size: 1.2rem;
+        .batch-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .roll-number-value {
-            color: #dc2626;
-            font-family: 'Courier New', monospace;
+        .batch-years {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
         }
 
-        .batch-value {
-            color: #059669;
-        }
-
-        .department-value {
-            color: #7c3aed;
-        }
-
-        .message-icon-button {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .view-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 50%;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             transition: all 0.3s ease;
-            z-index: 10;
         }
 
-        .message-icon-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        .view-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .message-icon-button:active {
-            transform: scale(0.95);
+
+
+        .stats-summary {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        /* Modal Styles */
-
-        /* Different card themes */
-        .student-card:nth-child(1) {
-            border-left: 4px solid #667eea;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
 
-        .student-card:nth-child(2) {
-            border-left: 4px solid #dc2626;
+        .stat-item {
+            text-align: center;
+            color: white;
         }
 
-        .student-card:nth-child(3) {
-            border-left: 4px solid #059669;
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .student-card:nth-child(4) {
-            border-left: 4px solid #7c3aed;
-        }
-
-        .student-card:nth-child(5) {
-            border-left: 4px solid #f97316;
-        }
-
-        .student-card:nth-child(6) {
-            border-left: 4px solid #ec4899;
-        }
-
-        @media (max-width: 768px) {
-            .students-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
-            
-            .page-title {
-                font-size: 2rem;
-            }
-            
-            .student-card {
-                padding: 2rem 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .detail-row {
-                padding: 0.8rem;
-            }
-            
-            .detail-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
-            
-            .detail-value {
-                font-size: 1rem;
-            }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="page-title">Student Details</h1>
-        
-        <div class="students-container" id="studentsContainer">
-            <!-- Student cards will be populated by JavaScript -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🎓 ACADEMIC PORTAL
+            </div>
+            <div class="filter-container">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search batches...">
+                    <span style="color: rgba(255,255,255,0.7);">🔍</span>
+                </div>
+                <div style="position: relative;">
+                    <button class="filter-btn" onclick="toggleFilter()">
+                        <span>🔽</span>
+                        Filter
+                        <div class="filter-indicator" id="filterIndicator">2</div>
+                    </button>
+                    
+                    <div class="filter-dropdown" id="filterDropdown">
+                        <div class="filter-section">
+                            <div class="filter-title">📅 Program Type</div>
+                            <div class="filter-options">
+                                <div class="filter-option active" data-filter="program" data-value="undergraduate">Undergraduate Only</div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-title">🔄 Sort Order</div>
+                            <div class="filter-options">
+                                <div class="filter-option active" data-filter="sort" data-value="asc">Ascending (A-Z)</div>
+                                <div class="filter-option" data-filter="sort" data-value="desc">Descending (Z-A)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-title">📅 Year Range</div>
+                            <div class="filter-options">
+                                <div class="filter-option" data-filter="year" data-value="2020-2023">2020-2023</div>
+                                <div class="filter-option" data-filter="year" data-value="2021-2024">2021-2024</div>
+                                <div class="filter-option" data-filter="year" data-value="2022-2025">2022-2025</div>
+                                <div class="filter-option" data-filter="year" data-value="2023-2026">2023-2026</div>
+                                <div class="filter-option" data-filter="year" data-value="2024-2027">2024-2027</div>
+                                <div class="filter-option" data-filter="year" data-value="2025-2028">2025-2028</div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="clear-filters" onclick="clearAllFilters()">Clear All</button>
+                            <button class="apply-filters" onclick="applyFilters()">Apply Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="main-content">
+        <h1 class="page-title">Academic Batches</h1>
+        
+        <div class="stats-summary">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Total Batches</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">15,847</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Active Years</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="batches-grid" id="batchesGrid">
+            <div class="batch-card" data-program="undergraduate" data-status="active" data-size="large" data-year="2023-2026">
+                <div class="batch-icon">23</div>
+                <div class="batch-title">Batch 2023-2026</div>
+                <div class="batch-count">1,245 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">4 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="undergraduate" data-status="active" data-size="large" data-year="2024-2027">
+                <div class="batch-icon">24</div>
+                <div class="batch-title">Batch 2024-2027</div>
+                <div class="batch-count">1,389 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">4 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="undergraduate" data-status="upcoming" data-size="large" data-year="2025-2028">
+                <div class="batch-icon">25</div>
+                <div class="batch-title">Batch 2025-2028</div>
+                <div class="batch-count">1,156 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">4 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="undergraduate" data-status="active" data-size="large" data-year="2022-2025">
+                <div class="batch-icon">22</div>
+                <div class="batch-title">Batch 2022-2025</div>
+                <div class="batch-count">1,078 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">4 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="undergraduate" data-status="active" data-size="medium" data-year="2021-2024">
+                <div class="batch-icon">21</div>
+                <div class="batch-title">Batch 2021-2024</div>
+                <div class="batch-count">967 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">4 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="undergraduate" data-status="graduated" data-size="medium" data-year="2020-2023">
+                <div class="batch-icon">20</div>
+                <div class="batch-title">Batch 2020-2023</div>
+                <div class="batch-count">892 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">Graduated</span>
+                    <button class="view-btn">View Alumni</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="graduate" data-status="active" data-size="small" data-year="2023-2025">
+                <div class="batch-icon">G1</div>
+                <div class="batch-title">Graduate 2023-2025</div>
+                <div class="batch-count">234 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">2 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="graduate" data-status="active" data-size="small" data-year="2024-2026">
+                <div class="batch-icon">G2</div>
+                <div class="batch-title">Graduate 2024-2026</div>
+                <div class="batch-count">189 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">2 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="graduate" data-status="upcoming" data-size="small" data-year="2025-2027">
+                <div class="batch-icon">G3</div>
+                <div class="batch-title">Graduate 2025-2027</div>
+                <div class="batch-count">167 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">2 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="phd" data-status="active" data-size="small" data-year="2023-2028">
+                <div class="batch-icon">P1</div>
+                <div class="batch-title">PhD 2023-2028</div>
+                <div class="batch-count">45 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">5 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="phd" data-status="active" data-size="small" data-year="2024-2029">
+                <div class="batch-icon">P2</div>
+                <div class="batch-title">PhD 2024-2029</div>
+                <div class="batch-count">38 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">5 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+
+            <div class="batch-card" data-program="phd" data-status="upcoming" data-size="small" data-year="2025-2030">
+                <div class="batch-icon">P3</div>
+                <div class="batch-title">PhD 2025-2030</div>
+                <div class="batch-count">42 students</div>
+                <div class="batch-details">
+                    <span class="batch-years">5 Year Program</span>
+                    <button class="view-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
     <script>
-        // Sample student data
-        const students = [
-            {
-                name: "Alex Johnson",
-                rollNo: "CS2024001",
-                batch: "2024-2028",
-                department: "Computer Science Engineering"
-            },
-            {
-                name: "Sarah Chen",
-                rollNo: "EC2024015",
-                batch: "2024-2028",
-                department: "Electronics & Communication"
-            },
-            {
-                name: "Mike Rodriguez",
-                rollNo: "ME2024032",
-                batch: "2024-2028",
-                department: "Mechanical Engineering"
-            },
-            {
-                name: "Emma Wilson",
-                rollNo: "CE2024008",
-                batch: "2024-2028",
-                department: "Civil Engineering"
-            },
-            {
-                name: "David Kumar",
-                rollNo: "BT2024005",
-                batch: "2024-2028",
-                department: "Biotechnology"
-            },
-            {
-                name: "Lisa Park",
-                rollNo: "IT2024021",
-                batch: "2024-2028",
-                department: "Information Technology"
-            }
-        ];
+        let activeFilters = {
+            program: ['undergraduate'],
+            sort: ['asc'],
+            year: []
+        };
 
-        // Function to create student card
-        function createStudentCard(student, index) {
-            const studentCard = document.createElement('div');
-            studentCard.className = 'student-card';
+        // Filter functionality
+        function toggleFilter() {
+            const dropdown = document.getElementById('filterDropdown');
+            dropdown.classList.toggle('active');
             
-            studentCard.innerHTML = `
-                <div class="student-header">
-                    <div class="student-avatar">👤</div>
-                    <div class="student-title">Student ${index + 1}</div>
-                    <div class="student-subtitle">Academic Profile</div>
-                </div>
-                
-                <div class="details-grid">
-                    <div class="detail-row">
-                        <div class="detail-icon name-icon">👤</div>
-                        <div class="detail-info">
-                            <div class="detail-label">Student Name</div>
-                            <div class="detail-value student-name-value">${student.name}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-icon roll-icon">🆔</div>
-                        <div class="detail-info">
-                            <div class="detail-label">Roll Number</div>
-                            <div class="detail-value roll-number-value">${student.rollNo}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-icon batch-icon">📅</div>
-                        <div class="detail-info">
-                            <div class="detail-label">Batch</div>
-                            <div class="detail-value batch-value">${student.batch}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-icon department-icon">🏛️</div>
-                        <div class="detail-info">
-                            <div class="detail-label">Department</div>
-                            <div class="detail-value department-value">${student.department}</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Message Icon Button -->
-                <button class="message-icon-button" onclick="openChatroom('${student.name}', '${student.rollNo}')">
-                    💬
-                </button>
-            `;
-            
-            return studentCard;
-        }
-
-        // Function to populate all students
-        function populateStudents() {
-            const container = document.getElementById('studentsContainer');
-            container.innerHTML = '';
-            
-            students.forEach((student, index) => {
-                const studentCard = createStudentCard(student, index);
-                container.appendChild(studentCard);
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.filter-container')) {
+                    dropdown.classList.remove('active');
+                }
             });
         }
 
-        // Load students on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            populateStudents();
-        });
+        function updateFilterIndicator() {
+            const indicator = document.getElementById('filterIndicator');
+            const totalActive = Object.values(activeFilters).reduce((total, arr) => total + arr.length, 0);
+            
+            if (totalActive > 0) {
+                indicator.textContent = totalActive;
+                indicator.classList.add('active');
+            } else {
+                indicator.classList.remove('active');
+            }
+        }
 
-        // Function to open chatroom page
-        function openChatroom(studentName, rollNo) {
-            // Store student information in localStorage for the chatroom page
-            const studentInfo = {
-                name: studentName,
-                rollNo: rollNo,
-                timestamp: new Date().toISOString()
+        function clearAllFilters() {
+            activeFilters = {
+                program: [],
+                sort: ['asc'], // Keep default sort
+                year: []
             };
             
-            // In a real application, you would use localStorage
-            // localStorage.setItem('chatroomStudent', JSON.stringify(studentInfo));
+            document.querySelectorAll('.filter-option').forEach(option => {
+                option.classList.remove('active');
+                // Re-activate default sort
+                if (option.getAttribute('data-value') === 'asc' && option.getAttribute('data-filter') === 'sort') {
+                    option.classList.add('active');
+                }
+            });
             
-            // For demonstration, we'll show an alert and simulate redirect
-            alert(`Redirecting to chatroom with ${studentName} (${rollNo})`);
-            
-            // In a real application, uncomment the line below:
-            // window.location.href = 'chatroom.html?student=' + encodeURIComponent(studentName) + '&rollno=' + encodeURIComponent(rollNo);
-            
-            // For demo purposes, you can also open in a new tab:
-            // window.open('chatroom.html?student=' + encodeURIComponent(studentName) + '&rollno=' + encodeURIComponent(rollNo), '_blank');
+            updateFilterIndicator();
+            applyFilters();
         }
+
+        function sortBatches(batchCards, sortOrder) {
+            const sortedCards = Array.from(batchCards).sort((a, b) => {
+                const titleA = a.querySelector('.batch-title').textContent;
+                const titleB = b.querySelector('.batch-title').textContent;
+                
+                if (sortOrder === 'asc') {
+                    return titleA.localeCompare(titleB);
+                } else {
+                    return titleB.localeCompare(titleA);
+                }
+            });
+            
+            const container = document.getElementById('batchesGrid');
+            sortedCards.forEach(card => {
+                container.appendChild(card);
+            });
+        }
+
+        function applyFilters() {
+            const batchCards = document.querySelectorAll('.batch-card');
+            let visibleCount = 0;
+            
+            batchCards.forEach(card => {
+                let shouldShow = true;
+                
+                // Check program filter (exclude sort from filtering logic)
+                if (activeFilters.program.length > 0) {
+                    const cardValue = card.getAttribute('data-program');
+                    if (!activeFilters.program.includes(cardValue)) {
+                        shouldShow = false;
+                    }
+                }
+                
+                // Check year filter
+                if (activeFilters.year.length > 0) {
+                    const cardValue = card.getAttribute('data-year');
+                    if (!activeFilters.year.includes(cardValue)) {
+                        shouldShow = false;
+                    }
+                }
+                
+                if (shouldShow) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Apply sorting to visible cards
+            const visibleCards = Array.from(batchCards).filter(card => card.style.display !== 'none');
+            const sortOrder = activeFilters.sort.length > 0 ? activeFilters.sort[0] : 'asc';
+            sortBatches(visibleCards, sortOrder);
+            
+            // Update statistics
+            updateStatistics(visibleCount);
+            
+            // Close dropdown after applying
+            document.getElementById('filterDropdown').classList.remove('active');
+        }
+
+        function updateStatistics(visibleCount) {
+            const totalBatches = document.querySelector('.stat-number');
+            if (totalBatches) {
+                totalBatches.textContent = visibleCount;
+            }
+        }
+
+        // Handle filter option clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('filter-option')) {
+                const filterType = e.target.getAttribute('data-filter');
+                const filterValue = e.target.getAttribute('data-value');
+                
+                // Special handling for sort (only one can be active at a time)
+                if (filterType === 'sort') {
+                    // Remove active from all sort options
+                    document.querySelectorAll('.filter-option[data-filter="sort"]').forEach(option => {
+                        option.classList.remove('active');
+                    });
+                    // Clear sort array and add new value
+                    activeFilters.sort = [filterValue];
+                    e.target.classList.add('active');
+                } else {
+                    // Regular multi-select behavior for other filters
+                    if (e.target.classList.contains('active')) {
+                        // Remove filter
+                        e.target.classList.remove('active');
+                        const index = activeFilters[filterType].indexOf(filterValue);
+                        if (index > -1) {
+                            activeFilters[filterType].splice(index, 1);
+                        }
+                    } else {
+                        // Add filter
+                        e.target.classList.add('active');
+                        activeFilters[filterType].push(filterValue);
+                    }
+                }
+                
+                updateFilterIndicator();
+            }
+        });
+
+        // Add interactive functionality
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const batchTitle = this.closest('.batch-card').querySelector('.batch-title').textContent;
+                alert(`Opening details for ${batchTitle}`);
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const batchCards = document.querySelectorAll('.batch-card');
+            
+            batchCards.forEach(card => {
+                const title = card.querySelector('.batch-title').textContent.toLowerCase();
+                const isVisible = card.style.display !== 'none';
+                
+                if (title.includes(searchTerm) && isVisible) {
+                    card.style.display = 'block';
+                } else if (!title.includes(searchTerm)) {
+                    card.style.display = 'none';
+                } else if (title.includes(searchTerm) && !isVisible) {
+                    // Apply filters again to check if it should be visible
+                    applyFilters();
+                }
+            });
+        });
+
+        // Export buttons functionality
+        document.querySelectorAll('.export-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                alert(`${action} functionality would be implemented here`);
+            });
+        });
+
+        // Add subtle animations on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationDelay = Math.random() * 0.5 + 's';
+                    entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+                }
+            });
+        });
+
+        document.querySelectorAll('.batch-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Initialize filter indicator
+        updateFilterIndicator();
     </script>
+
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .batch-card {
+            opacity: 0;
+        }
+    </style>
 </body>
 </html>

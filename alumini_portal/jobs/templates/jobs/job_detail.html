@@ -1,174 +1,208 @@
+{% load custom_timesince %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ job.title }} - SocialGram</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #8EC5FC, #E0C3FC);
-            margin: 0;
-            padding: 20px;
-        }
-        .navbar {
-            background: #efbcec;
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-        }
-        .navbar h1 {
-            font-size: 20px;
-            color: #ff6600;
-        }
-        .navbar a {
-            text-decoration: none;
-            color: #007bff;
-            font-size: 14px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .user-info {
-            font-size: 14px;
-        }
-        .user-info strong {
-            display: block;
-            font-size: 15px;
-        }
-        .card-content {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        .card-footer {
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #555;
-        }
-        .card-footer button {
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: #007bff;
-        }
-        .likes-comments {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #777;
-        }
-        .comments-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .comment {
-            border-bottom: 1px solid #eee;
-            padding: 10px 0;
-        }
-        .comment:last-child {
-            border-bottom: none;
-        }
-        .comment strong {
-            font-size: 14px;
-        }
-        .comment-form {
-            margin-top: 15px;
-        }
-        .comment-form textarea {
-            width: 100%;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            resize: vertical;
-        }
-        .comment-form button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: none;
-            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            cursor: pointer;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ job.title }} - Alumni Jobs</title>
+<style>
+/* ===== Body & Layout ===== */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f3f2ef;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Card */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ccc;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.user-info strong { font-size: 14px; color: #111; }
+.user-info span { font-size: 12px; color: #666; display: block; }
+
+/* Card Content */
+.card-content h2 { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+.card-content p { font-size: 14px; color: #444; }
+
+/* Footer */
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.action-btn:hover { background: #f0f2f5; color: #0a66c2; }
+
+.heart.liked { color: #e0245e; }
+
+/* Comments Section */
+.comments-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+.comment { border-bottom: 1px solid #eee; padding: 10px 0; }
+.comment:last-child { border-bottom: none; }
+.comment strong { font-size: 14px; color: #111; }
+.comment p { margin: 4px 0; color: #444; }
+.comment small { font-size: 11px; color: #888; }
+
+/* Comment Form */
+.comment-form { margin-top: 10px; }
+.comment-form textarea {
+    width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;
+    font-size: 14px; resize: vertical;
+}
+.comment-form button {
+    margin-top: 8px; padding: 6px 12px; border-radius: 8px; border: none;
+    background: #0a66c2; color: #fff; cursor: pointer;
+}
+.comment-form button:hover { background: #004182; }
+</style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>SocialGram</h1>
-        <a href="{% url 'job_list' %}">← Back to Jobs</a>
-    </div>
 
-    <div class="container">
-        <div class="card">
-            <div class="card-header">
-                <div class="user-info">
-                    <strong>{{ job.user.username }}</strong>
-                    <span>{{ job.created_at|timesince }} ago</span>
-                </div>
+<div class="container">
+    <!-- Job Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="avatar">
+                {% if job.posted_by.userdetails.first %}
+                    {% if job.posted_by.userdetails.first.profilephoto %}
+                        <img src="{{ job.posted_by.userdetails.first.profilephoto.url }}" 
+                            alt="{{ job.posted_by.userdetails.first.firstname }}">
+                    {% else %}
+                        {{ job.posted_by.userdetails.first.firstname|slice:":1"|upper }}
+                    {% endif %}
+                {% else %}
+                    ❓
+                {% endif %}
+            </div>
+            <!-- User Info -->
+            <div class="user-info">
+                {% if job.posted_by.userdetails.first %}
+                    <strong>{{ job.posted_by.userdetails.first.get_full_name }}</strong>
+                {% else %}
+                    <strong>Unknown</strong>
+                {% endif %}
+                <span>
+                Alumni • {{ job.posted_at|short_timesince  }} ago
+                {% if job.posted_at|timesince == "0 minutes" or job.posted_at|timesince < "1 hour" %}
+                    <span class="new-badge">New</span>
+                {% endif %}
+                </span>
             </div>
 
-            <div class="card-content">
-                <h2>{{ job.title }}</h2>
-                <p>{{ job.description }}</p>
-            </div>
-
-            <div class="card-footer">
-                <form method="post" action="{% url 'job_like' job.pk %}">
-                    {% csrf_token %}
-                    <button type="submit">
-                        {% if user in job.likes.all %}Unlike{% else %}Like{% endif %}
-                    </button>
-                </form>
-                <span class="likes-comments">{{ job.likes.count }} likes</span>
-            </div>
         </div>
 
-        <!-- Comments Section -->
-        <div class="comments-section">
-            <h3>Comments ({{ job.comments.count }})</h3>
-
-            {% for comment in job.comments.all %}
-            <div class="comment">
-                <strong>{{ comment.user.username }}</strong>
-                <p>{{ comment.text }}</p>
-                <small>{{ comment.created_at|timesince }} ago</small>
+        <div class="card-content">
+            <h2>{{ job.title }}</h2>
+            <p>{{ job.description }}</p>
+            {% if job.tags.all %}
+            <div class="job-tags" style="margin-top:6px;">
+                {% for tag in job.tags.all %}
+                <span style="background:#eef3f8; color:#0a66c2; padding:2px 6px; border-radius:12px; font-size:12px;">{{ tag.name }}</span>
+                {% endfor %}
             </div>
-            {% empty %}
-            <p>No comments yet. Be the first to comment!</p>
-            {% endfor %}
+            {% endif %}
+        </div>
 
-            <!-- Add Comment Form -->
-            <div class="comment-form">
-                <form method="post" action="{% url 'job_comment' job.pk %}">
-                    {% csrf_token %}
-                    <textarea name="text" rows="3" placeholder="Write a comment..." required></textarea>
-                    <button type="submit">Post Comment</button>
-                </form>
-            </div>
+        <div class="card-footer">
+            <form method="post" action="{% url 'job_like' job.pk %}">
+                {% csrf_token %}
+                <button class="action-btn" type="submit">
+                    <span class="heart {% if user in job.likes.all %}liked{% endif %}">
+                        {% if user in job.likes.all %}❤️{% else %}🤍{% endif %}
+                    </span> {{ job.likes.count }}
+                </button>
+            </form>
+            <span>💬 {{ job.comments.count }}</span>
+            <a href="{{ job.apply_link }}" target="_blank" class="action-btn">Apply</a>
         </div>
     </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h3>Comments ({{ job.comments.count }})</h3>
+
+        {% for comment in job.comments.all %}
+        <div class="comment">
+            <strong>
+                {% if comment.user.userdetails.first %}
+                    {{ comment.user.userdetails.first.get_full_name }}
+                {% else %}
+                    {{ comment.user.username }}
+                {% endif %}
+            </strong>
+            <p>{{ comment.text }}</p>
+            <small>{{ comment.commented_at|short_timesince }} ago</small>
+        </div>
+        {% empty %}
+        <p>No comments yet. Be the first to comment!</p>
+        {% endfor %}
+
+        <!-- Add Comment Form -->
+        <div class="comment-form">
+            <form method="post" action="{% url 'job_comment' job.pk %}">
+                {% csrf_token %}
+                <textarea name="text" rows="3" placeholder="Write a comment..." required></textarea>
+                <button type="submit">Post Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

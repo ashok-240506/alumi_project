@@ -7,20 +7,20 @@ For more information on this file, see
 https://docs.djangoproject.com/en/3.0/howto/deployment/asgi/
 """
 
-# import os
-
-# from django.core.asgi import get_asgi_application
-
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'alumini_portal.settings')
-
-# application = get_asgi_application()
-# alumini_portal/asgi.py
 import os
-import django
-from channels.routing import get_default_application
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from django.core.asgi import get_asgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "alumini_portal.settings")
-django.setup()
-application = get_default_application()
+django_asgi_app = get_asgi_application()
+import chats.routing
 
-
+application = ProtocolTypeRouter({
+    "http": django_asgi_app,
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            chats.routing.websocket_urlpatterns
+        )
+    ),
+})

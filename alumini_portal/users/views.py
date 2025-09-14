@@ -58,7 +58,7 @@ class AlumniHomeView(TemplateView):
         return context
 def student_list(request):
     student_qs = (
-        CustomUser.objects.filter(is_active=True, is_staff=False)
+        CustomUser.objects.filter(is_active=True, is_staff=False,is_alumini=False)
         .prefetch_related("userdetails__batch__department")
     )
 
@@ -66,6 +66,7 @@ def student_list(request):
     for stud in student_qs:
         details = stud.userdetails.first() if stud.userdetails.exists() else None
         student_data.append({
+            "id":stud.id,
             "username": details.get_full_name(),
             "roll_no": stud.roll_no,
             "email": stud.email,
@@ -377,50 +378,41 @@ class SignupView(View):
     def post(self, request):
         form = SignupForm(request.POST)
         if form.is_valid():
-            mobile = form.cleaned_data['mobilenumber']
-            password = form.cleaned_data['password']
-            roll_no = form.cleaned_data['roll_no']
             reg_no = form.cleaned_data['reg_no']
-            email = form.cleaned_data['email']
-            address = form.cleaned_data['address']
-            date_of_birth = form.cleaned_data['date_of_birth']
-            batch = form.cleaned_data['batch']   
-            role_type ='Student'
-            reg_no = form.cleaned_data.get('reg_no')
-            # if CustomUser.objects.filter(reg_no=reg_no).exists():
-            #     form.add_error('reg_no', 'This registration number is already registered.')
-            #     return render(request, 'signup.html', {'form': form})
 
-            user, created = CustomUser.objects.get_or_create(
-                mobilenumber=mobile,
-                defaults={
-                    'roll_no': roll_no,
-                    'reg_no': reg_no,
-                    'email': email,
-                    'address': address,
-                    'date_of_birth': date_of_birth,
-                    'is_verified': True
-                }
-            )
-            user.set_password(password)
+            user = CustomUser.objects.filter(reg_no=reg_no, is_active=True).first()
+            print
+            if not user:
+                messages.error(request, "You are not authorized to signup. Please contact Admin.")
+                return redirect('/')
+
+
+            user.mobilenumber = form.cleaned_data['mobilenumber']
+            user.email = form.cleaned_data['email']
+            user.address = form.cleaned_data['address']
+            user.date_of_birth = form.cleaned_data['date_of_birth']
+            user.set_password(form.cleaned_data['password'])
             user.save()
 
-            UserPersonalProfile.objects.create(
+            profile, created = UserPersonalProfile.objects.update_or_create(
                 user=user,
-                firstname=form.cleaned_data['firstname'],
-                lastname=form.cleaned_data['lastname'],
-                gender=form.cleaned_data['gender'],
-                age=form.cleaned_data['age'],
-                language=form.cleaned_data['language'],
-                major=form.cleaned_data['major'],
-                college_name=form.cleaned_data['college_name'],
-                university_name=form.cleaned_data['university_name'],
-                batch=batch
+                defaults={
+                    'firstname': form.cleaned_data['firstname'],
+                    'lastname': form.cleaned_data['lastname'],
+                    'gender': form.cleaned_data['gender'],
+                    'age': form.cleaned_data['age'],
+                    'language': form.cleaned_data['language'],
+                    'major': form.cleaned_data['major'],
+                    'college_name': form.cleaned_data['college_name'],
+                    'university_name': form.cleaned_data['university_name'],
+                    'batch': form.cleaned_data['batch'],
+                }
             )
 
+            role_type = 'Student'
             try:
                 role_obj = RoleMaster.objects.get(role_type=role_type)
-                RoleMapping.objects.create(user=user, role=role_obj)
+                RoleMapping.objects.get_or_create(user=user, role=role_obj)
             except RoleMaster.DoesNotExist:
                 print("Role not found. Skipping mapping.")
 
@@ -428,7 +420,7 @@ class SignupView(View):
             return redirect('send-otp')
 
         return render(request, 'users/signup.html', {'form': form})
-    
+
 
 class SigninView(View):
     def get(self, request):
@@ -489,6 +481,8 @@ def profile_view(request):
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
+            messages.success(request, "Profile updated successfully!")
+
             return redirect("profile")
     else:
         user_form = CustomUserForm(instance=user)

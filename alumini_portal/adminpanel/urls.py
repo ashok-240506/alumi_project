@@ -20,6 +20,12 @@ urlpatterns = [
     path('batches/add/', BatchCreateView.as_view(), name='batch-add'),
     path('batches/edit/<int:pk>/', BatchUpdateView.as_view(), name='batch-edit'),
     path('batches/delete/<int:pk>/', BatchDeleteView.as_view(), name='batch-delete'),
+    path("user-analytics/", user_analytics, name="user-analytics"),
+    path("user-analytics-page/", user_analytics_page, name="user-analytics-page"), # Chart page
+    path("batches_details/<int:batch_id>/", batch_detail, name="batch_detail"),
+    path('batches_details/', batch_list, name='all_batch_list'),
+
+
 
 
 ]

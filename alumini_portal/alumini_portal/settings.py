@@ -43,15 +43,33 @@ INSTALLED_APPS = [
     'adminpanel',
     'chats',
     'jobs',
+    "widget_tweaks",
 
 ]
-ASGI_APPLICATION = 'alumini_portal.routing.application'
+# ASGI_APPLICATION = 'alumini_portal.routing.application'
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer',  # use RedisChannelLayer in prod
+#     },
+# }
+ASGI_APPLICATION = "alumini_portal.asgi.application"
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {"hosts": [("127.0.0.1", 6379)]},
+#     },
+# }
+# ASGI_APPLICATION = "alumini_portal.asgi.application"
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # use RedisChannelLayer in prod
-    },
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

@@ -60,9 +60,103 @@
       display:inline-block; margin-top:10px; padding:8px 16px;
       background:#7b5fc4; color:white; border-radius:8px; text-decoration:none;
     }
+
+    /* Navbar */
+    .top-navbar {
+      width: 100%;
+      background: #7b5fc4;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .top-navbar .brand {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .top-navbar .nav-items {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .top-navbar .nav-items .dropdown {
+      position: relative;
+    }
+    .top-navbar .nav-items .dropdown-content {
+      display: none;
+      position: absolute;
+      background: white;
+      color: black;
+      min-width: 150px;
+      top: 35px;
+      right: 0;
+      border-radius: 8px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .top-navbar .nav-items .dropdown-content a {
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      color: #333;
+    }
+    .top-navbar .nav-items .dropdown-content a:hover {
+      background: #f0f0f0;
+    }
+    .top-navbar .nav-items .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .notification {
+      position: relative;
+      cursor: pointer;
+    }
+    .notification .badge {
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      background: red;
+      color: white;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
+
+<!-- New Top Navbar -->
+<div class="top-navbar">
+  <div class="brand">ALUFA</div>
+  <div class="nav-items">
+    <div class="notification">
+      🔔
+      <span class="badge">3</span>
+    </div>
+    <div class="dropdown">
+      <span>🌐 EN</span>
+      <div class="dropdown-content">
+        <a href="#">EN</a>
+        <a href="#">IN</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <span>{% if is_alumini %} Alumni {% else %} Student {% endif %}</span>
+      <div class="dropdown-content">
+        <a href="#">Dashboard</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <span>{{ user.userdetails.first.full_name }}</span>
+      <div class="dropdown-content">
+        <a href="{% url 'reset-password' %}">Change Password</a>
+        <a href="{% url 'signout' %}">Logout</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Navigation -->
 <div class="nav-links">

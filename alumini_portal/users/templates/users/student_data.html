@@ -156,7 +156,11 @@
           <span class="info-value">{{ stud.university }}</span></div>
         </div>
       </div>
-      <button id="chatbot-button">💬</button>
+      {% if student.id %}
+        <div class="card-footer">
+          <a href="{% url 'chats:start-private-chat' alumini.id %}" class="chat-button">💬 Chat</a>
+        </div>
+      {% endif %}
       {% empty %}
         <p style="color:white;text-align:center;">No student found.</p>
       {% endfor %}
