@@ -412,20 +412,13 @@ class SignupView(View):
                 user.is_alumni = False
             user.save()
 
-            profile, created = UserPersonalProfile.objects.update_or_create(
-                user=user,
-                defaults={
-                    'firstname': form.cleaned_data.get('firstname'),
-                    'lastname': form.cleaned_data.get('lastname'),
-                    'gender': form.cleaned_data.get('gender'),
-                    'age': form.cleaned_data.get('age'),
-                    'language': form.cleaned_data.get('language') or "",
-                    'major': form.cleaned_data.get('major') or "",
-                    'college_name': form.cleaned_data.get('college_name') or "",
-                    'university_name': form.cleaned_data.get('university_name') or "",
-                    'batch': form.cleaned_data.get('batch'),
-                }
-            )
+            profile = UserPersonalProfile.objects.filter(user=user).first()
+            if profile:
+                for field, value in form.cleaned_data.items():
+                    setattr(profile, field, value)
+                profile.save()
+            else:
+                profile = UserPersonalProfile.objects.create(user=user, **form.cleaned_data)
 
 
             role_type = 'Student'
