@@ -79,6 +79,17 @@
       gap: 20px;
       margin-bottom: 20px;
     }
+    .profile-image-container {
+            position: relative;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #6c63ff;
+        }
     @keyframes titleGlow {
             0% { filter: brightness(1) saturate(1); }
             100% { filter: brightness(1.1) saturate(1.2); }
@@ -187,9 +198,9 @@
       margin-top: 5px;
     }
     /* Hide the actual file input */
-input[type="file"] {
-    display: none;
-}
+    input[type="file"] {
+        display: none;
+    }
 
 /* Circular avatar wrapper */
 .profile-photo-wrapper {
@@ -215,8 +226,9 @@ input[type="file"] {
 /* Plus icon for adding photo */
 .add-photo-icon {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 5px; /* move it slightly above the bottom */
+    right: 5px;  /* move it slightly left from the right */
+    transform: translate(30%, -30%);
     background-color: #007bff;
     color: white;
     width: 25px;
@@ -231,6 +243,18 @@ input[type="file"] {
   </style>
 </head>
 <body>
+<div class="navbar">
+    <div class="left">
+        <a href="{% url 'home' %}" class="logout-btn">Back</a>
+    </div>
+    <div class="center">
+        ALUFA
+    </div>
+    <div class="right">
+        <span>Student</span>
+        <img src="{% if personal_form.instance.profilephoto %}{{ personal_form.instance.profilephoto.url }}{% else %}https://i.pravatar.cc/100{% endif %}" class="profile-img">
+    </div>
+</div>
 <div class="signup-container">
     <form method="post" action="{% url 'signup' %}" id="signupForm">
         <h2>Student Signup</h2>
@@ -246,10 +270,11 @@ input[type="file"] {
                 {{ form.lastname.label_tag }} {{ form.lastname }}
                 <span id="lastNameError" class="errorlist"></span>
             </div>
-            <div class="form-group" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+           <div class="form-group" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
                 <label for="{{ form.profilephoto.id_for_label }}">Profile Photo</label>
                 <div class="profile-photo-wrapper">
                     <img id="profilePreview" src="{% static 'default-avatar.png' %}" alt="Profile" />
+
                     <label for="{{ form.profilephoto.id_for_label }}" class="add-photo-icon">+</label>
                 </div>
                 {{ form.profilephoto }}
@@ -259,10 +284,12 @@ input[type="file"] {
 
         <!-- Row 2: mobilenumber, email, gender -->
         <div class="form-row" style="display: flex; gap: 15px;">
-            <div class="form-group" style="flex: 1;">
-                {{ form.mobilenumber.label_tag }} {{ form.mobilenumber }}
+          <div class="form-group" style="flex: 1;">
+                {{ form.mobilenumber.label_tag }} 
+                {{ form.mobilenumber }}
                 <span id="mobilenumberError" class="errorlist"></span>
             </div>
+
             <div class="form-group" style="flex: 1;">
                 {{ form.email.label_tag }} {{ form.email }}
                 <span id="emailError" class="errorlist"></span>
@@ -333,7 +360,8 @@ input[type="file"] {
                 {{ form.address.label_tag }} {{ form.address }} {{ form.address.errors }}
             </div>
         </div>
-        <button type="submit" class="btn-submit">Signup</button>
+            <button type="submit" class="btn-submit">Sign Up</button>
+
 
     </form>
 
@@ -419,6 +447,17 @@ document.addEventListener('DOMContentLoaded', function() {
         return isValid;
     }
 });
+const batchField = document.getElementById('id_batch');
+if (batchField && batchField.options[batchField.selectedIndex]) {
+    const selectedText = batchField.options[batchField.selectedIndex].text;
+    const currentYear = new Date().getFullYear();
+    const yearMatch = selectedText.match(/\d{4}/); // extract year from option text
+    if (yearMatch && parseInt(yearMatch[0]) > currentYear) {
+        alert("Batch year cannot be in the future!");
+        isValid = false;
+    }
+}
+
 </script>
 
 

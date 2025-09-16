@@ -1,10 +1,14 @@
+from datetime import date
+from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 import random
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+from chats.models import ChatRoom
 from .models import CustomUser,OTP, RoleMapping, RoleMaster, UserPersonalProfile 
 from django.views.generic import TemplateView
 from .forms import  *
@@ -85,10 +89,14 @@ def alumni_list(request):
         CustomUser.objects.filter(is_alumini=True, is_active=True, is_staff=False)
         .prefetch_related("userdetails__batch__department")
     )
-
     alumni_data = []
     for alum in alumni_qs:
         details = alum.userdetails.first() if alum.userdetails.exists() else None
+        room = ChatRoom.objects.filter(
+            is_group=False,
+            participants=request.user
+        ).filter(participants=alum).first()
+        alum.chat_room_id = room.id if room else None
         alumni_data.append({
             "id":alum.id,
             "username": details.get_full_name(),
@@ -97,8 +105,8 @@ def alumni_list(request):
             "phone_number": alum.mobilenumber,
             "department": details.batch.department.name if details and details.batch else "",
             "batch": details.batch.name if details and details.batch else "",
-            "college": details.college_name if details else "",
-            "university": details.university_name if details else "",
+            # "college": details.college_name if details else "",
+            # "university": details.university_name if details else "",
             "profile_photo": details.profilephoto.url if details and details.profilephoto else "",
         })
 
@@ -257,7 +265,11 @@ class VerifyOTPView(View):
 
                     login(request, user)
                     messages.success(request, "Login successful.")
-                    return redirect('student_home')
+                    if user.is_alumini:
+                        return redirect('alumni_home')
+                    else:
+                        return redirect('student_home')
+
 
                 else:
                     messages.error(request, "OTP expired or already used.")
@@ -376,12 +388,11 @@ class SignupView(View):
         return render(request, 'users/signup.html', {'form': SignupForm()})
 
     def post(self, request):
-        form = SignupForm(request.POST)
+        form = SignupForm(request.POST, request.FILES)
         if form.is_valid():
             reg_no = form.cleaned_data['reg_no']
 
             user = CustomUser.objects.filter(reg_no=reg_no, is_active=True).first()
-            print
             if not user:
                 messages.error(request, "You are not authorized to signup. Please contact Admin.")
                 return redirect('/')
@@ -389,25 +400,33 @@ class SignupView(View):
 
             user.mobilenumber = form.cleaned_data['mobilenumber']
             user.email = form.cleaned_data['email']
-            user.address = form.cleaned_data['address']
+            user.address = form.cleaned_data.get('address') or ""
             user.date_of_birth = form.cleaned_data['date_of_birth']
             user.set_password(form.cleaned_data['password'])
+            batch = form.cleaned_data['batch']
+            print(batch)
+            current_year = date.today().year
+            if batch.end_year < current_year:  
+                user.is_alumni = True
+            else:
+                user.is_alumni = False
             user.save()
 
             profile, created = UserPersonalProfile.objects.update_or_create(
                 user=user,
                 defaults={
-                    'firstname': form.cleaned_data['firstname'],
-                    'lastname': form.cleaned_data['lastname'],
-                    'gender': form.cleaned_data['gender'],
-                    'age': form.cleaned_data['age'],
-                    'language': form.cleaned_data['language'],
-                    'major': form.cleaned_data['major'],
-                    'college_name': form.cleaned_data['college_name'],
-                    'university_name': form.cleaned_data['university_name'],
-                    'batch': form.cleaned_data['batch'],
+                    'firstname': form.cleaned_data.get('firstname'),
+                    'lastname': form.cleaned_data.get('lastname'),
+                    'gender': form.cleaned_data.get('gender'),
+                    'age': form.cleaned_data.get('age'),
+                    'language': form.cleaned_data.get('language') or "",
+                    'major': form.cleaned_data.get('major') or "",
+                    'college_name': form.cleaned_data.get('college_name') or "",
+                    'university_name': form.cleaned_data.get('university_name') or "",
+                    'batch': form.cleaned_data.get('batch'),
                 }
             )
+
 
             role_type = 'Student'
             try:
@@ -458,7 +477,7 @@ class SigninView(View):
 class SignoutView(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
-        return redirect('signin')
+        return redirect('home')
     
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required

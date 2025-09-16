@@ -62,7 +62,7 @@ form.addEventListener('submit', function(e){
     const content = input.value.trim();
     if(!content) return;
 
-    fetch("{% url 'chats:send-message-api' room.name %}", {
+    fetch("{% url 'chats:send-message-api' room.id %}", {
         method:"POST",
         headers:{
             "Content-Type":"application/json",

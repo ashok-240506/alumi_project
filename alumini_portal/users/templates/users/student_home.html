@@ -46,7 +46,7 @@
     @media(max-width: 600px) {
       header h1 { font-size: 26px; }
       .nav-links { flex-direction: column; align-items: center; }
-    }
+    } 
     .flash-message {
       padding: 12px 20px; margin-bottom: 10px; border-radius: 8px;
       font-size: 14px; font-weight: 500; min-width: 220px; max-width: 300px;
@@ -60,52 +60,76 @@
       display:inline-block; margin-top:10px; padding:8px 16px;
       background:#7b5fc4; color:white; border-radius:8px; text-decoration:none;
     }
+    .dropdown-content a.active-click {
+    background: #5e45ab !important; /* darker purple */
+    color: #fff !important;
+  }
 
     /* Navbar */
-    .top-navbar {
-      width: 100%;
-      background: #7b5fc4;
-      color: white;
+  .top-navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
+      padding: 10px 40px;       /* increase horizontal padding */
+      background: #7b5fc4;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      width: 100%;              /* span full width */
+      max-width: 1600px;        /* optional: restrict max width */
+      border-radius: 10px;      /* optional: rounded edges */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);  /* subtle shadow */
+      margin-bottom: 30px;      /* spacing from content below */
+  }
+
+  
     .top-navbar .brand {
       font-size: 20px;
       font-weight: bold;
     }
-    .top-navbar .nav-items {
+  .top-navbar .nav-items {
       display: flex;
-      gap: 20px;
+      gap: 30px;       /* more space between dropdowns */
       align-items: center;
-    }
+  }
     .top-navbar .nav-items .dropdown {
-      position: relative;
-    }
+  position: relative;
+  display: flex;          /* make it a flex container */
+  align-items: center;    /* vertically center pic + name */
+  gap: 8px;               /* space between pic and name */
+}
+
+    
     .top-navbar .nav-items .dropdown-content {
       display: none;
       position: absolute;
-      background: white;
+      background: #7b5fc4;
       color: black;
-      min-width: 150px;
+      min-width: 200px;
       top: 35px;
       right: 0;
       border-radius: 8px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.2);
       z-index: 1000;
     }
-    .top-navbar .nav-items .dropdown-content a {
-      display: block;
-      padding: 10px;
-      text-decoration: none;
-      color: #333;
-    }
-    .top-navbar .nav-items .dropdown-content a:hover {
-      background: #f0f0f0;
-    }
+   .top-navbar .nav-items .dropdown-content a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #fff;                /* make text white */
+    cursor: pointer;            /* show hand cursor */
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .top-navbar .nav-items .dropdown-content a:hover {
+    background: rgba(255, 255, 255, 0.2);  /* subtle highlight */
+  }
+
+  .top-navbar .nav-items .dropdown-content a:active {
+    background: rgba(255, 255, 255, 0.35); /* stronger when clicked */
+    transform: scale(0.97);                /* small click animation */
+  }
+
+  
     .top-navbar .nav-items .dropdown:hover .dropdown-content {
       display: block;
     }
@@ -113,6 +137,17 @@
       position: relative;
       cursor: pointer;
     }
+    .top-navbar .nav-items .dropdown span {
+    cursor: pointer;
+    padding: 8px 12px;    
+    border-radius: 6px;
+    transition: 0.2s;
+    }
+    .top-navbar .nav-items .dropdown span:hover {
+        background: rgba(255,255,255,0.2); 
+
+    }
+
     .notification .badge {
       position: absolute;
       top: -6px;
@@ -123,6 +158,26 @@
       padding: 2px 6px;
       border-radius: 50%;
     }
+    @media (max-width: 768px) {
+  .top-navbar .nav-items {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .top-navbar .brand {
+    margin-bottom: 10px;
+  }
+}
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 40%;
+  object-fit: cover;     /* crop instead of stretching */
+  border: 2px solid #fff; /* optional: adds clean border */
+  box-shadow: 0 0 4px rgba(0,0,0,0.2); /* optional: subtle clarity effect */
+}
+
+
   </style>
 </head>
 <body>
@@ -137,24 +192,20 @@
     </div>
     <div class="dropdown">
       <span>🌐 EN</span>
-      <div class="dropdown-content">
-        <a href="#">EN</a>
-        <a href="#">IN</a>
-      </div>
     </div>
     <div class="dropdown">
       <span>{% if is_alumini %} Alumni {% else %} Student {% endif %}</span>
-      <div class="dropdown-content">
-        <a href="#">Dashboard</a>
-      </div>
+     
     </div>
-    <div class="dropdown">
+   <div class="dropdown">
+      <img src="{{ user.userdetails.first.profilephoto.url|default:'https://i.pravatar.cc/30' }}" class="profile-pic">
       <span>{{ user.userdetails.first.full_name }}</span>
       <div class="dropdown-content">
-        <a href="{% url 'reset-password' %}">Change Password</a>
-        <a href="{% url 'signout' %}">Logout</a>
+        <a href="{% url 'reset-password' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M280-400q-33 0-56.5-23.5T200-480q0-33 23.5-56.5T280-560q33 0 56.5 23.5T360-480q0 33-23.5 56.5T280-400Zm0 160q-100 0-170-70T40-480q0-100 70-170t170-70q67 0 121.5 33t86.5 87h352l120 120-180 180-80-60-80 60-85-60h-47q-32 54-86.5 87T280-240Zm0-80q56 0 98.5-34t56.5-86h125l58 41 82-61 71 55 75-75-40-40H435q-14-52-56.5-86T280-640q-66 0-113 47t-47 113q0 66 47 113t113 47Z"/></svg>Change Password</a>
+        <a href="{% url 'signout' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-160h80v160h560v-560H200v160h-80v-160q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm220-160-56-58 102-102H120v-80h346L364-622l56-58 200 200-200 200Z"/></svg>Logout</a>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -162,9 +213,9 @@
 <div class="nav-links">
   <a href="{% url 'profile' %}">Your Profile</a>
   {% if is_alumini %}
-    <a href="{% url 'chats:chat_with_alumni' %}">Chat with Student</a>
+    <a href="{% url 'chats:chat_with_alumni' %}">Chats</a>
   {% else %}
-    <a href="{% url 'chats:chat_with_alumni' %}">Chat with Alumni</a>
+    <a href="{% url 'chats:chat_with_alumni' %}">Chats</a>
   {% endif %}
 </div>
 
@@ -191,13 +242,13 @@
 <div class="card-container">
   {% if is_alumini %}
     <div class="card">
-      <h3>View Student Data</h3>
-      <p>Browse student information from all batches</p>
-      <a href="{% url 'student_data' %}" class="btn">View Students</a>
+      <h3>User Details</h3>
+      <p>Browse user information from all batches</p>
+      <a href="{% url 'alumni_data' %}" class="btn">User Details</a>
     </div>
     <div class="card">
-      <h3>Post Job</h3>
-      <p>Share job opportunities with current students</p>
+      <h3>Job</h3>
+      <p>Share job opportunities </p>
       <a href="{% url 'job_create' %}" class="btn">Post a Job</a>
     </div>
   {% else %}
@@ -224,6 +275,40 @@
       setTimeout(() => flashBox.remove(), 500);
     }
   }, 3000);
+// Dropdown handling (only when clicking on the span next to profile pic)
+  document.querySelectorAll('.dropdown').forEach(drop => {
+    const trigger = drop.querySelector('span');  // only text span will trigger
+    const content = drop.querySelector('.dropdown-content');
+
+    if (trigger && content) {
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // close other open dropdowns first
+        document.querySelectorAll('.dropdown-content').forEach(dc => {
+          if (dc !== content) dc.style.display = 'none';
+        });
+        // toggle this one
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+      });
+
+      // keep dropdown open when clicking inside
+      content.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Here we can differentiate actions:
+        if (e.target.closest('a')) {
+          const linkText = e.target.innerText.trim();
+          console.log("Clicked:", linkText); // debug → "Logout" or "Change Password"
+        }
+      });
+    }
+  });
+
+  // Close dropdowns if clicked outside
+  window.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-content').forEach(dc => dc.style.display = 'none');
+  });
+
+
 </script>
 
 </body>

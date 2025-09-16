@@ -38,15 +38,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             user = self.scope['user']
 
-            msg_obj = await save_message(self.room_name, user, data['message'])
+            msg_obj = await save_message(self.room_id, user, data['message'])
 
             user_detail = await database_sync_to_async(lambda: user.userdetails.first())()
             username = user_detail.get_full_name() if user_detail else str(user)
+
+            if user_detail:
+                username = f"{user_detail.firstname} {user_detail.lastname}"
+            else:
+                username = str(user)
 
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
+                    "room_id": self.room_id,
                     "message": msg_obj.content,
                     "username": username,
                     "timestamp": str(msg_obj.timestamp),

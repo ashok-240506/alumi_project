@@ -39,32 +39,54 @@ class SetPasswordForm(forms.Form):
 
 
 class SignupForm(forms.Form):
-    mobilenumber = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput())
-    confirm_password = forms.CharField(widget=forms.PasswordInput())
+    mobilenumber = forms.CharField(
+        max_length=10,
+        min_length=10,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'pattern': '[0-9]{10}',
+            'title': 'Enter a valid 10-digit mobile number',
+            'maxlength': '10',
+        })
+    )
+    password = forms.CharField(widget=forms.PasswordInput(), required=True)
+    confirm_password = forms.CharField(widget=forms.PasswordInput(), required=True)
 
-    roll_no = forms.CharField()
-    reg_no = forms.CharField()
-    email = forms.EmailField()
-    address = forms.CharField(widget=forms.Textarea)
-    date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    roll_no = forms.CharField(required=True)
+    reg_no = forms.CharField(required=True)
+    email = forms.EmailField(required=True)
+    address = forms.CharField(widget=forms.Textarea, required=False)
+    date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
 
-    # Personal profile
-    firstname = forms.CharField()
-    lastname = forms.CharField()
-    gender = forms.ChoiceField(choices=[("Male", "Male"), ("Female", "Female"), ("Other", "Other")])
-    age = forms.IntegerField()
-    language = forms.CharField()
-    major = forms.CharField()
-    college_name = forms.CharField()
-    university_name = forms.CharField()
+    firstname = forms.CharField(required=True)
+    lastname = forms.CharField(required=True)
+    gender = forms.ChoiceField(
+        choices=[("Male", "Male"), ("Female", "Female"), ("Other", "Other")],
+        required=True
+    )
+    age = forms.IntegerField(required=False)
+    language = forms.CharField(required=False)      
+    major = forms.CharField(required=False)          
+    college_name = forms.CharField(required=False)   
+    university_name = forms.CharField(required=False)
     profilephoto = forms.ImageField(
-        required=False,  # make optional if you like
+        required=False,
         widget=forms.ClearableFileInput(attrs={'class': 'form-input'})
     )
 
-    # Batch dropdown instead of batch_id
-    batch = forms.ModelChoiceField(queryset=Batch.objects.all(), empty_label="Select Batch")
+    batch = forms.ModelChoiceField(
+        queryset=Batch.objects.all(),
+        empty_label="Select Batch",
+        required=True
+    )
+
+    def clean_mobilenumber(self):
+        mobilenumber = self.cleaned_data.get('mobilenumber')
+        if not mobilenumber.isdigit():
+            raise forms.ValidationError("Mobile number must contain only digits.")
+        if len(mobilenumber) != 10:
+            raise forms.ValidationError("Mobile number must be exactly 10 digits.")
+        return mobilenumber
 
     def clean(self):
         cleaned = super().clean()
@@ -74,6 +96,7 @@ class SignupForm(forms.Form):
         if password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
         return cleaned
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if CustomUser.objects.filter(email=email).exists():

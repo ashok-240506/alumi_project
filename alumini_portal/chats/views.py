@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.views.generic import TemplateView
 from django.http import HttpResponseForbidden
 from django.utils.timezone import localtime
-
+from django.views.decorators.clickjacking import xframe_options_exempt
 @login_required
 def chat_home_view(request):
     print(request.user.id)
@@ -23,21 +23,24 @@ def chat_home_view(request):
 class ChatRoomView(LoginRequiredMixin, View):
     def get(self, request, room_id):
         room = get_object_or_404(ChatRoom, id=room_id)
-        messages = room.messages.select_related('sender').order_by('timestamp')
+
         room.messages.filter(
             is_read=False
         ).exclude(sender=request.user).update(is_read=True)
 
+        messages = room.messages.select_related('sender').order_by('timestamp')
 
         other_user = None
         if not room.is_group:
             other_user = room.participants.exclude(id=request.user.id).first()
+
         return render(request, 'chats/chat_room.html', {
             'room': room,
             'messages': messages,
             'user': request.user,
             'other_user': other_user
         })
+
 
 class StartPrivateChatView(LoginRequiredMixin, View):
     def get(self, request, user_id):
@@ -118,7 +121,6 @@ class GroupChatRedirectView(LoginRequiredMixin, View):
             return redirect("chats:chat-room", room_name=room.name)
 
 
-
 class SendMessageAPIView(LoginRequiredMixin, View):
     def post(self, request, room_id):
         try:
@@ -142,7 +144,7 @@ class SendMessageAPIView(LoginRequiredMixin, View):
             "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
         })
 
-
+@xframe_options_exempt
 def chatbot_view(request):
     return render(request, "chats/chatbot.html")
 @login_required
@@ -159,17 +161,42 @@ def chat_messages_api(request, room_id):
 
 class ChatHistoryView(LoginRequiredMixin, View):
     def get(self, request, room_id):
-        room = get_object_or_404(ChatRoom, id=room_id, participants=request.user)
-        messages = room.messages.select_related("sender").order_by("timestamp")[:50]
+        room = get_object_or_404(ChatRoom, id=room_id)
+        room.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
+        messages = Message.objects.filter(room=room).select_related("sender").order_by("timestamp")
+        
         data = []
         for m in messages:
-            profile = m.sender.userdetails.first()
-            full_name = profile.get_full_name() if profile else f"{m.profile.firstname}"
+            user_detail = m.sender.userdetails.first()
+            if user_detail:
+                username = f"{user_detail.firstname} {user_detail.lastname}"
+            else:
+                username = str(m.sender)  # fallback if profile missing
+
             data.append({
-                "sender_id":m.id,
-                'sender_name': full_name,
-                'content': m.content,
-                'timestamp': m.timestamp.isoformat(),
-                'is_sender': m.sender == request.user
+                "id": m.id,
+                "username": username,
+                "message": m.content,
+                "timestamp": m.timestamp.isoformat(),
             })
+
         return JsonResponse(data, safe=False)
+
+class GetOrCreateChatRoomView(LoginRequiredMixin, View):
+    def get(self, request, alumini_id):
+        target_user = get_object_or_404(CustomUser, id=alumini_id)
+
+        room = ChatRoom.objects.filter(is_group=False, participants=request.user)\
+                               .filter(participants=target_user).first()
+        if not room:
+            user_ids = sorted([request.user.id, target_user.id])
+            room_name = f"room_{user_ids[0]}_{user_ids[1]}"
+
+            room = ChatRoom.objects.create(name=room_name, is_group=False)
+            room.participants.add(request.user, target_user)
+
+        profile = target_user.userdetails.first() if hasattr(target_user, "userdetails") else None
+        display_name = profile.full_name if profile and profile.full_name else target_user.get_full_name() or target_user.username
+
+        return JsonResponse({"room_id": room.id, "display_name": display_name})

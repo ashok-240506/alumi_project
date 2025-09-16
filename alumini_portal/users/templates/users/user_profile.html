@@ -8,12 +8,12 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background: linear-gradient(to right, #a18cd1, #fbc2eb);
+            background: linear-gradient(to right, #8EC5FC, #E0C3FC);
             color: #333;
         }
 
-        .navbar {
-    background-color: #6c63ff;
+    .navbar {
+    background-color: #7b5fc4;
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
@@ -21,32 +21,47 @@
     color: white;
     font-size: 18px;
     font-weight: bold;
+    }
+
+    .navbar .left {
+        flex: 1;
+        text-align: left;
+    }
+
+    .navbar .center {
+        flex: 1;
+        text-align: center;
 }
+    .navbar .right {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .navbar .right .username {
+        font-weight: 600;
+        color: white;
+    }
 
-.navbar .left {
-    flex: 1;
-    text-align: left;
-}
-
-.navbar .center {
-    flex: 1;
-    text-align: center;
-}
-
-.navbar .right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 15px;
-}
-
-
-        .navbar .profile-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
+    .navbar .logout-btn {
+    background: #ff7675;
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: 0.3s;
+    }
+    .navbar .logout-btn:hover {
+    background: #e74c3c;
+    }
+    .navbar .profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    }
 
         /* Profile Card */
         .container {
@@ -201,7 +216,6 @@ flash-message {
 <body>
 
     <!-- Navbar -->
-    <!-- Navbar -->
 <div class="navbar">
     <div class="left">
         <a href="{% url 'student_home' %}" class="logout-btn">Back</a>
@@ -209,8 +223,10 @@ flash-message {
     <div class="center">
         ALUFA
     </div>
+    
     <div class="right">
-        <span>Student</span>
+        <span class="username">{{ personal_form.firstname.value }} {{ personal_form.lastname.value }}</span>
+        <a href="{% url 'signout' %}" class="logout-btn">Logout</a>
         <img src="{% if personal_form.instance.profilephoto %}{{ personal_form.instance.profilephoto.url }}{% else %}https://i.pravatar.cc/100{% endif %}" class="profile-img">
     </div>
 </div>

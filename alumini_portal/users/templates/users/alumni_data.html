@@ -6,28 +6,51 @@
   <style>
     body {
         font-family: 'Roboto', sans-serif;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(to right, #8EC5FC, #E0C3FC);
         margin: 0;
         padding: 0;
     }
-    .container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        padding: 30px;
+
+    h1 {
+      text-align: center;
+      color: #6a1b9a;
+      font-size: 2.5rem;
+      margin-bottom: 40px;
     }
+
+    .container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 30px;
+        justify-items: center;
+    }
+
+    @media (max-width: 1024px) {
+        .container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 700px) {
+        .container {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .alumni-card {
         background: #fff;
         border-radius: 16px;
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        margin: 15px;
-        padding: 20px;
-        width: 320px;
+        padding: 15px;
+        width: 240px;
         transition: transform 0.3s;
     }
+
     .alumni-card:hover {
-        transform: translateY(-8px);
+        transform: translateY(-5px);
     }
+
     .avatar {
       width: 80px;
       height: 80px;
@@ -40,64 +63,209 @@
       background: linear-gradient(135deg, #6a11cb, #2575fc);
       color: #fff;
     }
+
     .alumni-title {
       text-align: center;
       color: #333;
       font-weight: bold;
       margin-bottom: 10px;
     }
+
     .subtitle {
       text-align: center;
       color: #666;
       font-size: 0.9rem;
       margin-bottom: 20px;
     }
+
     .info-box {
       display: flex;
       align-items: center;
       background: #f5f7fb;
       border-radius: 12px;
       padding: 10px 15px;
-      margin: 12px 0;
+      margin: 8px 0;
     }
+
     .info-icon {
       font-size: 20px;
       margin-right: 10px;
     }
+
     .info-label {
       font-weight: 600;
       color: #333;
       margin-right: 5px;
     }
+
     .info-value {
       color: #555;
     }
-    h1 {
-      text-align: center;
-      color: #fff;
-      font-size: 2.5rem;
-      margin-bottom: 40px;
-    }
-    .chat-button {
-    display: inline-block;
-    background: #6a11cb;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: background 0.3s, transform 0.2s;
-  }
 
-  .chat-button:hover {
-    background: #2575fc;
-    transform: scale(1.05);
+    .more-details {
+      margin-top: 10px;
+      display: none;
+    }
+
+    .card-footer {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .chat-button {
+      display: inline-block;
+      background: #7b5fc4;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+      margin: 3px;
+    }
+
+    .chat-button:hover {
+      background: #7b5fc4;
+      transform: scale(1.05);
+    }
+    .navbar {
+    background-color: #7b5fc4;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    }
+
+    .navbar .left {
+        flex: 1;
+        text-align: left;
+    }
+
+    .navbar .center {
+        flex: 1;
+        text-align: center;
 }
+    .navbar .right {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .navbar .right .username {
+        font-weight: 600;
+        color: white;
+    }
+
+    .navbar .logout-btn {
+    background: #ff7675;
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: 0.3s;
+    }
+    .navbar .logout-btn:hover {
+    background: #e74c3c;
+    }
+    .navbar .profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    }
   </style>
+
+<script>
+function toggleDetails(id, btn) {
+  const elem = document.getElementById(`details-${id}`);
+  if (elem.style.display === "none" || elem.style.display === "") {
+    elem.style.display = "block";
+    btn.innerText = " View Less";
+  } else {
+    elem.style.display = "none";
+    btn.innerText = " View More";
+  }
+}
+
+function openOrCreateRoom(aluminiId, displayName) {
+    fetch(`/chat/get-or-create-room/${aluminiId}/`)
+        .then(res => res.json())
+        .then(data => {
+            const roomId = data.room_id;
+            const roomName = data.display_name;
+
+            // Redirect to chat_home.html if not there
+            if (window.location.pathname !== "/chat/alumni/") {
+                localStorage.setItem("open_room_id", roomId);
+                window.location.href = "/chat/alumni/";
+                return;
+            }
+
+            // Add room to sidebar if not exists
+            if (!document.querySelector(`.chat-item[data-room="${roomId}"]`)) {
+                const list = document.getElementById("chat-list");
+                if (list) {
+                    const div = document.createElement("div");
+                    div.className = "chat-item";
+                    div.dataset.room = roomId;
+                    div.dataset.display = roomName;
+                    div.innerHTML = `
+                        <div class="avatar" style="background-color:#6a11cb">${roomName[0]}</div>
+                        <div class="chat-info">
+                            <div class="chat-name">${roomName}</div>
+                            <div class="last-message">No messages yet.</div>
+                        </div>
+                        <div class="chat-meta"></div>
+                    `;
+                    div.addEventListener("click", () => openChat(roomId, roomName));
+                    list.prepend(div);
+                }
+            }
+
+            // Open chat window
+            if (typeof openChat === "function") {
+                openChat(roomId, roomName);
+            }
+        })
+        .catch(err => console.error(err));
+}
+
+// Auto-open room if redirected from alumni page
+window.addEventListener("DOMContentLoaded", () => {
+    const roomId = localStorage.getItem("open_room_id");
+    if (roomId) {
+        const item = document.querySelector(`.chat-item[data-room="${roomId}"]`);
+        if (item) item.click();
+        localStorage.removeItem("open_room_id");
+    }
+});
+</script>
+
 </head>
 <body>
+      <!-- Navbar -->
+<div class="navbar">
+    <div class="left">
+        <a href="{% url 'student_home' %}" class="logout-btn">Back</a>
+    </div>
+    <div class="center">
+        ALUFA
+    </div>
+    
+    <div class="right">
+        <span class="username">{{ personal_form.firstname.value }} {{ personal_form.lastname.value }}</span>
+        <a href="{% url 'signout' %}" class="logout-btn">Logout</a>
+        <img src="{% if personal_form.instance.profilephoto %}{{ personal_form.instance.profilephoto.url }}{% else %}https://i.pravatar.cc/100{% endif %}" class="profile-img">
+    </div>
+</div>
+
   <h1>Alumni Details</h1>
   <div class="container">
     {% for alumini in alumni %}
@@ -105,32 +273,14 @@
         <div class="avatar">
           {% if alumini.profile_photo %}
             <img src="{{ alumini.profile_photo }}" 
-                alt="{{ alumini.username }}" 
-                style="width:80px; height:80px; border-radius:70%; object-fit:cover;">
+                 alt="{{ alumini.username }}" 
+                 style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
           {% else %}
             👤
           {% endif %}
         </div>
         <div class="alumni-title">{{ alumini.username }}</div>
         <div class="subtitle">Academic Profile</div>
-
-        <div class="info-box">
-          <div class="info-icon">🆔</div>
-          <div><span class="info-label">Roll No:</span>
-          <span class="info-value">{{ alumini.roll_no }}</span></div>
-        </div>
-
-        <div class="info-box">
-          <div class="info-icon">📧</div>
-          <div><span class="info-label">Email:</span>
-          <span class="info-value">{{ alumini.email }}</span></div>
-        </div>
-
-        <div class="info-box">
-          <div class="info-icon">📞</div>
-          <div><span class="info-label">Phone:</span>
-          <span class="info-value">{{ alumini.phone_number }}</span></div>
-        </div>
 
         <div class="info-box">
           <div class="info-icon">📅</div>
@@ -144,28 +294,45 @@
           <span class="info-value">{{ alumini.department }}</span></div>
         </div>
 
-        <div class="info-box">
-          <div class="info-icon">🎓</div>
-          <div><span class="info-label">College:</span>
-          <span class="info-value">{{ alumini.college }}</span></div>
+        <div class="more-details" id="details-{{ alumini.id }}">
+          <div class="info-box">
+            <div class="info-icon">🆔</div>
+            <div><span class="info-label">Roll No:</span>
+            <span class="info-value">{{ alumini.roll_no }}</span></div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-icon">📧</div>
+            <div><span class="info-label">Email:</span>
+            <span class="info-value">{{ alumini.email }}</span></div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-icon">📞</div>
+            <div><span class="info-label">Phone:</span>
+            <span class="info-value">{{ alumini.phone_number }}</span></div>
+          </div>
         </div>
 
-        <div class="info-box">
-          <div class="info-icon">🌐</div>
-          <div><span class="info-label">University:</span>
-          <span class="info-value">{{ alumini.university }}</span></div>
-        </div>
-        
-        {% if alumini.id %}
         <div class="card-footer">
-          <a href="{% url 'chats:chat_with_alumni'%}" class="chat-button">💬 Chat</a>
+          <button class="chat-button"
+                  data-id="{{ alumini.id }}"
+                  onclick="toggleDetails(this.dataset.id, this)">
+            View More
+          </button>
+
+          <a href="javascript:void(0);" class="chat-button"
+            data-id="{{ alumini.id }}" 
+            data-username="{{ alumini.username }}"
+            onclick="openOrCreateRoom(this.dataset.id, this.dataset.username)">
+            💬 Chat
+          </a>
         </div>
-      {% endif %}
-         
-      {% empty %}
-        <p style="color:white;text-align:center;">No student found.</p>
-      {% endfor %}
+
       </div>
+    {% empty %}
+      <p style="color:white;text-align:center;">No student found.</p>
+    {% endfor %}
   </div>
 </body>
 </html>

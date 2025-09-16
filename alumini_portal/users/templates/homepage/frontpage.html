@@ -134,6 +134,13 @@
       height: 100%;
       border: none;
     }
+    .flash-message {
+      padding: 12px 20px; margin-bottom: 10px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; min-width: 220px; max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: left;
+    }
+    .success { color: green; background-color: #eafaf1; border: 1px solid #b2f2bb; }
+    .error { color: #c0392b; background-color: #fdecea; border: 1px solid #f5c6cb; }
     
   </style>
 </head>
@@ -142,6 +149,14 @@
   {% url 'student_login' as signin_url %}
   {% url 'signup' as signup_url %}
   {% url 'admin_login' as admin_login_url %}
+    {% if messages %}
+      <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+        {% for message in messages %}
+          <div class="flash-message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
 
   <div class="admin-btn-container">
     <button class="admin-btn" onclick="window.location.href='{{ admin_login_url }}'">Admin Login</button>
@@ -161,7 +176,7 @@
 <!-- 💬 Chatbot Popup -->
 <div id="chatbot-popup">
   <button id="chatbot-close">×</button>
-  <iframe src="{% static 'chats/chatbot.html' %}"></iframe>
+  <iframe src="{% url 'chats:chatbot' %}" style="width:100%; height:100%; border:none;"></iframe>
 </div>
 <script>
   const chatbotButton = document.getElementById("chatbot-button");
@@ -177,6 +192,15 @@
     chatbotPopup.style.display = "none";
     chatbotButton.style.display = "block"; // show 💬 again
   });
+// auto dismiss flash messages
+  setTimeout(() => {
+    const flashBox = document.getElementById('flash-messages');
+    if (flashBox) {
+      flashBox.style.transition = 'opacity 0.5s ease';
+      flashBox.style.opacity = '0';
+      setTimeout(() => flashBox.remove(), 500);
+    }
+  }, 3000);
 </script>
 </body>
 </html>

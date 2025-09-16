@@ -8,7 +8,10 @@
   .chat-wrapper { display:flex; height:100vh; min-width: 0;}
 
   /* Sidebar */
-  .chat-list { width:320px; background:#fff; border-right:1px solid #ddd; overflow-y:auto; }
+  .sidebar { width:320px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; }
+  .search-bar { padding:8px; border-bottom:1px solid #ddd; background:#f9f9f9; }
+  .search-bar input { width:90%; padding:8px; border:1px solid #ccc; border-radius:8px; font-size:14px; }
+  .chat-list { flex:1; overflow-y:auto; }
   .chat-item { display:flex; align-items:center; padding:12px 16px; border-bottom:1px solid #f0f0f0; cursor:pointer; transition:background .2s; }
   .chat-item:hover { background:#f5f5f5; }
   .avatar { width:45px; height:45px; border-radius:50%; flex-shrink:0; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:12px; }
@@ -16,7 +19,7 @@
   .chat-name { font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .last-message { font-size:13px; color:#666; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .chat-meta { font-size:11px; color:#999; margin-left:6px; }
-  .unread-badge { background:#25D366; color:white; font-size:11px; border-radius:10px; padding:2px 6px; margin-left:6px; }
+  .unread-badge { background:hsl(142, 70%, 49%); color:white; font-size:11px; border-radius:10px; padding:2px 6px; margin-left:6px; }
 
   /* Chat window */
   .chat-container { flex:1; display:flex; flex-direction:column; min-width: 0; overflow-x: hidden;}
@@ -40,28 +43,34 @@
 
 <div class="chat-wrapper">
   <!-- Sidebar -->
-  <div class="chat-list">
-    {% for room in chat_rooms %}
-      <div class="chat-item" data-room="{{ room.id }}" data-display="{{ room.display_name }}">
-        <div class="avatar" style="background-color:{{ room.avatar_bg }}">{{ room.avatar_initial }}</div>
-        <div class="chat-info">
-          <div class="chat-name">{{ room.display_name }}</div>
-          <div class="last-message">
-            {% if room.last_message %}
-              {{ room.last_message.content|truncatechars:25 }}
-            {% else %}No messages yet.{% endif %}
+  <div class="sidebar">
+    <div class="search-bar">
+      <input type="text" id="chat-search" placeholder="Search user...">
+    </div>
+
+    <div class="chat-list" id="chat-list">
+      {% for room in chat_rooms %}
+        <div class="chat-item" data-room="{{ room.id }}" data-display="{{ room.display_name }}">
+          <div class="avatar" style="background-color:{{ room.avatar_bg }}">{{ room.avatar_initial }}</div>
+          <div class="chat-info">
+            <div class="chat-name">{{ room.display_name }}</div>
+            <div class="last-message">
+              {% if room.last_message %}
+                {{ room.last_message.content|truncatechars:25 }}
+              {% else %}No messages yet.{% endif %}
+            </div>
+          </div>
+          <div class="chat-meta">
+            {% if room.last_message_time %}
+              {{ room.last_message_time }}
+            {% endif %}
+            {% if room.unread_count %}
+              <span class="unread-badge">{{ room.unread_count }}</span>
+            {% endif %}
           </div>
         </div>
-        <div class="chat-meta">
-          {% if room.last_message_time %}
-            {{ room.last_message_time }}
-          {% endif %}
-          {% if room.unread_count %}
-            <span class="unread-badge">{{ room.unread_count }}</span>
-          {% endif %}
-        </div>
-      </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
   </div>
 
   <!-- Chat Window -->
@@ -86,17 +95,22 @@ const chatBox = document.getElementById("chat-box");
 const chatHeader = document.getElementById("chat-header");
 const form = document.getElementById("chat-form");
 const input = document.getElementById("message-input");
-const currentUser = "{{ request.user.userdetails.first.firstname }}";
+const currentUser = "{{ request.user.userdetails.first.firstname }} {{ request.user.userdetails.first.lastname }}";
+
 
 // Helper: Render a single message
 function renderMessage(message) {
-    const isSender = message.username === currentUser;
+    const username = message.username || "Unknown";
+    const isSender = username === currentUser;
+
     const div = document.createElement("div");
     div.classList.add("message", isSender ? "sent" : "received");
     div.innerHTML = `
-        <div class="sender-name">${isSender ? "You" : message.username}</div>
+        <div class="sender-name">${isSender ? "You" : username}</div>
         <div class="message-content">${message.message}</div>
-        <div class="timestamp">${new Date(message.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+        <div class="timestamp">
+            ${new Date(message.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+        </div>
     `;
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -109,7 +123,7 @@ function renderMessages(messages) {
         chatBox.innerHTML = '<div class="chat-placeholder">No messages yet. Start chatting!</div>';
         return;
     }
-    messages.forEach(m => renderMessage(m, m.is_sender));
+    messages.forEach(m => renderMessage(m));
 }
 
 // Open chat room
@@ -118,7 +132,11 @@ function openChat(roomId, displayName) {
     chatHeader.innerText = displayName;
     form.style.display = "flex";
     chatBox.innerHTML = '<div class="chat-placeholder">Loading...</div>';
-
+    const item = document.querySelector(`.chat-item[data-room="${roomId}"]`);
+    if (item) {
+        const unreadBadge = item.querySelector(".unread-badge");
+        if (unreadBadge) unreadBadge.remove(); // reset unread count
+    }
     // Close previous WebSocket if any
     if (chatSocket && chatSocket.readyState !== WebSocket.CLOSED) chatSocket.close();
 
@@ -127,18 +145,30 @@ function openChat(roomId, displayName) {
 
     chatSocket.onopen = () => console.log("WebSocket connected");
 
-    chatSocket.onmessage = function(e) {
-      const data = JSON.parse(e.data);
-      renderMessage(data);  // renders 'sent' or 'received' based on username
-     };
+       chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        renderMessage(data);
 
-        // Update sidebar last message + time
-        const item = document.querySelector(`.chat-item[data-room="${roomId}"]`);
+        // ✅ Update sidebar last message + time
+        const item = document.querySelector(`.chat-item[data-room="${data.room_id || roomId}"]`);
         if (item) {
             const lastMessageDiv = item.querySelector(".last-message");
             const metaDiv = item.querySelector(".chat-meta");
             lastMessageDiv.innerText = data.message;
             metaDiv.innerText = new Date(data.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+            // ✅ If message is for another chat (not currently open) → increment unread badge
+            if (currentRoom !== (data.room_id || roomId)) {
+                let badge = item.querySelector(".unread-badge");
+                if (!badge) {
+                    badge = document.createElement("span");
+                    badge.className = "unread-badge";
+                    badge.innerText = "1";
+                    item.querySelector(".chat-meta").appendChild(badge);
+                } else {
+                    badge.innerText = parseInt(badge.innerText) + 1;
+                }
+            }
         }
     };
 
@@ -153,7 +183,7 @@ function openChat(roomId, displayName) {
             chatBox.innerHTML = '<div class="chat-placeholder">Failed to load messages.</div>';
             console.error("Fetch error:", err);
         });
-
+}
 
 // Send message
 form.addEventListener("submit", e => {
@@ -164,9 +194,7 @@ form.addEventListener("submit", e => {
     // Send to server (WebSocket)
     chatSocket.send(JSON.stringify({ message: messageText, username: currentUser }));
 
-    // Render immediately in same format as server
-    renderMessage({sender_name: currentUser, content: messageText, timestamp: new Date().toISOString()}, true);
-
+    // ❌ Removed immediate render to avoid duplicates
     input.value = "";
 });
 
@@ -176,6 +204,71 @@ document.querySelectorAll(".chat-item").forEach(item => {
         openChat(item.dataset.room, item.dataset.display);
     });
 });
+
+// 🔍 Search functionality
+document.getElementById("chat-search").addEventListener("keyup", function() {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll("#chat-list .chat-item").forEach(item => {
+        const name = item.querySelector(".chat-name").innerText.toLowerCase();
+        if (name.includes(filter)) {
+            item.style.display = "flex";
+        } else {
+            item.style.display = "none";
+        }
+    });
+});
+function openOrCreateRoom(aluminiId, displayName) {
+    fetch(`/chat/get-or-create-room/${aluminiId}/`)
+        .then(res => res.json())
+        .then(data => {
+            const roomId = data.room_id;
+            const roomName = data.display_name;
+
+            // Redirect to chat_home if not there
+            if (window.location.pathname !== "/chat/home/") {
+                localStorage.setItem("open_room_id", roomId);
+                window.location.href = "/chat/home/";
+                return;
+            }
+
+            // Add room to sidebar if it doesn't exist
+            if (!document.querySelector(`.chat-item[data-room="${roomId}"]`)) {
+                const list = document.getElementById("chat-list");
+                if (list) {
+                    const div = document.createElement("div");
+                    div.className = "chat-item";
+                    div.dataset.room = roomId;
+                    div.dataset.display = roomName;
+                    div.innerHTML = `
+                        <div class="avatar" style="background-color:#6a11cb">${roomName[0]}</div>
+                        <div class="chat-info">
+                            <div class="chat-name">${roomName}</div>
+                            <div class="last-message">No messages yet.</div>
+                        </div>
+                        <div class="chat-meta"></div>
+                    `;
+                    div.addEventListener("click", () => openChat(roomId, roomName));
+                    list.prepend(div);
+                }
+            }
+
+            // Open chat window
+            openChat(roomId, roomName);
+        })
+        .catch(err => console.error(err));
+}
+// Auto-open room after redirect
+document.addEventListener("DOMContentLoaded", () => {
+    const openRoomId = localStorage.getItem("open_room_id");
+    if (openRoomId) {
+        const item = document.querySelector(`.chat-item[data-room="${openRoomId}"]`);
+        if (item) {
+            openChat(openRoomId, item.dataset.display);
+        }
+        localStorage.removeItem("open_room_id");
+    }
+});
+
 </script>
 
 </body>
