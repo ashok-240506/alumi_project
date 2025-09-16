@@ -243,7 +243,7 @@
   </style>
 </head>
 <body>
-<div class="navbar">
+<!-- <div class="navbar">
     <div class="left">
         <a href="{% url 'home' %}" class="logout-btn">Back</a>
     </div>
@@ -254,7 +254,7 @@
         <span>Student</span>
         <img src="{% if personal_form.instance.profilephoto %}{{ personal_form.instance.profilephoto.url }}{% else %}https://i.pravatar.cc/100{% endif %}" class="profile-img">
     </div>
-</div>
+</div> -->
 <div class="signup-container">
     <form method="post" action="{% url 'signup' %}" id="signupForm">
         <h2>Student Signup</h2>
