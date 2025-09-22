@@ -7,7 +7,7 @@ from .models import Job
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
-        fields = ['title', 'description', 'company_name', 'location', 'job_type', 'salary', 'deadline']
+        fields = ['title', 'description', 'company_name', 'location', 'job_type', 'salary', 'deadline','image']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -36,6 +36,9 @@ class JobForm(forms.ModelForm):
             'deadline': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
+            }),
+            'image': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
             }),
         }
 

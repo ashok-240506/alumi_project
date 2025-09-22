@@ -84,7 +84,7 @@
     <h1>{% if object %}Edit{% else %}Create{% endif %} Job</h1>
     <p class="subtitle">Post an opportunity and connect with students</p>
     
-   <form method="post">
+  <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
 
   <div class="mb-3">
@@ -129,6 +129,11 @@
     {{ form.deadline.label_tag }}
     {{ form.deadline }}
     <div class="text-danger small">{{ form.deadline.errors }}</div>
+  </div>
+  <div class="mb-3">
+    {{ form.image.label_tag }}
+    {{ form.image }}
+    <div class="text-danger small">{{ form.image.errors }}</div>
   </div>
 
   <button type="submit" class="btn btn-primary w-100">💾 Save Job</button>

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,6 +181,14 @@
     border-radius: 50%;
     cursor: pointer;
     }
+  .profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 40%;
+  object-fit: cover;     /* crop instead of stretching */
+  border: 2px solid #fff; /* optional: adds clean border */
+  box-shadow: 0 0 4px rgba(0,0,0,0.2); /* optional: subtle clarity effect */
+}
   </style>
 
 <script>
@@ -251,20 +260,31 @@ window.addEventListener("DOMContentLoaded", () => {
 </head>
 <body>
       <!-- Navbar -->
+
+<!-- Navbar -->
 <div class="navbar">
     <div class="left">
-        <a href="{% url 'student_home' %}" class="logout-btn">Back</a>
+        <a href="{% if user.is_alumini %}{% url 'alumni_home' %}{% else %}{% url 'student_home' %}{% endif %}" class="logout-btn">
+          Back
+        </a>
     </div>
+
     <div class="center">
         ALUFA
     </div>
-    
+
     <div class="right">
-        <span class="username">{{ personal_form.firstname.value }} {{ personal_form.lastname.value }}</span>
+        <span class="username">{{ user.userdetails.first.firstname }} {{ user.userdetails.first.lastname }}</span>
         <a href="{% url 'signout' %}" class="logout-btn">Logout</a>
-        <img src="{% if personal_form.instance.profilephoto %}{{ personal_form.instance.profilephoto.url }}{% else %}https://i.pravatar.cc/100{% endif %}" class="profile-img">
+
+        {% if user.userdetails.first.profilephoto %}
+            <img src="{{ user.userdetails.first.profilephoto.url }}" class="profile-pic">
+        {% else %}
+            <img src="{% static 'default-avatar.png' %}" class="profile-pic">
+        {% endif %}
     </div>
 </div>
+
 
   <h1>Alumni Details</h1>
   <div class="container">

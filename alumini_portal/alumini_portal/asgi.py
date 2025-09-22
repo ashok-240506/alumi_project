@@ -15,12 +15,14 @@ from django.core.asgi import get_asgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "alumini_portal.settings")
 django_asgi_app = get_asgi_application()
 import chats.routing
+import notification.routing
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            chats.routing.websocket_urlpatterns
+            chats.routing.websocket_urlpatterns + notification.routing.websocket_urlpatterns
+
         )
     ),
 })

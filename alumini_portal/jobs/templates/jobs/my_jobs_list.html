@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ job.title }} - Alumni Jobs</title>
+<title>My Jobs - Alumni Jobs</title>
 <style>
 /* ===== Body & Layout ===== */
 body {
@@ -14,10 +14,15 @@ body {
     padding: 20px;
 }
 
-/* Container */
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #0a66c2;
 }
 
 /* Card */
@@ -52,18 +57,25 @@ body {
 
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.user-info strong { font-size: 14px; color: #111; }
+.user-info strong { font-size: 16px; color: #111; }
 .user-info span { font-size: 12px; color: #666; display: block; }
 
-/* Card Content */
-.card-content h2 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+.card-content h2 { font-size: 20px; font-weight: 600; margin: 8px 0; }
 .card-content p { font-size: 14px; color: #444; }
 
-/* Job Details */
-.job-meta { font-size: 14px; color: #333; margin-top: 8px; }
-.job-meta p { margin: 4px 0; }
+/* Job Meta */
+.job-meta p { margin: 4px 0; font-size: 14px; color: #333; }
 
-/* Footer */
+.job-tags span {
+    background: #eef3f8;
+    color: #0a66c2;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+/* Card Footer */
 .card-footer {
     display: flex;
     align-items: center;
@@ -88,13 +100,11 @@ body {
 }
 
 .action-btn:hover { background: #f0f2f5; color: #0a66c2; }
-
 .heart.liked { color: #e0245e; }
 
 .delete-btn { color: #d9534f; }
 .delete-btn:hover { background: #f8d7da; color: #c82333; }
 
-/* Apply Button */
 .apply-btn {
     background: #0a66c2;
     color: #fff !important;
@@ -104,38 +114,6 @@ body {
     font-weight: 500;
 }
 .apply-btn:hover { background: #004182; }
-
-/* Comments Section */
-.comments-section {
-    background: #fff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
-}
-
-.comments-section h3 {
-    margin: 0 0 10px;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.comment { border-bottom: 1px solid #eee; padding: 10px 0; }
-.comment:last-child { border-bottom: none; }
-.comment strong { font-size: 14px; color: #111; }
-.comment p { margin: 4px 0; color: #444; }
-.comment small { font-size: 11px; color: #888; }
-
-/* Comment Form */
-.comment-form { margin-top: 10px; }
-.comment-form textarea {
-    width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;
-    font-size: 14px; resize: vertical;
-}
-.comment-form button {
-    margin-top: 8px; padding: 6px 12px; border-radius: 8px; border: none;
-    background: #0a66c2; color: #fff; cursor: pointer;
-}
-.comment-form button:hover { background: #004182; }
 </style>
 <script>
 function confirmDelete(event) {
@@ -148,14 +126,16 @@ function confirmDelete(event) {
 <body>
 
 <div class="container">
-    <!-- Job Card -->
+    <h1>My Jobs</h1>
+
+    {% for job in jobs %}
     <div class="card">
         <div class="card-header">
             <div class="avatar">
                 {% if job.posted_by.userdetails.first %}
                     {% if job.posted_by.userdetails.first.profilephoto %}
                         <img src="{{ job.posted_by.userdetails.first.profilephoto.url }}" 
-                            alt="{{ job.posted_by.userdetails.first.firstname }}">
+                             alt="{{ job.posted_by.userdetails.first.firstname }}">
                     {% else %}
                         {{ job.posted_by.userdetails.first.firstname|slice:":1"|upper }}
                     {% endif %}
@@ -163,27 +143,20 @@ function confirmDelete(event) {
                     ❓
                 {% endif %}
             </div>
-            <!-- User Info -->
             <div class="user-info">
                 {% if job.posted_by.userdetails.first %}
                     <strong>{{ job.posted_by.userdetails.first.get_full_name }}</strong>
                 {% else %}
                     <strong>Unknown</strong>
                 {% endif %}
-                <span>
-                Alumni • {{ job.posted_at|short_timesince  }} ago
-                {% if job.posted_at|timesince == "0 minutes" or job.posted_at|timesince < "1 hour" %}
-                    <span class="new-badge">New</span>
-                {% endif %}
-                </span>
+                <span>Alumni • {{ job.posted_at|short_timesince }} ago</span>
             </div>
         </div>
 
         <div class="card-content">
             <h2>{{ job.title }}</h2>
-            <p>{{ job.description }}</p>
+            <p>{{ job.description|truncatewords:25 }}</p>
 
-            <!-- Extra Job Details -->
             <div class="job-meta">
                 {% if job.company_name %}<p><strong>Company:</strong> {{ job.company_name }}</p>{% endif %}
                 {% if job.location %}<p><strong>Location:</strong> {{ job.location }}</p>{% endif %}
@@ -193,16 +166,16 @@ function confirmDelete(event) {
             </div>
 
             {% if job.tags.all %}
-            <div class="job-tags" style="margin-top:6px;">
+            <div class="job-tags">
                 {% for tag in job.tags.all %}
-                <span style="background:#eef3f8; color:#0a66c2; padding:2px 6px; border-radius:12px; font-size:12px;">{{ tag.name }}</span>
+                    <span>{{ tag.name }}</span>
                 {% endfor %}
             </div>
             {% endif %}
         </div>
 
         <div class="card-footer">
-            <!-- Like -->
+            <!-- Likes -->
             <form method="post" action="{% url 'job_like' job.pk %}">
                 {% csrf_token %}
                 <button class="action-btn" type="submit">
@@ -215,8 +188,8 @@ function confirmDelete(event) {
             <!-- Comments -->
             <span>💬 {{ job.comments.count }}</span>
 
-            <!-- Apply -->
-            <a href="{{ job.apply_link }}" target="_blank" class="apply-btn">🚀 Apply Now</a>
+            <!-- View / Apply -->
+            <a href="{% url 'job_detail' job.pk %}" class="apply-btn">View Details</a>
 
             <!-- Edit/Delete (only owner) -->
             {% if job.posted_by == request.user %}
@@ -225,29 +198,9 @@ function confirmDelete(event) {
             {% endif %}
         </div>
     </div>
-
-    <!-- Comments Section -->
-    <div class="comments-section">
-        <h3>Comments</h3>
-        {% for comment in job.comments.all %}
-          <div class="comment">
-            <strong>{{ comment.user.get_full_name }}</strong>
-            <p>{{ comment.text }}</p>
-            <small>{{ comment.created_at|timesince }} ago</small>
-          </div>
-        {% empty %}
-          <p>No comments yet.</p>
-        {% endfor %}
-
-        <!-- Comment Form -->
-        <div class="comment-form">
-            <form method="post" action="{% url 'job_comment' job.id %}">
-                {% csrf_token %}
-                <textarea name="text" placeholder="Write a comment..." required></textarea>
-                <button type="submit">💬 Post Comment</button>
-            </form>
-        </div>
-    </div>
+    {% empty %}
+        <p>You haven't posted any jobs yet.</p>
+    {% endfor %}
 </div>
 
 </body>

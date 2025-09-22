@@ -60,11 +60,12 @@ class AlumniHomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['is_alumini'] = True
         return context
+    
 def student_list(request):
     student_qs = (
         CustomUser.objects.filter(is_active=True, is_staff=False,is_alumini=False)
         .prefetch_related("userdetails__batch__department")
-    )
+    ).exclude(id=request.user.id)
 
     student_data = []
     for stud in student_qs:
@@ -88,7 +89,7 @@ def alumni_list(request):
     alumni_qs = (
         CustomUser.objects.filter(is_alumini=True, is_active=True, is_staff=False)
         .prefetch_related("userdetails__batch__department")
-    )
+    ).exclude(id=request.user.id)
     alumni_data = []
     for alum in alumni_qs:
         details = alum.userdetails.first() if alum.userdetails.exists() else None
@@ -472,9 +473,6 @@ class SignoutView(LoginRequiredMixin, View):
         logout(request)
         return redirect('home')
     
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .forms import CustomUserForm, UserPersonalProfileForm
 
 @login_required
 def profile_view(request):

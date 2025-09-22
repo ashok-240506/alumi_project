@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'chats',
     'jobs',
     "widget_tweaks",
+    "notification",
 
 ]
 # ASGI_APPLICATION = 'alumini_portal.routing.application'
@@ -72,6 +73,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -185,5 +187,12 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]   # where your source static files live
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')     # where collectstatic will copy them
+

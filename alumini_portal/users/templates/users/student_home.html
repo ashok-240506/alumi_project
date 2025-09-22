@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,10 +134,10 @@
     .top-navbar .nav-items .dropdown:hover .dropdown-content {
       display: block;
     }
-    .notification {
+    /* .notification {
       position: relative;
       cursor: pointer;
-    }
+    } */
     .top-navbar .nav-items .dropdown span {
     cursor: pointer;
     padding: 8px 12px;    
@@ -147,7 +148,7 @@
         background: rgba(255,255,255,0.2); 
 
     }
-
+/* 
     .notification .badge {
       position: absolute;
       top: -6px;
@@ -157,7 +158,7 @@
       font-size: 12px;
       padding: 2px 6px;
       border-radius: 50%;
-    }
+    } */
     @media (max-width: 768px) {
   .top-navbar .nav-items {
     flex-direction: column;
@@ -176,8 +177,157 @@
   border: 2px solid #fff; /* optional: adds clean border */
   box-shadow: 0 0 4px rgba(0,0,0,0.2); /* optional: subtle clarity effect */
 }
+.notification {
+  position: relative;
+  cursor: pointer;
+}
+
+.badge {
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+
+/* .notification-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 250px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.notification-dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-dropdown li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+.notification-dropdown li:last-child {
+  border-bottom: none;
+}
+ */
+/* Notification Dropdown Styling */
+/* Notification Dropdown */
+.notification-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  width: 340px;
+  max-height: 420px;
+  overflow-y: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Tabs */
+.notification-dropdown .tabs {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #fff;
+}
+
+.notif-tab {
+  border: 1px solid #f77e3e;
+  background: #fff;
+  color: #f77e3e;
+  border-radius: 20px;
+  padding: 4px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.notif-tab.active {
+  background: #f77e3e;
+  color: white;
+}
+
+/* Notification Card */
+#notification-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  margin: 8px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background: #fff;
+  border-left: 4px solid transparent;
+}
+
+#notification-list li.unread {
+  border-left: 4px solid #f77e3e;
+  background: #fff7f3;
+}
+
+.notif-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
 
+.notif-content {
+  flex: 1;
+}
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+
+.notif-message {
+  font-size: 14px;
+  color: #333;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.notif-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: #f77e3e;
+  text-decoration: none;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notif-link:hover {
+  text-decoration: underline;
+}
+.unread {
+  background: #f9f5ff; /* subtle highlight */
+}
   </style>
 </head>
 <body>
@@ -186,10 +336,26 @@
 <div class="top-navbar">
   <div class="brand">ALUFA</div>
   <div class="nav-items">
-    <div class="notification">
-      🔔
-      <span class="badge">3</span>
+    <div class="notification" id="notification-container">
+      <div id="notification-bell">
+        🔔
+        <span class="notification-count">0</span>
+      </div>
+      
+      <!-- Dropdown -->
+      <div class="notification-dropdown" id="notification-dropdown" style="display:none;">
+        <div class="tabs">
+          <button class="notif-tab active" data-tab="all">All (<span id="all-count">0</span>)</button>
+          <button class="notif-tab" data-tab="unread">Unread (<span id="unread-count">0</span>)</button>
+          <button class="notif-tab" data-tab="read">Read (<span id="read-count">0</span>)</button>
+        </div>
+
+        <ul id="notification-list">
+          <li>No new notifications</li>
+        </ul>
+      </div>
     </div>
+    
     <div class="dropdown">
       <span>🌐 EN</span>
     </div>
@@ -247,9 +413,9 @@
       <a href="{% url 'alumni_data' %}" class="btn">User Details</a>
     </div>
     <div class="card">
-      <h3>Job</h3>
+      <h3>Job Portal</h3>
       <p>Share job opportunities </p>
-      <a href="{% url 'job_create' %}" class="btn">Post a Job</a>
+      <a href="{% url 'job_list' %}" class="btn">Job Portal</a>
     </div>
   {% else %}
     <div class="card">
@@ -266,50 +432,109 @@
 </div>
 
 <script>
-  // auto dismiss flash messages
-  setTimeout(() => {
-    const flashBox = document.getElementById('flash-messages');
-    if (flashBox) {
-      flashBox.style.transition = 'opacity 0.5s ease';
-      flashBox.style.opacity = '0';
-      setTimeout(() => flashBox.remove(), 500);
-    }
-  }, 3000);
-// Dropdown handling (only when clicking on the span next to profile pic)
-  document.querySelectorAll('.dropdown').forEach(drop => {
-    const trigger = drop.querySelector('span');  // only text span will trigger
-    const content = drop.querySelector('.dropdown-content');
+document.addEventListener("DOMContentLoaded", () => {
+    const userId = {{ user.id }};
+    const bell = document.getElementById("notification-bell");
+    const dropdown = document.getElementById("notification-dropdown");
+    const list = document.getElementById("notification-list");
+    const countElem = document.querySelector("#notification-bell .notification-count");
 
-    if (trigger && content) {
-      trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // close other open dropdowns first
-        document.querySelectorAll('.dropdown-content').forEach(dc => {
-          if (dc !== content) dc.style.display = 'none';
+    // Fetch notifications from backend
+    function fetchNotifications() {
+        fetch(`/jobs/${userId}/notification/`)
+            .then(res => res.json())
+            .then(data => {
+                countElem.textContent = data.count;
+                document.getElementById("all-count").textContent = data.count.all;
+                document.getElementById("unread-count").textContent = data.count.unread;
+                document.getElementById("read-count").textContent = data.count.read;
+                list.innerHTML = "";
+
+    if (!data.notifications || data.notifications.length === 0) {
+        list.innerHTML = "<li>No new notifications</li>";
+    } else {
+        data.notifications.forEach(n => {
+            const li = document.createElement("li");
+            if (!n.read) li.classList.add("unread"); // highlight unread
+
+            li.innerHTML = `
+                <div class="notif-item">
+                    <img src="${n.sender_avatar}" class="notif-avatar" alt="user" />
+                    <div class="notif-content">
+                        <div class="notif-message">${n.message}</div>
+                        <div class="notif-time">${n.created_at}</div>
+                        <a href="${n.url}" class="notif-link">📩 Click here</a>
+                    </div>
+                </div>
+            `;
+            list.appendChild(li);
         });
-        // toggle this one
-        content.style.display = content.style.display === 'block' ? 'none' : 'block';
-      });
-
-      // keep dropdown open when clicking inside
-      content.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Here we can differentiate actions:
-        if (e.target.closest('a')) {
-          const linkText = e.target.innerText.trim();
-          console.log("Clicked:", linkText); // debug → "Logout" or "Change Password"
-        }
-      });
     }
-  });
+})
+            .catch(err => console.error("Notification fetch error:", err));
+    }
 
-  // Close dropdowns if clicked outside
-  window.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown-content').forEach(dc => dc.style.display = 'none');
-  });
+    // Initial fetch
+    fetchNotifications();
+    document.querySelectorAll(".notif-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".notif-tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          const filter = tab.dataset.tab;
 
+          document.querySelectorAll("#notification-list li").forEach(item => {
+            if (filter === "all") {
+              item.style.display = "flex";
+            } else if (filter === "unread") {
+              item.style.display = item.classList.contains("unread") ? "flex" : "none";
+            } else if (filter === "read") {
+              item.style.display = item.classList.contains("unread") ? "none" : "flex";
+            }
+          });
+        });
+      });
 
+    // Auto-refresh every 10 seconds
+    setInterval(fetchNotifications, 10000);
+
+    // Toggle dropdown on bell click
+    bell.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    });
+
+    // Close dropdown if clicked outside
+    window.addEventListener("click", () => {
+        dropdown.style.display = "none";
+    });
+
+    // WebSocket for real-time notifications
+    const socket = new WebSocket(`ws://${window.location.host}/ws/notification/`);
+    socket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        // Increment badge
+        countElem.textContent = parseInt(countElem.textContent) + 1;
+
+        // Add notification
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <div style="font-weight:bold;">${data.title}</div>
+            <div>${data.message}</div>
+            <div style="font-size:12px;color:#888;">${data.created_at || ''}</div>
+            <a href="${data.url}" style="font-size:12px;color:#2196F3;">Click here</a>
+        `;
+
+        // Remove placeholder if exists
+        if (list.querySelector("li") && list.querySelector("li").textContent === "No new notifications") {
+            list.innerHTML = "";
+        }
+
+        list.prepend(li);
+    };
+});
 </script>
+
 
 </body>
 </html>

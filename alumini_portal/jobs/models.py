@@ -18,7 +18,7 @@ class Job(models.Model):
     job_type = models.CharField(max_length=2, choices=JOB_TYPES)
     salary = models.CharField(max_length=100, blank=True, null=True)
     deadline = models.DateField(blank=True, null=True)
-    
+    image = models.ImageField(upload_to='job_images/', blank=True, null=True)
     posted_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='jobs')
     posted_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,9 +38,93 @@
   .chat-form { display:flex; border-top:1px solid #ccc; background:#f0f0f0; padding:8px; }
   .chat-form input { flex:1; padding:10px; border:none; border-radius:20px; outline:none; }
   .chat-form button { background:#075e54; color:white; border:none; padding:10px 18px; border-radius:20px; margin-left:8px; cursor:pointer; }
+.navbar {
+    background-color: #075e54;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    }
+
+    .navbar .left {
+        flex: 1;
+        text-align: left;
+    }
+
+    .navbar .center {
+        flex: 1;
+        text-align: center;
+}
+    .navbar .right {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .navbar .right .username {
+        font-weight: 600;
+        color: white;
+    }
+
+    .navbar .logout-btn {
+    background: #ff7675;
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: 0.3s;
+    }
+    .navbar .logout-btn:hover {
+    background: #e74c3c;
+    }
+    .navbar .profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    }
+  .profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 40%;
+  object-fit: cover;     /* crop instead of stretching */
+  border: 2px solid #fff; /* optional: adds clean border */
+  box-shadow: 0 0 4px rgba(0,0,0,0.2); /* optional: subtle clarity effect */
+}
 </style>
 </head>
 <body>
+    <!-- Navbar -->
+<div class="navbar">
+    <div class="left">
+        <a href="{% if user.is_alumini %}{% url 'alumni_home' %}{% else %}{% url 'student_home' %}{% endif %}" class="logout-btn"> ⬅ Back</a>
+    </div>
+
+    <div class="center">
+        ALUFA
+    </div>
+
+    <div class="right">
+        {% if details %}
+            <span class="username">{{ details.firstname }} {{ details.lastname }}</span>
+            {% if details.profilephoto %}
+                <img src="{{ details.profilephoto.url }}" class="profile-pic">
+            {% else %}
+                <img src="{% static 'default-avatar.png' %}" class="profile-pic">
+            {% endif %}
+        {% else %}
+            <span class="username">{{ user.firstname }} {{ user.lastname }}</span>
+            <img src="{% static 'default-avatar.png' %}" class="profile-pic">
+        {% endif %}
+        
+        <a href="{% url 'signout' %}" class="logout-btn">Logout</a>
+    </div>
+</div>
 
 <div class="chat-wrapper">
   <!-- Sidebar -->

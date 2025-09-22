@@ -103,6 +103,7 @@ class ChatWithAlumniListView(LoginRequiredMixin, TemplateView):
             visible_rooms.append(room)
 
         context['chat_rooms'] = visible_rooms
+        context["details"] = user.userdetails.first()  
         return context
 
 class GroupChatRedirectView(LoginRequiredMixin, View):

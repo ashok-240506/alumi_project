@@ -1,3 +1,4 @@
+{% load static %}
 {% load custom_timesince %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,57 +7,230 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alumni Job Feed</title>
 <style>
-/* ===== Body & Layout ===== */
+/* ===== Global Styles ===== */
 body {
     font-family: "Segoe UI", Arial, sans-serif;
-    background: #f3f2ef;
+    background: linear-gradient(to right, #8EC5FC, #E0C3FC);
     margin: 0;
-    padding: 20px;
+    padding: 0;
 }
-
-/* Top Banner */
-.top-banner {
-    background: linear-gradient(90deg, #0a66c2, #004182);
+/* ✅ Fixed Top Navbar */
+.top-navbar {
+    background: #7b5fc4;
     color: white;
-    padding: 40px 20px;
-    text-align: center;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-/* Search Filter Bar */
-.search-filter {
-    background: #fff;
-    padding: 16px;
-    border-radius: 8px;
-    margin: 0 auto 20px;
-    max-width: 900px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-.search-filter input, .search-filter select {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
+/* Left Side (Back Button) */
+.top-navbar .nav-left {
+    display: flex;
+    align-items: center;
 }
 
-.search-filter button {
-    padding: 8px 16px;
-    border: none;
+.top-navbar .nav-btn {
+    background: white;
+    color: #7b5fc4;
+    padding: 6px 14px;
     border-radius: 6px;
-    background: #0a66c2;
-    color: white;
-    font-weight: bold;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.top-navbar .nav-btn:hover {
+    background: #ece6ff;
+}
+
+/* Brand Center */
+.top-navbar .brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Right Section */
+.nav-items {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+}
+
+/* Notifications */
+.notification {
+    position: relative;
     cursor: pointer;
 }
 
+.notification .badge {
+    background: red;
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    padding: 2px 6px;
+    position: absolute;
+    top: -6px;
+    right: -10px;
+}
+
+/* Profile + Username */
+.profile-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    position: relative;
+}
+
+.profile-pic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+
+.profile-name {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Dropdown Menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 110%;
+    background: white;
+    color: #333;
+    border-radius: 8px;
+    min-width: 180px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 2000;
+    overflow: hidden;
+}
+
+.dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.dropdown-content a:hover {
+    background: #f3f2ff;
+}
+
+
+/* Top Banner */
+.top-banner {
+    background: #7b5fc4;
+    color: white;
+    padding: 24px;
+    margin: 20px auto;
+    border-radius: 12px;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-banner h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.top-banner p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: #e8e0ff;
+}
+
+.post-btn {
+    background: white;
+    color: #7b5fc4;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.post-btn:hover {
+    background: #ece6ff;
+}
+
+/* Search & Filter Bar */
+.search-filter {
+  background: white;
+  padding: 15px;
+  margin: 0 auto 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 1200px;
+}
+
+.search-filter form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.filter-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+
+.search-filter button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #7b5fc4;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
 .search-filter button:hover {
-    background: #004182;
+    background: #6643b0;
+}
+
+.clear-btn {
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #444;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f5f5f5;
+}
+
+.clear-btn:hover {
+  background: #e1e1e1;
 }
 
 /* Main Layout */
@@ -65,34 +239,31 @@ body {
     grid-template-columns: 250px 1fr 250px;
     gap: 20px;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0 auto 30px;
 }
 
 .left, .right {
-    background: #fff;
-    border-radius: 8px;
+    background: white;
+    border-radius: 10px;
     padding: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
     font-size: 14px;
 }
 
-.left h3, .right h3 { color: #0a66c2; margin-top: 0; }
-
-.left ul, .right ul { list-style: none; padding: 0; margin: 0; }
-.left li, .right li { padding: 6px 0; color: #444; }
+.left h3, .right h3 { color: #7b5fc4; margin-top: 0; }
 
 /* Feed Cards */
 .feed { display: flex; flex-direction: column; gap: 20px; }
 
 .card {
-    background: #fff;
+    background: white;
     border-radius: 12px;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
     padding: 16px;
 }
 
-.card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-2px); }
+.card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.15); transform: translateY(-2px); }
 
 .card-header {
     display: flex;
@@ -122,7 +293,7 @@ body {
 .user-info span { font-size: 12px; color: #666; display: block; }
 
 .card-content h3 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
-.card-content h3 a { text-decoration: none; color: #0073b1; }
+.card-content h3 a { text-decoration: none; color: #7b5fc4; }
 .card-content h3 a:hover { text-decoration: underline; }
 
 .card-content p { font-size: 14px; color: #444; margin: 2px 0; }
@@ -130,20 +301,13 @@ body {
 /* Tags */
 .job-tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
 .job-tags span {
-    background: #eef3f8; color: #0a66c2;
-    padding: 2px 6px; border-radius: 12px; font-size: 12px; cursor: pointer;
+    background: #f3f2ff; 
+    color: #7b5fc4;
+    padding: 3px 8px; 
+    border-radius: 12px; 
+    font-size: 12px; 
+    cursor: pointer;
 }
-
-/* "New" Badge
-.new-badge {
-    display: inline-block;
-    background: #798aca;
-    color: #fff;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 6px;
-    margin-left: 6px;
-} */
 
 /* Footer */
 .card-footer {
@@ -170,66 +334,135 @@ body {
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
+.comments-section {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+.comment {
+  padding: 6px 0;
+  font-size: 14px;
+}
+.comment strong {
+  color: #111;
+}
+.comment-meta {
+  font-size: 12px;
+  color: #666;
+}
+.view-more-btn {
+  background: none;
+  border: none;
+  color: #0a66c2;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
 
-.action-btn:hover { background: #f0f2f5; color: #0a66c2; }
+.action-btn:hover { background: #f0f2f5; color: #7b5fc4; }
 
 .heart.liked { color: #e0245e; }
 .heart.animate { transform: scale(1.3); transition: transform 0.2s; }
 
 .apply-btn {
-    background: #0073b1;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 14px;
-    transition: background 0.2s;
+  background: #7b5fc4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
 }
-
-.apply-btn:hover { background: #005582; }
+.apply-btn:hover {
+  background: #6643b0;
+}
 
 /* Responsive */
 @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
     .left, .right { display: none; }
+    .top-banner { flex-direction: column; text-align: center; gap: 12px; }
 }
 </style>
 </head>
 <body>
+<div class="top-navbar">
+  <div class="nav-left">
+    <a href="{% if user.is_alumini %}{% url 'alumni_home' %}{% else %}{% url 'student_home' %}{% endif %}" class="nav-btn">⬅ Back</a>
+  </div>
 
-<!-- Top Banner -->
-<div class="top-banner">
-  <h2>Alumni Job Feed</h2>
-  <p>Latest opportunities shared by your alumni network</p>
+  <div class="brand">ALUFA</div>
+
+  <div class="nav-items">
+    <div class="notification">🔔<span class="badge">3</span></div>
+
+    <div class="dropdown">🌐 EN</div>
+    <div class="dropdown">{% if user.is_alumini %} Alumni {% else %} Student {% endif %}</div>
+
+    <!-- Profile + Dropdown -->
+    <div class="profile-container" onclick="toggleDropdown()">
+      <img src="{{ user.userdetails.first.profilephoto.url|default:'https://i.pravatar.cc/30' }}" class="profile-pic">
+      <span class="profile-name">{{ user.userdetails.first.full_name }}</span>
+
+      <div id="profileDropdown" class="dropdown-content">
+        <a href="{% url 'reset-password' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M280-400q-33 0-56.5-23.5T200-480q0-33 23.5-56.5T280-560q33 0 56.5 23.5T360-480q0 33-23.5 56.5T280-400Zm0 160q-100 0-170-70T40-480q0-100 70-170t170-70q67 0 121.5 33t86.5 87h352l120 120-180 180-80-60-80 60-85-60h-47q-32 54-86.5 87T280-240Zm0-80q56 0 98.5-34t56.5-86h125l58 41 82-61 71 55 75-75-40-40H435q-14-52-56.5-86T280-640q-66 0-113 47t-47 113q0 66 47 113t113 47Z"/></svg>Change Password</a>
+        <a href="{% url 'signout' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-160h80v160h560v-560H200v160h-80v-160q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm220-160-56-58 102-102H120v-80h346L364-622l56-58 200 200-200 200Z"/></svg>Logout</a>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Search & Filter -->
+
+<!-- ✅ Banner Section -->
+<div style="background:rgba(255,255,255,0.08); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+  <div>
+    <h2 style="margin:0; font-size:24px;">Alumni Job Feed</h2>
+    <p style="margin:2px 0 0; font-size:14px; opacity:0.9;">Latest opportunities shared by your alumni network</p>
+  </div>
+  <a href="{% url 'job_create' %}" style="background:white; color:#7b5fc4; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:600;">➕ Post a Job</a>
+</div>
+
+
+<!-- 🔍 Search & Filter -->
 <div class="search-filter">
   <form method="GET" action="{% url 'job_list' %}">
-    <input type="text" name="q" placeholder="🔍 Search jobs by title or company" value="{{ request.GET.q }}">
-    <select name="location">
+    <!-- Search Box -->
+    <input type="text" 
+           name="q" 
+           placeholder="🔍 Search jobs by title or company"
+           value="{{ request.GET.q }}" 
+           class="search-input">
+
+    <!-- Location -->
+    <select name="location" class="filter-select">
       <option value="">🌍 All Locations</option>
       {% for loc in locations %}
       <option value="{{ loc }}" {% if request.GET.location == loc %}selected{% endif %}>{{ loc }}</option>
       {% endfor %}
     </select>
-    <select name="type">
+
+    <!-- Job Type -->
+    <select name="type" class="filter-select">
       <option value="">💼 All Types</option>
       <option value="Full-time" {% if request.GET.type == "Full-time" %}selected{% endif %}>Full-time</option>
       <option value="Part-time" {% if request.GET.type == "Part-time" %}selected{% endif %}>Part-time</option>
       <option value="Internship" {% if request.GET.type == "Internship" %}selected{% endif %}>Internship</option>
     </select>
-    <select name="experience">
+
+    <!-- Experience -->
+    <select name="experience" class="filter-select">
       <option value="">🕒 Any Experience</option>
       <option value="0-1" {% if request.GET.experience == "0-1" %}selected{% endif %}>0-1 years</option>
       <option value="2-5" {% if request.GET.experience == "2-5" %}selected{% endif %}>2-5 years</option>
       <option value="5+" {% if request.GET.experience == "5+" %}selected{% endif %}>5+ years</option>
     </select>
-    <button type="submit">Apply</button>
-    <a href="{% url 'job_list' %}" style="padding:6px 12px; margin-left:4px;">Clear</a>
+
+    <!-- Buttons -->
+    <button type="submit" class="apply-btn">Apply</button>
+    <a href="{% url 'job_list' %}" class="clear-btn">Clear</a>
+    <a href="{% url 'my_jobs' %}" class="post-btn">📌MY Job</a>
+
   </form>
 </div>
-
 <!-- Layout -->
 <div class="layout">
   <!-- Left Sidebar -->
@@ -245,78 +478,85 @@ body {
 
   <!-- Main Feed -->
 <main class="feed">
-  {% for job in jobs %}
-    <div class="card" data-job-id="{{ job.id }}">
-      <!-- Card Header -->
-        <div class="card-header">
-        <!-- Avatar -->
-        <div class="avatar">
-            {% if job.posted_by.userdetails.first %}
-                {% if job.posted_by.userdetails.first.profilephoto %}
-                    <img src="{{ job.posted_by.userdetails.first.profilephoto.url }}" 
-                        alt="{{ job.posted_by.userdetails.first.firstname }}">
-                {% else %}
-                    {{ job.posted_by.userdetails.first.firstname|slice:":1"|upper }}
-                {% endif %}
-            {% else %}
-                ❓
-            {% endif %}
-        </div>
+ {% for job in jobs %}
+  <div class="card job-card" data-job-id="{{ job.id }}">
 
-        <!-- User Info -->
-        <div class="user-info">
-            {% if job.posted_by.userdetails.first %}
-                <strong>{{ job.posted_by.userdetails.first.get_full_name }}</strong>
-            {% else %}
-                <strong>Unknown</strong>
-            {% endif %}
-            <span>
-            Alumni • {{ job.posted_at|short_timesince  }} ago
-            {% if job.posted_at|timesince == "0 minutes" or job.posted_at|timesince < "1 hour" %}
-                <span class="new-badge">New</span>
-            {% endif %}
-            </span>
-        </div>
-        </div>
-
-
-      <!-- Card Content -->
-      <div class="card-content">
-        <h3><a href="{% url 'job_detail' job.pk %}">{{ job.title }}</a></h3>
-        <p>{{ job.company_name }} • {{ job.location }}</p>
-        <p>{{ job.description|truncatewords:25 }}</p>
-        <div class="job-tags">
-          {% for tag in job.tags.all %}
-            <span>{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Card Footer -->
-      <div class="card-footer">
-        <div style="display:flex; gap:8px; flex-wrap: wrap;">
-          <button class="action-btn like-btn" data-url="{% url 'job_like' job.pk %}">
-            <span class="heart {% if job.is_liked %}liked{% endif %}">
-              {% if job.is_liked %}❤️{% else %}🤍{% endif %}
-            </span>
-            <span class="likes-count">{{ job.likes.count }}</span>
-          </button>
-
-          <a href="{% url 'job_detail' job.pk %}" class="action-btn">
-            💬 <span class="comments-number">{{ job.comments.count }}</span>
-          </a>
-          
-          <a href="{{ job.apply_link }}" target="_blank" class="apply-btn">Apply</a>
-          <button class="action-btn">🔗 Share</button>
-          <a href="{% url 'job_detail' job.pk %}" class="action-btn" style="background:#0a66c2; color:white; padding:6px 12px; border-radius:8px; text-decoration:none;">
-            View Details
-        </a>
-        </div>
+    <!-- Banner -->
+    <div class="job-banner">
+      {% if job.image %}
+        <img src="{{ job.image.url }}" alt="{{ job.company_name }}" class="company-logo">
+      {% else %}
+        <div class="company-logo-placeholder">{{ job.company_name|slice:":1"|upper }}</div>
+      {% endif %}
+      <div class="banner-text">
+        <h3>{{ job.company_name }}</h3>
+        <p>🚀 We are hiring!</p>
       </div>
     </div>
-  {% empty %}
-    <p>No jobs posted yet.</p>
-  {% endfor %}
+
+    <!-- Job Info -->
+    <div class="job-info">
+      <h2><a href="{% url 'job_detail' job.pk %}">{{ job.title }}</a></h2>
+      <p>📍 {{ job.location }}</p>
+      <p>{{ job.description|truncatewords:25 }}</p>
+
+      <div class="job-tags">
+        {% for tag in job.tags.all %}
+          <span>{{ tag.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+      <div class="card-footer">
+    <div style="display:flex; gap:8px; flex-wrap: wrap;">
+      <button class="action-btn like-btn" data-url="{% url 'job_like' job.pk %}">
+        <span class="heart {% if job.is_liked %}liked{% endif %}">
+          {% if job.is_liked %}❤️{% else %}🤍{% endif %}
+        </span>
+        <span class="likes-count">{{ job.likes.count }}</span>
+      </button>
+
+      <!-- Instead of link, toggle comment box -->
+      <button class="action-btn comment-toggle" data-job-id="{{ job.id }}">
+        💬 <span class="comments-number">{{ job.comments.count }}</span>
+      </button>
+
+      <a href="{{ job.apply_link }}" target="_blank" class="apply-btn">Apply Now</a>
+      <button class="action-btn">🔗 Share</button>
+    </div>
+  </div>
+
+  <!-- Hidden Comment Section -->
+<div class="comments-section" id="comments-{{ job.id }}" style="display:none; margin-top:15px;">
+  <!-- Existing comments -->
+  <div class="comments-list" id="comments-list-{{ job.id }}">
+    {% for comment in job.comments.all|slice:":2" %}
+      <div class="comment">
+        <strong>{{ comment.user.userdetails.first.firstname }}</strong>: {{ comment.comment }}
+        <div class="comment-meta">
+          <small>{{ comment.comment_at|timesince }} ago</small>
+        </div>
+      </div>
+    {% endfor %}
+    {% if job.comments.count > 2 %}
+      <button class="view-more-btn" data-job-id="{{ job.id }}">View more comments</button>
+    {% endif %}
+  </div>
+
+  <!-- Add Comment -->
+  <form method="post" class="comment-form" data-job-id="{{ job.id }}" 
+        action="{% url 'job_comment' job.id %}">
+      {% csrf_token %}
+      <input type="text" name="comment" placeholder="Add a comment..." required>
+      <button type="submit">Post</button>
+  </form>
+</div>
+
+</div>
+{% empty %}
+  <p>No jobs posted yet.</p>
+{% endfor %}
+
 </main>
 
 
@@ -333,6 +573,19 @@ body {
 
 <!-- JS -->
 <script>
+  
+  function toggleDropdown() {
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+}
+
+// Close dropdown when clicking outside
+document.addEventListener("click", function(e) {
+  const profile = document.querySelector(".profile-container");
+  if (!profile.contains(e.target)) {
+    document.getElementById("profileDropdown").style.display = "none";
+  }
+});
 document.addEventListener("DOMContentLoaded", function () {
   // LIKE toggle
   document.querySelectorAll(".like-btn").forEach(button => {
@@ -354,6 +607,63 @@ document.addEventListener("DOMContentLoaded", function () {
         likesCount.textContent = data.count;
       });
     });
+    document.querySelectorAll(".comment-toggle").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const jobId = this.dataset.jobId;
+      const section = document.getElementById(`comments-${jobId}`);
+      section.style.display = section.style.display === "none" ? "block" : "none";
+    });
+  });
+
+  // Handle "View more comments" (AJAX example)
+  document.querySelectorAll(".view-more-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      let jobId = this.dataset.jobId;
+      // TODO: fetch more comments via AJAX and append to comments-list
+      alert("Load more comments for job " + jobId);
+    });
+  });
+  });
+document.querySelectorAll(".comment-form").forEach(form => {
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const jobId = this.dataset.jobId;
+      const url = this.getAttribute("action");
+      const textInput = this.querySelector("input[name='comment']");  // match form
+      const csrfToken = this.querySelector("[name=csrfmiddlewaretoken]").value;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({ comment: textInput.value })  // match model field
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // prepend new comment
+        const list = document.getElementById(`comments-list-${jobId}`);
+        const newComment = document.createElement("div");
+        newComment.classList.add("comment");
+        newComment.innerHTML = `<strong>${data.user}</strong>: ${data.comment}
+          <div class="comment-meta"><small>${data.commented_at}</small></div>`;
+        list.prepend(newComment);
+
+        // update count
+        const countSpan = document.querySelector(
+          `.comment-toggle[data-job-id="${jobId}"] .comments-number`
+        );
+        if (countSpan) {
+          countSpan.textContent = parseInt(countSpan.textContent) + 1;
+        }
+
+        textInput.value = ""; // clear box
+      } else {
+        alert("Failed to post: " + JSON.stringify(data.error));
+      }
+    });
   });
 
   // Auto refresh likes & comments
@@ -367,7 +677,7 @@ document.addEventListener("DOMContentLoaded", function () {
           card.querySelector(".comments-number").textContent = data.comments;
         });
     });
-  }, 2000);
+  }, 25000);
 
   // Tag filter click
   document.querySelectorAll('.job-tags span').forEach(tag => {
@@ -376,6 +686,7 @@ document.addEventListener("DOMContentLoaded", function () {
       window.location.href = `{% url 'job_list' %}?tag=${encodeURIComponent(value)}`;
     });
   });
+
 });
 </script>
 

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ALUFA Portal{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8EC5FC, #E0C3FC);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    /* Navbar */
+    .top-navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 40px;
+      background: #7b5fc4;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      width: 100%;
+      max-width: 1600px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+    .top-navbar .brand { font-size: 20px; font-weight: bold; }
+    .top-navbar .nav-items { display: flex; gap: 30px; align-items: center; }
+    .notification { position: relative; cursor: pointer; }
+    .notification .badge {
+      position: absolute; top: -6px; right: -10px;
+      background: red; color: white; font-size: 12px;
+      padding: 2px 6px; border-radius: 50%;
+    }
+    .profile-pic {
+      width: 40px; height: 40px;
+      border-radius: 40%; object-fit: cover;
+      border: 2px solid #fff;
+      box-shadow: 0 0 4px rgba(0,0,0,0.2);
+    }
+    .dropdown { position: relative; display: flex; align-items: center; gap: 8px; }
+    .dropdown-content {
+      display: none; position: absolute;
+      background: #7b5fc4; min-width: 200px;
+      top: 35px; right: 0; border-radius: 8px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .dropdown-content a {
+      display: block; padding: 10px; text-decoration: none;
+      color: #fff; transition: background 0.2s;
+    }
+    .dropdown-content a:hover { background: rgba(255,255,255,0.2); }
+    .dropdown:hover .dropdown-content { display: block; }
+    /* Flash messages */
+    .flash-message {
+      padding: 12px 20px; margin-bottom: 10px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; min-width: 220px; max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: left;
+    }
+    .success { color: green; background: #eafaf1; border: 1px solid #b2f2bb; }
+    .error { color: #c0392b; background: #fdecea; border: 1px solid #f5c6cb; }
+    .info { color: #0c5460; background: #d1ecf1; border: 1px solid #bee5eb; }
+    .warning { color: #856404; background: #fff3cd; border: 1px solid #ffeeba; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="top-navbar">
+    <div class="brand">ALUFA</div>
+    <div class="nav-items">
+      <div class="notification">
+        🔔 <span class="badge">3</span>
+      </div>
+      <div class="dropdown">
+        <span>🌐 EN</span>
+      </div>
+      <div class="dropdown">
+        <span>{% if is_alumini %} Alumni {% else %} Student {% endif %}</span>
+      </div>
+      <div class="dropdown">
+        <img src="{{ user.userdetails.first.profilephoto.url|default:'https://i.pravatar.cc/30' }}" class="profile-pic">
+        <span>{{ user.userdetails.first.full_name }}</span>
+        <div class="dropdown-content">
+          <a href="{% url 'reset-password' %}">Change Password</a>
+          <a href="{% url 'signout' %}">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash messages -->
+  {% if messages %}
+    <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+      {% for message in messages %}
+        <div class="flash-message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Page-specific content -->
+  <main style="width: 100%; max-width: 1000px;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    // auto dismiss flash messages
+    setTimeout(() => {
+      const flashBox = document.getElementById('flash-messages');
+      if (flashBox) {
+        flashBox.style.transition = 'opacity 0.5s ease';
+        flashBox.style.opacity = '0';
+        setTimeout(() => flashBox.remove(), 500);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
