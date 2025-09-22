@@ -375,6 +375,142 @@ body {
 .apply-btn:hover {
   background: #6643b0;
 }
+.company-logo-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7b5fc4, #a98bfc);
+  color: white;
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+.comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.comment-form input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  font-size: 14px;
+  transition: border 0.2s ease;
+}
+
+.comment-form input[type="text"]:focus {
+  border-color: #7b5fc4;
+  box-shadow: 0 0 0 2px rgba(123, 95, 196, 0.2);
+}
+
+.comment-form button {
+  background: #7b5fc4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.comment-form button:hover {
+  background: #6643b0;
+}
+/* Comments container */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Each comment bubble */
+.comment {
+  background: #f8f7ff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 90%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+/* Comment author */
+.comment strong {
+  color: #7b5fc4;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+/* Meta text (time) */
+.comment-meta {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* "View more" button */
+.view-more-btn {
+  background: none;
+  border: none;
+  color: #7b5fc4;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+}
+.view-more-btn:hover {
+  text-decoration: underline;
+}
+
+.job-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Apply button */
+.apply-btn {
+  background: #7b5fc4;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  display: inline-block;
+}
+
+.apply-btn:hover {
+  background: #6643b0;
+}
+
+/* Share button */
+.share-btn {
+  background: #f1f0ff;
+  color: #7b5fc4;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.share-btn:hover {
+  background: #e2defa;
+}
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -521,8 +657,11 @@ body {
         💬 <span class="comments-number">{{ job.comments.count }}</span>
       </button>
 
-      <a href="{{ job.apply_link }}" target="_blank" class="apply-btn">Apply Now</a>
-      <button class="action-btn">🔗 Share</button>
+      <div class="job-actions">
+        <a href="{{ job.apply_link }}" target="_blank" class="apply-btn">Apply Now</a>
+        <button class="share-btn" onclick="shareJob('{{ request.build_absolute_uri }}jobs/{{ job.id }}/')">🔗 Share</button>
+      </div>
+
     </div>
   </div>
 
@@ -586,6 +725,19 @@ document.addEventListener("click", function(e) {
     document.getElementById("profileDropdown").style.display = "none";
   }
 });
+function shareJob(jobUrl) {
+  if (navigator.share) {
+    navigator.share({
+      title: "Check out this job!",
+      url: jobUrl
+    });
+  } else {
+    navigator.clipboard.writeText(jobUrl).then(() => {
+      alert("Job link copied to clipboard!");
+    });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   // LIKE toggle
   document.querySelectorAll(".like-btn").forEach(button => {
