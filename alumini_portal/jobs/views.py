@@ -5,7 +5,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.templatetags.static import static
+from django.views.decorators.http import require_POST
 
+from notification.models import Notification
 from users.models import CustomUser
 
 from .templatetags.custom_timesince import short_timesince
@@ -176,6 +178,7 @@ def user_notification(request, pk):
         sender = n.created_by
         avatar = sender.profile_pic.url if getattr(sender, "profile_pic", None) else static("default-avatar.png")
         data.append({
+            'id': n.id,
             'title': n.title,
             'sender_avatar':avatar,
             'message': n.message,
@@ -184,7 +187,7 @@ def user_notification(request, pk):
             'read': n.is_read,
             'count':count
         })
-    return JsonResponse({'count':count['unread'], 'notifications': data})
+    return JsonResponse({'count':count, 'notifications': data})
 
 def job_stats(request, pk):
     job = Job.objects.get(pk=pk)
@@ -206,3 +209,12 @@ def job_all_comments(request, pk):
         ]
     }
     return JsonResponse(data)
+
+@require_POST
+def mark_notification_read(request, pk):
+    print('pk-----------------',pk)
+    notif = get_object_or_404(Notification, pk=pk, recipient_id=request.user)
+    print('notif----------------------------',notif)
+    notif.is_read = True
+    notif.save(update_fields=["is_read"])
+    return JsonResponse({"success": True})

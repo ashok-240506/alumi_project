@@ -136,6 +136,239 @@ body {
     background: #0a66c2; color: #fff; cursor: pointer;
 }
 .comment-form button:hover { background: #004182; }
+ .top-navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 40px;       /* increase horizontal padding */
+      background: #7b5fc4;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      width: 100%;              /* span full width */
+      max-width: 1600px;        /* optional: restrict max width */
+      border-radius: 10px;      /* optional: rounded edges */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);  /* subtle shadow */
+      margin-bottom: 30px;      /* spacing from content below */
+  }
+
+  
+    .top-navbar .brand {
+      font-size: 20px;
+      font-weight: bold;
+    }
+  .top-navbar .nav-items {
+      display: flex;
+      gap: 30px;       /* more space between dropdowns */
+      align-items: center;
+  }
+    .top-navbar .nav-items .dropdown {
+  position: relative;
+  display: flex;          /* make it a flex container */
+  align-items: center;    /* vertically center pic + name */
+  gap: 8px;               /* space between pic and name */
+}
+
+    
+    .top-navbar .nav-items .dropdown-content {
+      display: none;
+      position: absolute;
+      background: #7b5fc4;
+      color: black;
+      min-width: 200px;
+      top: 35px;
+      right: 0;
+      border-radius: 8px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+   .top-navbar .nav-items .dropdown-content a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #fff;                /* make text white */
+    cursor: pointer;            /* show hand cursor */
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .top-navbar .nav-items .dropdown-content a:hover {
+    background: rgba(255, 255, 255, 0.2);  /* subtle highlight */
+  }
+
+  .top-navbar .nav-items .dropdown-content a:active {
+    background: rgba(255, 255, 255, 0.35); /* stronger when clicked */
+    transform: scale(0.97);                /* small click animation */
+  }
+
+  
+    .top-navbar .nav-items .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    /* .notification {
+      position: relative;
+      cursor: pointer;
+    } */
+    .top-navbar .nav-items .dropdown span {
+    cursor: pointer;
+    padding: 8px 12px;    
+    border-radius: 6px;
+    transition: 0.2s;
+    }
+    .top-navbar .nav-items .dropdown span:hover {
+        background: rgba(255,255,255,0.2); 
+
+    }
+     @media (max-width: 768px) {
+  .top-navbar .nav-items {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .top-navbar .brand {
+    margin-bottom: 10px;
+  }
+}
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 40%;
+  object-fit: cover;     /* crop instead of stretching */
+  border: 2px solid #fff; /* optional: adds clean border */
+  box-shadow: 0 0 4px rgba(0,0,0,0.2); /* optional: subtle clarity effect */
+}
+.notification {
+  position: relative;
+  cursor: pointer;
+}
+
+.badge {
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+.notification-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  width: 340px;
+  max-height: 420px;
+  overflow-y: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Tabs */
+.notification-dropdown .tabs {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #fff;
+}
+
+.notif-tab {
+  border: 1px solid #f77e3e;
+  background: #fff;
+  color: #f77e3e;
+  border-radius: 20px;
+  padding: 4px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.notif-tab.active {
+  background: #f77e3e;
+  color: white;
+}
+
+/* Notification Card */
+#notification-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  margin: 8px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background: #fff;
+  border-left: 4px solid transparent;
+}
+
+#notification-list li.unread {
+  border-left: 4px solid #f77e3e;
+  background: #fff7f3;
+}
+
+.notif-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+.notif-content {
+  flex: 1;
+}
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+
+.notif-message {
+  font-size: 14px;
+  color: #333;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.notif-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: #f77e3e;
+  text-decoration: none;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notif-link:hover {
+  text-decoration: underline;
+}
+.unread {
+  background: #f9f5ff; /* subtle highlight */
+}
+#notification-container {
+    position: relative;
+}
+.top-navbar .nav-btn:hover {
+    background: #ece6ff;
+}
+.top-navbar .nav-btn {
+    background: white;
+    color: #7b5fc4;
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
 </style>
 <script>
 function confirmDelete(event) {
@@ -143,10 +376,35 @@ function confirmDelete(event) {
         event.preventDefault();
     }
 }
+
 </script>
 </head>
 <body>
+<div class="top-navbar">
+  <div class="nav-left">
+    <a href="{% if user.is_alumini %}{% url 'job_list' %}{% else %}{% url 'job_list' %}{% endif %}" class="nav-btn">⬅ Back</a>
+  </div>
 
+  <div class="brand">ALUFA</div>
+
+  <div class="nav-items">
+    <div class="notification">🔔<span class="badge">3</span></div>
+
+    <div class="dropdown">🌐 EN</div>
+    <div class="dropdown">{% if user.is_alumini %} Alumni {% else %} Student {% endif %}</div>
+
+    <!-- Profile + Dropdown -->
+    <div class="profile-container" onclick="toggleDropdown()">
+      <img src="{{ user.userdetails.first.profilephoto.url|default:'https://i.pravatar.cc/30' }}" class="profile-pic">
+      <span class="profile-name">{{ user.userdetails.first.full_name }}</span>
+
+      <div id="profileDropdown" class="dropdown-content">
+        <a href="{% url 'reset-password' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M280-400q-33 0-56.5-23.5T200-480q0-33 23.5-56.5T280-560q33 0 56.5 23.5T360-480q0 33-23.5 56.5T280-400Zm0 160q-100 0-170-70T40-480q0-100 70-170t170-70q67 0 121.5 33t86.5 87h352l120 120-180 180-80-60-80 60-85-60h-47q-32 54-86.5 87T280-240Zm0-80q56 0 98.5-34t56.5-86h125l58 41 82-61 71 55 75-75-40-40H435q-14-52-56.5-86T280-640q-66 0-113 47t-47 113q0 66 47 113t113 47Z"/></svg>Change Password</a>
+        <a href="{% url 'signout' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-160h80v160h560v-560H200v160h-80v-160q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm220-160-56-58 102-102H120v-80h346L364-622l56-58 200 200-200 200Z"/></svg>Logout</a>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="container">
     <!-- Job Card -->
     <div class="card">
@@ -231,22 +489,22 @@ function confirmDelete(event) {
         <h3>Comments</h3>
         {% for comment in job.comments.all %}
           <div class="comment">
-            <strong>{{ comment.user.get_full_name }}</strong>
-            <p>{{ comment.text }}</p>
-            <small>{{ comment.created_at|timesince }} ago</small>
+            <strong>{{ comment.user.userdetails.first.get_full_name }}</strong>
+            <p>{{ comment.comment }}</p>
+            <small>{{ comment.commented_at|timesince }} ago</small>
           </div>
         {% empty %}
           <p>No comments yet.</p>
         {% endfor %}
 
-        <!-- Comment Form -->
+        <!-- Comment Form
         <div class="comment-form">
             <form method="post" action="{% url 'job_comment' job.id %}">
                 {% csrf_token %}
                 <textarea name="text" placeholder="Write a comment..." required></textarea>
                 <button type="submit">💬 Post Comment</button>
             </form>
-        </div>
+        </div> -->
     </div>
 </div>
 

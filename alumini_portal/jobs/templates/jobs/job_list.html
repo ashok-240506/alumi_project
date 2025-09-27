@@ -532,11 +532,29 @@ body {
     <div class="notification">🔔<span class="badge">3</span></div>
 
     <div class="dropdown">🌐 EN</div>
-    <div class="dropdown">{% if user.is_alumini %} Alumni {% else %} Student {% endif %}</div>
+          <span>
+      {% if is_staff %}
+          Admin
+      {% elif is_alumini %}
+          Alumni
+      {% else %}
+          Student
+      {% endif %}
+    </span>
 
     <!-- Profile + Dropdown -->
     <div class="profile-container" onclick="toggleDropdown()">
-      <img src="{{ user.userdetails.first.profilephoto.url|default:'https://i.pravatar.cc/30' }}" class="profile-pic">
+      <div class="dropdown">
+          {% if user.userdetails.first %}
+              {% if user.userdetails.first.profilephoto %}
+                  <img src="{{ user.userdetails.first.profilephoto.url }}" class="profile-pic" alt="Profile Photo">
+              {% else %}
+                  <img src="{% static 'default-avatar.png' %}" class="profile-pic" alt="Default Avatar">
+              {% endif %}
+          {% else %}
+              <img src="{% static 'default-avatar.png' %}" class="profile-pic" alt="Default Avatar">
+          {% endif %}
+      </div>
       <span class="profile-name">{{ user.userdetails.first.full_name }}</span>
 
       <div id="profileDropdown" class="dropdown-content">

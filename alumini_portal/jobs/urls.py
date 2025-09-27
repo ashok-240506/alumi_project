@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     JobListView, JobDetailView, JobCreateView, JobUpdateView, JobDeleteView,MyJobListView,job_all_comments,
-    JobCommentCreateView, job_like,job_stats,user_notification
+    JobCommentCreateView, job_like,job_stats,user_notification,mark_notification_read
 )
 
 urlpatterns = [
@@ -13,9 +13,10 @@ urlpatterns = [
     path('<int:pk>/comment/', JobCommentCreateView.as_view(), name='job_comment'),
     path('<int:pk>/like/', job_like, name='job_like'),
     path("<int:pk>/stats/", job_stats, name="job_stats"),
+    path("notification/<int:pk>/read/", mark_notification_read, name="mark_notification_read"),
     path("<int:pk>/notification/",user_notification, name="notification"),
     path("my-jobs/", MyJobListView.as_view(), name="my_jobs"),
-    path('jobs/<int:pk>/all-comments/', job_all_comments, name='job_all_comments')
+    path('jobs/<int:pk>/all-comments/', job_all_comments, name='job_all_comments'),
 
 
 

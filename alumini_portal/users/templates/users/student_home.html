@@ -328,6 +328,10 @@
 .unread {
   background: #f9f5ff; /* subtle highlight */
 }
+#notification-container {
+    position: relative;
+}
+
   </style>
 </head>
 <body>
@@ -344,27 +348,34 @@
       
       <!-- Dropdown -->
       <div class="notification-dropdown" id="notification-dropdown" style="display:none;">
-        <div class="tabs">
-          <button class="notif-tab active" data-tab="all">All (<span id="all-count">0</span>)</button>
-          <button class="notif-tab" data-tab="unread">Unread (<span id="unread-count">0</span>)</button>
-          <button class="notif-tab" data-tab="read">Read (<span id="read-count">0</span>)</button>
-        </div>
-
-        <ul id="notification-list">
-          <li>No new notifications</li>
-        </ul>
+          <div class="dropdown-header">
+              <span>Notifications</span>
+              <span id="close-dropdown" style="cursor:pointer;">&times;</span>
+          </div>
+          <div class="tabs">
+              <button class="notif-tab active" data-tab="all">All (<span id="all-count">0</span>)</button>
+              <button class="notif-tab" data-tab="unread">Unread (<span id="unread-count">0</span>)</button>
+              <button class="notif-tab" data-tab="read">Read (<span id="read-count">0</span>)</button>
+          </div>
+          <ul id="notification-list">
+              <li>No new notifications</li>
+          </ul>
       </div>
+
     </div>
     
     <div class="dropdown">
       <span>🌐 EN</span>
     </div>
     <div class="dropdown">
-      <span>{% if is_alumini %} Alumni {% else %} Student {% endif %}</span>
-     
+            <span>{% if is_alumini %} Alumni {% elif is_staff %} Admin {% else %} Student {% endif %}</span>
     </div>
-   <div class="dropdown">
-      <img src="{{ user.userdetails.first.profilephoto.url|default:'https://i.pravatar.cc/30' }}" class="profile-pic">
+      <div class="dropdown">
+        {% if user.userdetails.first.profilephoto %}
+          <img src="{{ user.userdetails.first.profilephoto.url }}" class="profile-pic">
+        {% else %}
+            <img src="{% static 'default-avatar.png' %}" class="profile-pic">
+        {% endif %}
       <span>{{ user.userdetails.first.full_name }}</span>
       <div class="dropdown-content">
         <a href="{% url 'reset-password' %}"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M280-400q-33 0-56.5-23.5T200-480q0-33 23.5-56.5T280-560q33 0 56.5 23.5T360-480q0 33-23.5 56.5T280-400Zm0 160q-100 0-170-70T40-480q0-100 70-170t170-70q67 0 121.5 33t86.5 87h352l120 120-180 180-80-60-80 60-85-60h-47q-32 54-86.5 87T280-240Zm0-80q56 0 98.5-34t56.5-86h125l58 41 82-61 71 55 75-75-40-40H435q-14-52-56.5-86T280-640q-66 0-113 47t-47 113q0 66 47 113t113 47Z"/></svg>Change Password</a>
@@ -441,58 +452,144 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Fetch notifications from backend
     function fetchNotifications() {
-        fetch(`/jobs/${userId}/notification/`)
-            .then(res => res.json())
-            .then(data => {
-                countElem.textContent = data.count;
-                document.getElementById("all-count").textContent = data.count.all;
-                document.getElementById("unread-count").textContent = data.count.unread;
-                document.getElementById("read-count").textContent = data.count.read;
-                list.innerHTML = "";
+    fetch(`/jobs/${userId}/notification/`)
+        .then(res => res.json())
+        .then(data => {
+            countElem.textContent = data.count.unread;
+            countElem.style.display = data.count.unread > 0 ? "inline-block" : "none";
+            document.getElementById("all-count").textContent = data.count.all;
+            document.getElementById("unread-count").textContent = data.count.unread;
+            document.getElementById("read-count").textContent = data.count.read;
+            list.innerHTML = "";
 
-    if (!data.notifications || data.notifications.length === 0) {
-        list.innerHTML = "<li>No new notifications</li>";
-    } else {
-        data.notifications.forEach(n => {
-            const li = document.createElement("li");
-            if (!n.read) li.classList.add("unread"); // highlight unread
+            if (!data.notifications || data.notifications.length === 0) {
+                list.innerHTML = "<li>No new notifications</li>";
+            } else {
+                data.notifications.forEach(n => {
+                    const li = document.createElement("li");
+                    if (!n.read) li.classList.add("unread");
 
-            li.innerHTML = `
-                <div class="notif-item">
-                    <img src="${n.sender_avatar}" class="notif-avatar" alt="user" />
-                    <div class="notif-content">
-                        <div class="notif-message">${n.message}</div>
-                        <div class="notif-time">${n.created_at}</div>
-                        <a href="${n.url}" class="notif-link">📩 Click here</a>
-                    </div>
-                </div>
-            `;
-            list.appendChild(li);
+                    li.innerHTML = `
+                        <div class="notif-item">
+                            <img src="${n.sender_avatar}" class="notif-avatar" alt="user" />
+                            <div class="notif-content">
+                                <div class="notif-message">${n.message}</div>
+                                <div class="notif-time">${n.created_at}</div>
+                                <a href="${n.url}" 
+                                   class="notif-link" 
+                                   data-id="${n.id}" 
+                                   target="_blank">📩 Click here</a>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+
+            // ✅ Attach click handler *here* after DOM is updated
+            list.querySelectorAll(".notif-link").forEach(link => {
+                link.addEventListener("click", (e) => {
+                    const notifId = link.dataset.id;
+
+                    fetch(`/jobs/notification/${notifId}/read/`, {  // make sure this matches urls.py
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(resp => {
+                        if (resp.success) {
+                            const li = link.closest("li");
+                            li.classList.remove("unread");
+                            li.classList.add("read");
+
+                            // Update counters
+                            let unread = parseInt(document.getElementById("unread-count").textContent);
+                            let read = parseInt(document.getElementById("read-count").textContent);
+
+                            document.getElementById("unread-count").textContent = unread > 0 ? unread - 1 : 0;
+                            document.getElementById("read-count").textContent = read + 1;
+
+                            // Update bell badge
+                            let badgeCount = parseInt(countElem.textContent);
+                            countElem.textContent = badgeCount > 0 ? badgeCount - 1 : 0;
+                            countElem.style.display = parseInt(countElem.textContent) > 0 ? "inline-block" : "none";
+                        }
+                    });
+                });
+            });
+        })
+        .catch(err => console.error("Notification fetch error:", err));
+}
+
+    list.querySelectorAll(".notif-link").forEach(link => {
+    link.addEventListener("click", (e) => {
+        const notifId = link.dataset.id;
+
+        fetch(`jobs/notification/${notifId}/read/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),  // Django CSRF
+            }
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (resp.success) {
+                const li = link.closest("li");
+                li.classList.remove("unread");
+                li.classList.add("read");
+
+                // Update counters
+                let unread = parseInt(document.getElementById("unread-count").textContent);
+                let read = parseInt(document.getElementById("read-count").textContent);
+
+                document.getElementById("unread-count").textContent = unread > 0 ? unread - 1 : 0;
+                document.getElementById("read-count").textContent = read + 1;
+
+                // Update bell badge
+                let badgeCount = parseInt(countElem.textContent);
+                countElem.textContent = badgeCount > 0 ? badgeCount - 1 : 0;
+                countElem.style.display = parseInt(countElem.textContent) > 0 ? "inline-block" : "none";
+            }
         });
-    }
-})
-            .catch(err => console.error("Notification fetch error:", err));
-    }
+    });
+});
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
     // Initial fetch
     fetchNotifications();
-    document.querySelectorAll(".notif-tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-          document.querySelectorAll(".notif-tab").forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          const filter = tab.dataset.tab;
+   document.querySelectorAll(".notif-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+        document.querySelectorAll(".notif-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const filter = tab.dataset.tab;
 
-          document.querySelectorAll("#notification-list li").forEach(item => {
+        document.querySelectorAll("#notification-list li").forEach(item => {
             if (filter === "all") {
-              item.style.display = "flex";
+                item.style.display = "flex";
             } else if (filter === "unread") {
-              item.style.display = item.classList.contains("unread") ? "flex" : "none";
+                item.style.display = item.classList.contains("unread") ? "flex" : "none";
             } else if (filter === "read") {
-              item.style.display = item.classList.contains("unread") ? "none" : "flex";
+                item.style.display = item.classList.contains("read") ? "flex" : "none"; // ✅ FIX
             }
-          });
         });
-      });
+    });
+});
+
 
     // Auto-refresh every 10 seconds
     setInterval(fetchNotifications, 10000);
@@ -518,6 +615,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add notification
         const li = document.createElement("li");
+        li.classList.add(n.read ? "read" : "unread");  // ✅ mark properly
+
         li.innerHTML = `
             <div style="font-weight:bold;">${data.title}</div>
             <div>${data.message}</div>
