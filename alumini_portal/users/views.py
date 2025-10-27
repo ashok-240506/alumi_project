@@ -222,7 +222,7 @@ class SendOTPView(View):
                     )
                     print(f"OTP sent to {user.email}: {otp_code}")
                 else:
-                    send_otp_sms(f'+91{user.mobilenumber}', otp_code)
+                    # send_otp_sms(f'+91{user.mobilenumber}', otp_code)
                     print(f"OTP sent to +91{user.mobilenumber}: {otp_code}")
             except Exception as e:
                 messages.error(request, "Failed to send OTP. Try again.")
