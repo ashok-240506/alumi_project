@@ -145,14 +145,14 @@
               {% else %}No messages yet.{% endif %}
             </div>
           </div>
-          <div class="chat-meta">
+        <div class="chat-meta" data-time="{{ room.last_message_time|date:'c' }}">
             {% if room.last_message_time %}
-              {{ room.last_message_time }}
+                <span class="chat-time">{{ room.last_message_time|date:"H:i" }}</span>
             {% endif %}
             {% if room.unread_count %}
-              <span class="unread-badge">{{ room.unread_count }}</span>
+                <span class="unread-badge">{{ room.unread_count }}</span>
             {% endif %}
-          </div>
+            </div>
         </div>
       {% endfor %}
     </div>
@@ -352,6 +352,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         localStorage.removeItem("open_room_id");
     }
+});
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll(".chat-meta").forEach(meta => {
+    const isoTime = meta.dataset.time;
+    if (!isoTime) return;
+
+    const dateObj = new Date(isoTime);
+    if (isNaN(dateObj)) return;
+
+    const formatted = dateObj.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+
+    const timeSpan = meta.querySelector(".chat-time");
+    if (timeSpan) timeSpan.textContent = formatted;
+  });
 });
 
 </script>

@@ -222,7 +222,7 @@ flash-message {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 40px;       /* increase horizontal padding */
+      padding: 10px 6px;       /* increase horizontal padding */
       background: #7b5fc4;
       color: white;
       font-family: 'Segoe UI', sans-serif;
@@ -281,10 +281,13 @@ flash-message {
     transform: scale(0.97);                /* small click animation */
   }
 
-  
+
     .top-navbar .nav-items .dropdown:hover .dropdown-content {
       display: block;
     }
+    .dropdown-content:hover {
+        background: #ece6ff;
+        }
     /* .notification {
       position: relative;
       cursor: pointer;
@@ -376,7 +379,18 @@ flash-message {
   font-weight: 500;
   transition: all 0.2s;
 }
-
+.top-navbar .nav-btn {
+  background: white;
+  color: #7b5fc4;
+  padding: 6px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+.top-navbar .nav-btn:hover {
+  background: #ece6ff;
+}
 .notif-tab.active {
   background: #f77e3e;
   color: white;
@@ -457,8 +471,8 @@ flash-message {
 <!-- New Top Navbar -->
 <div class="top-navbar">
     <div class="nav-left">
-    <a href="{% if user.is_alumini %}{% url 'alumni_home' %}{% else %}{% url 'student_home' %}{% endif %}" class="nav-btn">⬅ Back</a>
-  </div>
+        <a href="{% if user.is_alumini %}{% url 'alumni_home' %}{% else %}{% url 'student_home' %}{% endif %}" class="nav-btn">⬅ Back</a>
+    </div>
 
   <div class="brand">ALUFA</div>
   <div class="nav-items">

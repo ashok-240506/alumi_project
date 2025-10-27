@@ -93,8 +93,9 @@ class ChatWithAlumniListView(LoginRequiredMixin, TemplateView):
             room.avatar_bg = AVATAR_COLORS[sum(ord(c) for c in initial_char) % len(AVATAR_COLORS)]
             last_msg = room.messages.order_by("-timestamp").first()
             room.last_message = last_msg
-            room.last_message_time = localtime(last_msg.timestamp).strftime("%H:%M") if last_msg else ""
+            room.last_message_time = last_msg.timestamp if last_msg else None
 
+            print(room.last_message_time)
             room.unread_count = room.messages.filter(
                     is_read=False
                 ).exclude(sender=user).count()
