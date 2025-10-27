@@ -203,16 +203,16 @@ class SendOTPView(View):
             if not user:
                 messages.error(request, "Account not found. Please contact admin.")
                 return redirect('student_login')
-            # Send OTP
+
             otp_code = str(random.randint(100000, 999999))
             OTP.objects.create(
                 mobile_number=user.mobilenumber,
                 code=otp_code,
                 created_at=timezone.now()
             )
+
             try:
                 if '@' in identifier:
-                    # Send via email
                     send_mail(
                         subject="Your OTP Code",
                         message=f"Your OTP is {otp_code}",
@@ -222,17 +222,14 @@ class SendOTPView(View):
                     )
                     print(f"OTP sent to {user.email}: {otp_code}")
                 else:
-                    # Send via SMS
-                    mobile = '+91' + user.mobilenumber
-                    # send_otp_sms(mobile, otp_code)
-                    print(f"OTP sent to {mobile}: {otp_code}")
+                    send_otp_sms(f'+91{user.mobilenumber}', otp_code)
+                    print(f"OTP sent to +91{user.mobilenumber}: {otp_code}")
             except Exception as e:
                 messages.error(request, "Failed to send OTP. Try again.")
-
                 print(f"Failed to send OTP: {e}")
+
             request.session['mobile_number'] = user.mobilenumber
             messages.success(request, "OTP sent successfully.")
-
             print(f"OTP for {user.mobilenumber}: {otp_code}")
             return redirect(f"{reverse('verify-otp')}?new_otp=1")
 
@@ -241,8 +238,30 @@ class SendOTPView(View):
 
 class VerifyOTPView(View):
     def get(self, request):
+        mobile = request.session.get('mobile_number')
+        if not mobile:
+            messages.error(request, "Mobile number not found in session.")
+            return redirect('student_login')
+
+        user = CustomUser.objects.filter(mobilenumber=mobile).first()
+        if not user:
+            messages.error(request, "Account not found. Please contact admin.")
+            return redirect('student_login')
+
+        # Handle resend
+        if request.GET.get('new_otp') == '1':
+            otp_code = str(random.randint(100000, 999999))
+            OTP.objects.filter(mobile_number=mobile, is_used=False).delete()
+            OTP.objects.create(mobile_number=mobile, code=otp_code)
+
+            send_otp_sms(f'+91{user.mobilenumber}', otp_code)
+            print(f"✅ New OTP sent to +91{user.mobilenumber}: {otp_code}")
+
+            messages.success(request, "A new OTP has been sent to your mobile number.")
+            return redirect('verify-otp')
+
         return render(request, 'users/verify_otp.html', {'form': OTPForm()})
-    
+
     def post(self, request):
         form = OTPForm(request.POST)
         if form.is_valid():
@@ -258,29 +277,21 @@ class VerifyOTPView(View):
 
                 if otp.is_valid():
                     otp.mark_used()
-
                     user = CustomUser.objects.filter(mobilenumber=mobile).first()
+
                     if not user:
                         messages.error(request, "Account not found. Please contact admin.")
                         return redirect('student_login')
 
                     login(request, user)
                     messages.success(request, "Login successful.")
-                    if user.is_alumini:
-                        return redirect('alumni_home')
-                    else:
-                        return redirect('student_home')
-
-
+                    return redirect('alumni_home' if user.is_alumini else 'student_home')
                 else:
                     messages.error(request, "OTP expired or already used.")
-                    return redirect('verify-otp')
-
             except OTP.DoesNotExist:
                 messages.error(request, "Invalid or expired OTP.")
-                return redirect('verify-otp')
-
-        messages.error(request, "Invalid form input.")
+        else:
+            messages.error(request, "Invalid form input.")
         return redirect('verify-otp')
 
 class SetPasswordView(View):
